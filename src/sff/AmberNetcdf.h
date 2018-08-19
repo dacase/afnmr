@@ -45,8 +45,6 @@ struct AmberNetcdf {
   int TempVID;
 };
 
-// NOTE: To be NAB-useable, any functions added below must also be referenced in
-//       nab/nabcode.h and nab/symbol.c
 int netcdfDebug(struct AmberNetcdf*);
 int netcdfLoad(struct AmberNetcdf*,char *);
 int netcdfClose(struct AmberNetcdf*);

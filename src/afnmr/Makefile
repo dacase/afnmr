@@ -18,7 +18,7 @@ $(BINDIR)/afnmr.x: afnmr.F90
 	$(FC) $(FFLAGS) -o $@ $<
 
 $(BINDIR)/gridprune: gridprune.F90
-	$(FC) $(FFLAGS) $(FOPTFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBSF)
+	$(FC) $(FFLAGS) $(FOPTFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
 
 $(BINDIR)/txmin: txmin.c
 	$(CC) $(CFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)

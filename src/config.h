@@ -1,13 +1,15 @@
-Simple hard-wired config.h file for gnu compilers
+#  Simple hard-wired config.h file for gnu compilers
 
-AMBERHOME=/home/case/afnmr     # edit to match this installation!
+#set AFNMRHOME here, or use an environment variable:
+AFNMRHOME=/home/case/afnmr
+
 BINDIR=$(AFNMRHOME)/bin
 LIBDIR=$(AFNMRHOME)/lib
 INCDIR=$(AFNMRHOME)/include
 DATDIR=$(AFNMRHOME)/dat
 LOGDIR=$(AFNMRHOME)/logs
 
-FLIBS=-lsff -larpack -llapack -lblas
+FLIBS=-lsff -larpack -llapack -lblas -lgfortran
 
 CC=gcc
 CFLAGS=
@@ -20,3 +22,8 @@ CXXOPTFLAGS=-O3
 FC=gfortran
 FFLAGS=-I$(INCDIR)
 FOPTFLAGS=-O3 -mtune=native
+
+AR=ar rv
+RANLIB=ranlib
+LEX=flex
+YACC=yacc

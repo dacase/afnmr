@@ -7,11 +7,9 @@ include ../config.h
 	$(CXX) -c $(CXXOPTFLAGS) -o $@ $<
 	
 OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o \
-	   prm.o rand2.o sasad.o sff.o xminC.o AmberNetcdf.o ptrajmask.o \
-       $(SFF_RISM_INTERFACE)
+	   prm.o rand2.o sasad.o sff.o xminC.o ptrajmask.o AmberNetcdf_dummy.o
 
-
-install: libsff hcp_getpdb$(SFX)
+install: libsff 
 
 libsff: $(OBJS)
 	-rm -f $(LIBDIR)/libsff.a
@@ -26,7 +24,6 @@ libsff_mpi: $(OBJS)
 	cp sff.h AmberNetcdf.h $(INCDIR)
 
 uninstall:
-	-rm -f $(BINDIR)/hcp_getpdb$(SFX)
 	-rm -f $(LIBDIR)/libsff.a
 	-rm -f $(LIBDIR)/libsff_mpi.a
 	-rm -f $(INCDIR)/sff.h $(INCDIR)/AmberNetcdf.h

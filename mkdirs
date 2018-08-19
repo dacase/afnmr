@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ ! -d bin ]; then
+    mkdir bin
+fi
+if [ ! -d lib ]; then
+    mkdir lib
+fi
+if [ ! -d logs ]; then
+    mkdir logs
+fi
+if [ ! -d include ]; then
+    mkdir include
+fi
+if [ ! -d share ]; then
+    mkdir share
+fi
