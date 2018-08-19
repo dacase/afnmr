@@ -47,10 +47,10 @@ EOD
 
 }
 
-check_amberhome() {
-   if [ -z "$AMBERHOME" ]; then
+check_afnmrhome() {
+   if [ -z "$AFNMRHOME" ]; then
       echo ""
-      echo "Your AMBERHOME environment variable is not set!"
+      echo "Your AFNMRHOME environment variable is not set!"
       exit 1
    fi
 }
@@ -134,7 +134,7 @@ AFNMR_OPTIONS="$program $basis $solinprot $qopt"
 
 #############################################################################
 
-check_amberhome
+check_afnmrhome
 
 echo "Running afnmr with arguments $args\n" > $1.afnmr.log
 
@@ -152,7 +152,7 @@ saveamberparm x $1.parm7 $1.x
 quit
 EOF
 
-$AMBERHOME/bin/tleap -f leap.in > tleap.out
+$AFNMRHOME/bin/tleap -f leap.in > tleap.out
 if [ ! -s $1.parm7 ]; then 
    echo "Error in tleap: check tleap.out or leap.log "
    exit 1
@@ -164,14 +164,14 @@ cat tleap.out >> $1.afnmr.log
 
 if [ $min = "yes" ]; then
 
-$AMBERHOME/bin/ambpdb -p $1.parm7 < $1.x > $1.0.pdb  2> /dev/null
+$AFNMRHOME/bin/ambpdb -p $1.parm7 < $1.x > $1.0.pdb  2> /dev/null
 
 #============================================================================
 #  Do a constrained minimization to regularize the local geometries:
 #============================================================================
 echo "Minimization"
 
-$AMBERHOME/bin/txmin $1.parm7 $1.x $1.min.x > $1.min.o
+$AFNMRHOME/bin/txmin $1.parm7 $1.x $1.min.x > $1.min.o
 
 if [ "$?" -gt 0 ]; then 
    echo "Error in txmin: check $1.min.o"
@@ -185,15 +185,12 @@ cat $1.min.o >> $1.afnmr.log
 #============================================================================
 #  Create pqr for further use, with original residue numbers
 #============================================================================
-echo "====== parmed:  ======================================================" \
+echo "====== add_pdb:  ======================================================" \
      >> $1.afnmr.log
-$AMBERHOME/bin/parmed -n -p $1.parm7 <<EOF >> $1.afnmr.log
-setOverwrite
-addPDB $1.pdb
-outparm $1.parm7
-EOF
+$AFNMRHOME/bin/add_pdb -i $1.parm7 -o foozzz.parm7 -p $1.pdb >> $1.afnmr.log
+/bin/mv foozzz.parm7 $1.parm7
 
-$AMBERHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.min.x > $1.min.pqr 2> /dev/null
+$AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.min.x > $1.min.pqr 2> /dev/null
 /bin/rm -f $1.pqr
 ln -s $1.min.pqr $1.pqr
 
@@ -205,7 +202,7 @@ if false; then
 #============================================================================
 backbone="@C,CA,N,P,O3',O5',C3',C4',C5'"  # should work for both proteins
                                           # and nucleic acids
-$AMBERHOME/bin/cpptraj $1.parm7 <<EOF > cpptraj.out
+$AFNMRHOME/bin/cpptraj $1.parm7 <<EOF > cpptraj.out
 reference $1.x
 trajin $1.min.x
 rms all_heavy reference !@H= out rms.dat
@@ -228,13 +225,11 @@ else
     #========================================================================
     #  Create pqr for further use, with original residue numbers
     #========================================================================
-    $AMBERHOME/bin/parmed -n -p $1.parm7 <<EOF >> $1.afnmr.log
-    setOverwrite
-    addPDB $1.pdb
-    outparm $1.parm7
-EOF
+    echo "====== add_pdb:  ======================================================" \ >> $1.afnmr.log
+    $AFNMRHOME/bin/add_pdb -i $1.parm7 -o foozzz.parm7 -p $1.pdb >> $1.afnmr.log
+    /bin/mv foozzz.parm7 $1.parm7
 
-    $AMBERHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.x > $1.pqr 2> /dev/null
+    $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.x > $1.pqr 2> /dev/null
     ln -s $1.x $1.min.x
 
 fi
@@ -301,7 +296,7 @@ while (<PQR>) {
 
 close(ATM);
 
-system ("$AMBERHOME/bin/ms -atm input.atm -rad ms.rad -d 0.5 -rp 0.0 ");
+system ("$AFNMRHOME/bin/ms -atm input.atm -rad ms.rad -d 0.5 -rp 0.0 ");
 unlink("input.atm");
 
 open (CONTACT, "contact") || die "contact file not found\n";
@@ -351,7 +346,7 @@ EOF
 
 grep -v MOD \$1.pqr | awk '/ATOM/{print \$6,\$7,\$8}' > \$1.fpt
 
-$AMBERHOME/bin/solinprot -epsin1 1.0 -epsin2 4.0 -ionicstr 0.2 \
+$AFNMRHOME/bin/solinprot -epsin1 1.0 -epsin2 4.0 -ionicstr 0.2 \
      -ProteinField -ReactionField \$1 \$1.prot 
 if [ "\$?" -gt 0 ]; then 
    echo "Error in solinprot: check afnmr.log"
@@ -363,12 +358,12 @@ paste \$1.fpt \$1.rf \$1.pf | awk '{print \$1,\$2,\$3,\$4+\$5}' > input.xyzv
 /bin/rm \$1.fpt \$1.rf \$1.pf
 
 echo "gridprune"
-$AMBERHOME/bin/gridprune -solinprot < \$1.pqr 
+$AFNMRHOME/bin/gridprune -solinprot < \$1.pqr 
 if [ "\$?" -gt 0 ]; then 
    echo "Error in gridprune: check afnmr.log"
    exit 1
 fi
-$AMBERHOME/bin/pair < check.dat
+$AFNMRHOME/bin/pair < check.dat
 /bin/rm input.xyzv surf.pos check.dat
 exit 0
 
@@ -380,7 +375,7 @@ chmod +x runsolinprot
 #============================================================================
 echo "afnmr.x $AFNMR_OPTIONS $1 $list"
 echo "afnmr.x $AFNMR_OPTIONS $1 $list" > afnmr.out
-$AMBERHOME/bin/afnmr.x  $AFNMR_OPTIONS  $1 $list >> afnmr.out
+$AFNMRHOME/bin/afnmr.x  $AFNMR_OPTIONS  $1 $list >> afnmr.out
 if [ "$?" -gt 0 ]; then 
    echo "Error in afnmr: check afnmr.out"
    exit 1

@@ -6,11 +6,13 @@ AOBJ=   ambpdb.o forFIRSTtype.o forFIRSTbond.o forFIRSThbond.o \
 
 include ../config.h
 
-PROGS= $(BINDIR)/ambpdb$(SFX)
+PROGS= $(BINDIR)/ambpdb $(BINDIR)/add_pdb
 
-$(BINDIR)/ambpdb$(SFX): 	$(AOBJ)
-	$(FC) $(FPPFLAGS) $(FFLAGS) $(AMBERFFLAGS) -o $(BINDIR)/ambpdb$(SFX) \
-		$(AOBJ) $(LDFLAGS) $(AMBERLDFLAGS)
+$(BINDIR)/ambpdb: $(AOBJ)
+	$(FC) $(FFLAGS) -o $@ $(AOBJ)
+
+$(BINDIR)/add_pdb: add_pdb.o nxtsec.o
+	$(FC) $(FFLAGS) -o $@ add_pdb.o nxtsec.o
 
 install:	$(PROGS)
 

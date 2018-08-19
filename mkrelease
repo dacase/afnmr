@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#    make a tar file for users: new tree will be rooted at "ambermini-$version"
+#    make a tar file for users
 #
 CWD=`pwd`
 h=afnmr-1.0
@@ -8,23 +8,9 @@ tarfile=$h.tar
 TARC="gnutar cf $tarfile"
 TAR="gnutar rf $tarfile"
 
-# save files for later restoration
-cp src/Makefile src/Makefile.save
-cp src/Makefile.afnmr src/Makefile
-cp test/Makefile test/Makefile.save
-cp test/Makefile.afnmr test/Makefile
-
 cd ..
 ln -s $CWD $h
-$TARC $h/{LICENSE,Makefile,README,amber.sh,amber.csh,configure}
-$TAR $h/src/{fftw-3.3,netcdf-4.3.0,arpack,blas,lapack}
-$TAR $h/src/{MEAD,Makefile,afnmr,configure2,etc,include,leap,sander,rism,sqm}
-$TAR $h/test/{Makefile,dacdif,ndiff.awk,afnmr}
+$TARC $h/*
 bzip2 -v $tarfile
 /bin/rm $h
-
-#restore copied files
-cd $CWD
-mv src/Makefile.save src/Makefile
-mv test/Makefile.save test/Makefile
 

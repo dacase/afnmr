@@ -1,7 +1,0 @@
-include $(AMBERHOME)/config.h
-
-test: test.afnmr
-
-test.afnmr:
-	cd afnmr && $(MAKE) test
-
