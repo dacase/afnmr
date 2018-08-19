@@ -1,0 +1,11 @@
+This is a piece of the MEAD program, just to build solinprot.
+
+For the full code, which does many other useful things, please visit
+  http://stjuderesearch.org/site/lab/bashford
+
+Note: the above site is no longer available.  Another source, for an
+"extended" MEAD is here:
+  http://www.bisb.uni-bayreuth.de/People/ullmannt/index.php?name=extended-mead
+
+As with SHIFTS itself, MEAD is distributed under the terms of GNU General
+Public License; see the COPYING file in the directory above this one.

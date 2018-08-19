@@ -1,0 +1,32 @@
+* [#B] Clean up centering code.
+centerSolute has allot of debug code - should be easy to clean up, but
+needs careful testing.
+* [#A] Ensure unit cell is set in non-periodic case.
+To simplify code, it would be ideal if the non-periodic (i.e., dilute
+solute) case had its unit cell defined so it can be treated the same
+as the periodic case.
+* [#A] Add triclinic unit cell support to PME code.
+* [#B] Add periodic LJ cutoff support.
+No-force minimization with sander for PH4+ in a triclinic unit cell
+produced thermodynamic results identical to rism3d.snglpnt, including
+volumetric data.
+* [#B] Ensure triclinic unit cells work with force minimization in sander.
+* [#B] Output the individual terms in the OZ sum.
+Rationale explained in 2014-10-21 e-mail from Dave.
+h-gamma = sum-over-alpha(c-alpha * chi-alpha-gamma)
+* [#B] Derive convolution algorithm and ensure no incorrect assumptions are made.
+Particularly interested in how how changes in the DCF affect the TCF.
+* [#C] Ensure that thermodynamic output is correct for periodic case.
+See functions rism3d_* in rism3d_c.F90, such as rism3d_kirkwoodBuff,
+where functions include both LR asymp corrected and uncorrected
+versions. Periodic case should NOT include these corrections.
+* [#C] Get Intel compiler working.
+* [#C] Implement parallelism (MPI + MP or OpenCL).
+* Documentation.
+** [#B] Describe how each component of potential is calculated.
+** [#C] Add Doxygen calls to Makefile.
+** [#C] Document existing periodic-rism changes in file:ChangeLog.org.
+** [#C] Add MathJaX support.
+** [#C] Add BibTeX file for Doxygen citations.
+* Fun
+** Use rotation matrices to calculate the triclinic unit cell axis.

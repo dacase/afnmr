@@ -1,0 +1,68 @@
+
+
+
+Below I describe how to get the code for the SPME. The original PME algorithm
+code appears to be lost. It may be on a tape somewhere however. We use
+mainly the SPME now, whic I have put into AMBER.
+
+When I get time, I plan to clean up some code for a "force-interpolated"
+version of PME, which has the nice property that the total force on the system
+is ~0 (to 12 places or so), unlike the smooth PME, for which the total force on
+the system divided by the number of particles is of the order of the RMS error.
+I.e. the smooth PME doesn't conserve momentum as well. The practical
+consequences of this are negligible in my experience (so far) as long as the
+total momentum is zeroed fairly often. Also, a lot of other people have run
+simulations with the smooth PME and have not seen artifacts versus regular
+Ewald, but I'd like the force interpolated alternative as a check. 
+The force interpolated alternative does require more FFT's however.
+(this stuff is in amber, need to make a public version)
+
+Also, I have code to do the long range dispersion attraction by PME. This
+doesn't seem so critical, and is much less efficient than the usual continuum
+correction, but may be important in sufficiently non-homogeneous situations.
+
+Finally, a student and I have worked out the extension of PME to dipolar
+interaction, and hence to  polarizability, but the code's not quite ready for
+release. It should be ready in a month or so, if you are interested.
+
+Here's how to get what's done so far: (in case the attachment doesn't work)
+Directions for getting (FORTRAN) source code for smooth PME:
+
+
+The code you want can be obtained as follows:
+ftp to t-rex.niehs.nih.gov
+login as guest  password guest1
+the tar file is wat.tar.Z
+
+
+The tar file contains source code and data for doing Ewald and PME on
+water boxes.  There is a huge pdb file of water, together with a filter
+program to cut it into smaller boxes. (its best to test on small boxes
+first, such as 3000 atoms or less. The exact code is very slow, i.e. 1 day
+or more on big boxes such as 30000 atoms or more). Then there are programs to
+compute "exact" ewald for accuracy tests, conventional ewald and
+PME. The ewald sum consists of a direct sum, reciprocal sum, self energy
+and an adjustment term. The latter is to correct for the fact that
+atoms belonging to the same water molecule don't feel Coulomb forces,
+but the reciprocal component of them are computed in the reciprocal sum.
+The direct sum in these codes is very inefficient, since I was interested
+here in PME, which is an approximation of the reciprocal sum. Besides,
+the direct sum would now be computed the same way as normal nonbonds are
+computed in MD programs, except the Coulombic pair interaction
+	q_i.q_j/r_ij   becomes    q_i.q_j.erfc(beta.r_ij)/r_ij,
+with a corresponding adjustment in force terms.
+
+Some pieces of code are specific to water, since I wanted to be
+independent of any force field (note however PME is in Amber4.1)
+The PME reciprocal code itself is general however, and should work for any
+unit cell.
+
+The code as is will definitely work on SGI's. I think HP's also.
+If you have IBM there are a few minor problems that I recently helped
+someone with, but I haven't put the fixes into the code yet.
+
+Good Luck and e-mail me if you have problems,
+
+Tom Darden
+darden@.niehs.nih.gov
+919-541-4933

@@ -1,0 +1,5 @@
+this stuff is the same as the pme_recip code except for a cray.
+Note that some loops in charge_grid.f are exchanged versus the same
+file in pme_recip: i.e. here the loop over atoms is the inner loop.
+This code is much faster (145 mflops versus 23 mflops) on the YMP.
+Thanks to Vance Shaffer of cray research for help wwith vector esoterica.

@@ -1,0 +1,406 @@
+#!/bin/sh
+#set -xv
+
+#  Automate all the steps needed to take a system through af-nmr.  
+
+#------------------------------------------------------------------------------
+#  set up usage statement:
+#------------------------------------------------------------------------------
+usage(){
+cat<<EOD
+
+Usage: `basename $0` [flags] basename
+
+   where the file "basename.pdb" must be present
+
+Optional flags:
+   -list           list of residues to create fragments for; uses bash 
+                   syntax and must be quoted, e.g.:
+                       "{1,2,{4..9},13}" or "46" or "{5..8}"
+                   Residue numbers are those in the pdb file, and must
+                      be unique: afnmr does not process chainID's
+                   If this flag is not present, fragments will be created
+                   for residues 1 up to the last protein or nucleic acid
+                   residue
+   -mixedb         use a mixed basis with the primary residue at TZP,
+                   others at DZP (default)
+   -tzp            all quantum residues are treated at the TZP level
+   -dzp            all quantum residues are treated at the DZP level
+   -solinprot      use the solinprot program to get surface charges (default)
+   -demon, -deMon  Set up quantum input files to use with deMon (default)
+   -demon5         Set up quantum input files for use with deMon2k, v5
+   -qopt           Do quantum optimization
+   -orca           Set up quantum input files to use with Orca
+   -gau            Set up quantum input files to use with Gaussian
+   -qchem          Set up quantum input files to use with Q-Chem
+   -tc             Set up quantum input files to use with TeraChem
+   -workdir        Do everything inside of a working directory named <basename>
+   -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
+                       (only works with -solinprot)
+   -nomin          Skip the minimization steps, but still build from 
+                       <basename>.pdb
+   -frcmod <file>  An additional frcmod file to load in to tleap
+   -offlib <file>  An additional library file to load in to tleap
+
+===========================================================
+EOD
+
+}
+
+check_amberhome() {
+   if [ -z "$AMBERHOME" ]; then
+      echo ""
+      echo "Your AMBERHOME environment variable is not set!"
+      exit 1
+   fi
+}
+
+implicit_solvent="solinprot"
+solinprot="T"
+program="D"
+qopt="F"
+basis="M"
+workdir="no"
+min="yes"
+build="yes"
+list=""
+
+#------------------------------------------------------------------------------
+#  Checking Arguments:
+#------------------------------------------------------------------------------
+if [ $# -lt 1 ]; then usage; exit 1;  fi
+
+args=$@
+
+cat > leap.in << EOF
+source leaprc.protein.ff14SB
+source leaprc.RNA.OL3
+source leaprc.DNA.OL15
+source leaprc.water.tip3p
+source leaprc.gaff2
+set default PBRadii mbondi3
+EOF
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -list)        shift; list=`eval echo $1`;;
+        -mixedb)      basis="M";;
+        -tzp)         basis="T";;
+        -dzp)         basis="D";;
+        -demon)       program="D";;
+        -deMon)       program="D";;
+        -demon5)      program="E";;
+        -qopt)        qopt="T";;
+        -orca)        program="O";;
+        -gau)         program="G";;
+        -qchem)       program="Q";;
+        -tc)          program="T";;
+        -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
+        -workdir)     workdir="T";;
+        -nobuild)     build="no";;
+        -nomin)       min="no";;
+        -frcmod)      shift; echo "loadAmberParams $1" >> leap.in;;
+        -offlib)      shift; echo "loadOFF $1" >> leap.in;;
+        -help)        usage; exit 0;;
+        --help)       usage; exit 0;;
+        -h)           usage; exit 0;;
+
+        -*) echo "Error: unknown flag: $1"
+            usage
+            exit 1;;
+        *) if [ $# -gt 1 ]; then
+             echo "Too many arguments"
+             usage
+             exit 1
+           fi
+           break;;
+    esac
+    shift
+done
+
+if [ "$workdir" = "T" ]; then
+   /bin/mkdir -p $1
+   cd $1
+   /bin/rm -f $1.pdb
+   /bin/ln -s ../$1.pdb
+   cp ../leap.in .
+fi
+
+#  Set the options to afnmr.x:
+AFNMR_OPTIONS="$program $basis $solinprot $qopt"
+
+#  Should not need to edit anything below here; (except to perhaps change 
+#  detailed parameters in minimization)
+
+#############################################################################
+
+check_amberhome
+
+echo "Running afnmr with arguments $args\n" > $1.afnmr.log
+
+if [ $build = "yes" ]; then
+
+echo "Running AFNMR on $1.pdb"
+
+#============================================================================
+#  Use tleap to create the Amber prmtop file:
+#============================================================================
+echo "Running tleap"
+cat <<EOF >> leap.in
+x = loadpdb $1.pdb
+saveamberparm x $1.parm7 $1.x
+quit
+EOF
+
+$AMBERHOME/bin/tleap -f leap.in > tleap.out
+if [ ! -s $1.parm7 ]; then 
+   echo "Error in tleap: check tleap.out or leap.log "
+   exit 1
+fi
+echo "====== tleap.out =====================================================" \
+     >> $1.afnmr.log
+cat tleap.out >> $1.afnmr.log
+/bin/rm leap.in tleap.out
+
+if [ $min = "yes" ]; then
+
+$AMBERHOME/bin/ambpdb -p $1.parm7 < $1.x > $1.0.pdb  2> /dev/null
+
+#============================================================================
+#  Do a constrained minimization to regularize the local geometries:
+#============================================================================
+echo "Minimization"
+
+$AMBERHOME/bin/txmin $1.parm7 $1.x $1.min.x > $1.min.o
+
+if [ "$?" -gt 0 ]; then 
+   echo "Error in txmin: check $1.min.o"
+   exit 1
+fi
+echo "====== min.o =========================================================" \
+     >> $1.afnmr.log
+cat $1.min.o >> $1.afnmr.log
+/bin/rm -f $1.min.o
+
+#============================================================================
+#  Create pqr for further use, with original residue numbers
+#============================================================================
+echo "====== parmed:  ======================================================" \
+     >> $1.afnmr.log
+$AMBERHOME/bin/parmed -n -p $1.parm7 <<EOF >> $1.afnmr.log
+setOverwrite
+addPDB $1.pdb
+outparm $1.parm7
+EOF
+
+$AMBERHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.min.x > $1.min.pqr 2> /dev/null
+/bin/rm -f $1.pqr
+ln -s $1.min.pqr $1.pqr
+
+
+#cpptraj is missing from ambermini (for now?)
+if false; then
+#============================================================================
+#  Check how far the struture has moved from the initial conformation:
+#============================================================================
+backbone="@C,CA,N,P,O3',O5',C3',C4',C5'"  # should work for both proteins
+                                          # and nucleic acids
+$AMBERHOME/bin/cpptraj $1.parm7 <<EOF > cpptraj.out
+reference $1.x
+trajin $1.min.x
+rms all_heavy reference !@H= out rms.dat
+rms backbone reference $backbone out rms.dat
+EOF
+
+if [ "$?" -gt 0 ]; then 
+   echo "Error in cpptraj: check cpptraj.out"
+   exit 1
+fi
+echo "====== rms.dat  ======================================================" \
+     >> $1.afnmr.log
+cat rms.dat >> $1.afnmr.log
+/bin/rm cpptraj.out rms.dat
+fi
+
+#  end of "if min=yes" block:
+else
+    echo "Skipping minimization"
+    #========================================================================
+    #  Create pqr for further use, with original residue numbers
+    #========================================================================
+    $AMBERHOME/bin/parmed -n -p $1.parm7 <<EOF >> $1.afnmr.log
+    setOverwrite
+    addPDB $1.pdb
+    outparm $1.parm7
+EOF
+
+    $AMBERHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.x > $1.pqr 2> /dev/null
+    ln -s $1.x $1.min.x
+
+fi
+
+#  end of "if build=yes" block:
+else
+    /bin/rm -f leap.in
+    echo "nobuild: Running AFNMR on $1.pqr"
+fi
+
+#============================================================================
+#  write a script to get MS surface points:
+#============================================================================
+cat <<EOF2 > runms.solsurf
+#! /usr/bin/env perl
+#
+#----------------------------------------------------------------
+#   run the "ms" program from input pqr file,(s) to get solvent-
+#   accesible surface area.  Results to STDOUT
+#----------------------------------------------------------------
+#
+
+#  solvent accessible radius for solvent probe radius of 1.4:
+open (MSRAD, ">ms.rad") || die "can't open ms.rad\n";
+print MSRAD <<"EOF";
+    1      3.25                      phosphorus;
+    2      2.90                      oxygen
+    4      2.95                      nitrogen
+    7      3.10                      carbon, allatom
+    8      3.20                      sulfur
+   15      2.60                      hydrogen
+   16      3.03                      potassium
+EOF
+
+close(MSRAD); 
+
+foreach \$file (@ARGV) {
+
+#   change a pdb or pqr file to atm format, using our standard
+#     atom types
+#
+open (PQR, "\$file") || die "can't find input file \$file\n";
+open (ATM, ">input.atm") || die "can't open input.atm\n";
+
+\$type{"H"} = 15; \$type{"C"} = 7; \$type{"N"} = 4; \$type{"P"} = 1;
+\$type{"O"} = 2; \$type{"S"} = 8; \$type{"F"} = 4; \$type{"K"} = 16;
+
+while (<PQR>) { 
+	next unless /^ATOM|^HETATM/;
+	( \$atno, \$atname, \$alt, \$resname, \$resno, \$x, \$y, \$z ) =
+	    unpack("x7 a4 x a4 a a3 x3 a3 x4 a8 a8 a8",\$_);
+
+	\$atname =~ s/^\s+//;  # remove leading spaces
+	\$atname =~ s/\s+\$//;  # remove trailing spaces
+
+	if ( defined(\$type{substr(\$atname,0,1)}) ){
+		\$r = \$type{substr(\$atname,0,1)};
+	} else {
+		print STDERR "Error in atom type\n";
+        exit 1;
+	}
+	printf ATM "%10.3f%10.3f%10.3f%5d    2    1\n",\$x,\$y,\$z,\$r;
+}
+
+close(ATM);
+
+system ("$AMBERHOME/bin/ms -atm input.atm -rad ms.rad -d 0.5 -rp 0.0 ");
+unlink("input.atm");
+
+open (CONTACT, "contact") || die "contact file not found\n";
+open (SRF, ">surf.pos") || die "cannot open surf.pos\n";
+
+#
+#  convert a "contact" solvent-accessible surface file to
+#  one where each line corresponds a given surface point
+#
+while (<CONTACT>) {
+	@_ = split(' ', \$_); 
+    printf SRF "%10.3f%10.3f%10.3f\n", \$_[4],\$_[5],\$_[6];
+}
+close(CONTACT);
+unlink("contact");
+
+}
+unlink("ms.rad");
+EOF2
+
+chmod +x runms.solsurf
+
+echo "Here is the runms.solsurf file:" >> $1.afnmr.log
+echo "---------------------------------------------------------------------" >> $1.afnmr.log
+cat runms.solsurf >> $1.afnmr.log
+echo "---------------------------------------------------------------------" >> $1.afnmr.log
+
+#============================================================================
+#   Use the solinprot method to get the environment influence
+#============================================================================
+cat <<EOF3 > runsolinprot
+#!/bin/sh
+
+echo "MS"
+./runms.solsurf \$1.pqr
+if [ "\$?" -gt 0 ]; then 
+   echo "Error in ms: check afnmr.log"
+   exit 1
+fi
+
+echo "solinprot"
+cat <<EOF > \$1.ogm
+ON_GEOM_CENT 101 2.0
+ON_GEOM_CENT 101 1.0
+ON_GEOM_CENT 101 0.25
+EOF
+
+grep -v MOD \$1.pqr | awk '/ATOM/{print \$6,\$7,\$8}' > \$1.fpt
+
+$AMBERHOME/bin/solinprot -epsin1 1.0 -epsin2 4.0 -ionicstr 0.2 \
+     -ProteinField -ReactionField \$1 \$1.prot 
+if [ "\$?" -gt 0 ]; then 
+   echo "Error in solinprot: check afnmr.log"
+   exit 1
+fi
+/bin/rm \$1.ogm
+
+paste \$1.fpt \$1.rf \$1.pf | awk '{print \$1,\$2,\$3,\$4+\$5}' > input.xyzv
+/bin/rm \$1.fpt \$1.rf \$1.pf
+
+echo "gridprune"
+$AMBERHOME/bin/gridprune -solinprot < \$1.pqr 
+if [ "\$?" -gt 0 ]; then 
+   echo "Error in gridprune: check afnmr.log"
+   exit 1
+fi
+$AMBERHOME/bin/pair < check.dat
+/bin/rm input.xyzv surf.pos check.dat
+exit 0
+
+EOF3
+chmod +x runsolinprot
+
+#============================================================================
+#  Run the fragment program to create the quantum chemistry input files;
+#============================================================================
+echo "afnmr.x $AFNMR_OPTIONS $1 $list"
+echo "afnmr.x $AFNMR_OPTIONS $1 $list" > afnmr.out
+$AMBERHOME/bin/afnmr.x  $AFNMR_OPTIONS  $1 $list >> afnmr.out
+if [ "$?" -gt 0 ]; then 
+   echo "Error in afnmr: check afnmr.out"
+   exit 1
+fi
+cat afnmr.out >> $1.afnmr.log
+/bin/rm afnmr.out
+
+#============================================================================
+#  Some fine file clean-ups  (optional)
+#============================================================================
+/bin/rm -f $1.0.pdb $1.min.x $1???.prot.pqr \
+       srfchg.pos runms.solsurf runsolinprot leap.log
+
+if [ "$build" = "yes" ]; then
+	/bin/rm -f $1.x $1.parm7
+fi
+
+if [ "$workdir" = "T" ]; then
+   cd ../
+   /bin/rm -f leap.in
+fi
+
+echo "done"

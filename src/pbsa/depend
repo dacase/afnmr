@@ -1,0 +1,683 @@
+#
+#   Please do not edit the "depend" file directly, since it is created by the
+#   "makedepend" script.  If changes are needed, edit "makedepend" itself.
+#
+bicg.o: \
+                    ../include/dprec.fh
+
+curv.o: \
+                    ../include/dprec.fh
+
+curv.LIBPBSA.o: \
+                    ../include/dprec.fh
+debug.o: \
+                    copyright.h\
+                    flocntrl.h\
+                    debug.h\
+                    ../include/md.h\
+                    memory_module.o\
+                    extra.h
+
+decomp.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o
+
+decomp.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.LIBPBSA.o
+density.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+density.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+dsvdc.o: \
+                    ../include/dprec.fh
+
+dsvdc.LIBPBSA.o: \
+                    ../include/dprec.fh
+egb.o: \
+                    ../include/dprec.fh
+
+ene.o: \
+                    ../include/dprec.fh
+
+force.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    egb.o\
+                    pb_force.o\
+                    np_force.o\
+                    timer.o\
+                    parms.o\
+                    memory_module.o\
+                    pb_constants.h\
+                    timer.h\
+                    ../include/md.h\
+                    box.h\
+                    files.h\
+                    flocntrl.h\
+                    pb_md.h
+
+gen_dx_file.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+
+gen_dx_file.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+getcoor.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    files.h
+
+gmres.o: \
+                    ../include/dprec.fh
+
+GrToPr.o: \
+                    ../include/dprec.fh
+
+GrToPr.LIBPBSA.o: \
+                    ../include/dprec.fh
+indexg.o: \
+                    ../include/dprec.fh
+
+interpX.o: \
+                    ../include/dprec.fh\
+                    pb_iimdrv.o\
+                    pb_constants.h
+
+interpX.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    pb_iimdrv.LIBPBSA.o\
+                    pb_constants.h
+irre31.o: \
+                    ../include/dprec.fh\
+                    pb_iimdrv.o
+
+irre32.o: \
+                    ../include/dprec.fh\
+                    pb_iimdrv.o
+
+jumps.o: \
+                    ../include/dprec.fh\
+                    pb_iimdrv.o
+
+locmem.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    box.h\
+                    ../include/md.h\
+                    dynph.h
+
+memory_module.o: \
+                    ../include/memory.h\
+                    parallel.h
+
+memory_module.LIBPBSA.o: \
+                    ../include/memory.h\
+                    parallel.h
+miniop.o: \
+                    ../include/dprec.fh
+
+miniop.LIBPBSA.o: \
+                    ../include/dprec.fh
+myopen.o: \
+                    copyright.h
+
+myopen.LIBPBSA.o: \
+                    copyright.h
+np_force.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    timer.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    box.h\
+                    pb_constants.h\
+                    flocntrl.h
+
+np_force.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    timer.LIBPBSA.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    box.h\
+                    pb_constants.h\
+                    flocntrl.h
+parms.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o
+
+parms.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.LIBPBSA.o
+pb_anaiim.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    timer.o\
+                    density.o\
+                    pb_force.o
+
+pb_anaiim.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    timer.LIBPBSA.o\
+                    density.LIBPBSA.o\
+                    pb_force.LIBPBSA.o
+pb_augdrv.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    pb_iimdrv.o\
+                    density.o
+
+pb_augdrv.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    pb_iimdrv.LIBPBSA.o\
+                    density.LIBPBSA.o
+pb_bldsys.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    density.o\
+                    pb_anaiim.o\
+                    timer.o\
+                    pb_md.h\
+                    pb_constants.h\
+                    ../include/md.h
+
+pb_bldsys.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    density.LIBPBSA.o\
+                    pb_anaiim.LIBPBSA.o\
+                    timer.LIBPBSA.o\
+                    pb_md.h\
+                    pb_constants.h\
+                    ../include/md.h
+pb_chkfrc.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    pb_force.o\
+                    random.o\
+                    pb_constants.h\
+                    ../include/md.h\
+                    pb_md.h
+
+pb_crgview.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    sa_driver.o\
+                    pb_force.o\
+                    pb_constants.h
+
+pb_crgview.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    sa_driver.LIBPBSA.o\
+                    pb_force.LIBPBSA.o\
+                    pb_constants.h
+pb_direct.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    flocntrl.h\
+                    pb_force.o\
+                    decomp.o
+
+pb_direct.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    flocntrl.h\
+                    pb_force.LIBPBSA.o\
+                    decomp.LIBPBSA.o
+pb_fddrv.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    timer.o\
+                    pb_constants.h\
+                    pb_lsolver.o\
+                    pb_nlsolver.o
+
+pb_fddrv.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    timer.LIBPBSA.o\
+                    pb_constants.h\
+                    pb_lsolver.LIBPBSA.o\
+                    pb_nlsolver.LIBPBSA.o
+pb_fdfrc.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    pb_iimdrv.o\
+                    pb_anaiim.o\
+                    pb_augdrv.o\
+                    pb_p3m.o\
+                    timer.o\
+                    flocntrl.h\
+                    parallel.h\
+                    decomp.o\
+                    pb_dbfrc_fld2.h\
+                    pb_dbfrc.h\
+                    pb_constants.h
+
+pb_fdfrc.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    pb_iimdrv.LIBPBSA.o\
+                    pb_anaiim.LIBPBSA.o\
+                    pb_augdrv.LIBPBSA.o\
+                    pb_p3m.LIBPBSA.o\
+                    timer.LIBPBSA.o\
+                    flocntrl.h\
+                    parallel.h\
+                    decomp.LIBPBSA.o\
+                    pb_dbfrc_fld2.h\
+                    pb_dbfrc.h\
+                    pb_constants.h
+pb_force.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    sa_driver.o\
+                    decomp.o\
+                    timer.o\
+                    random.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    box.h\
+                    extra.h
+
+pb_force.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    sa_driver.LIBPBSA.o\
+                    decomp.LIBPBSA.o\
+                    timer.LIBPBSA.o\
+                    random.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    box.h\
+                    extra.h
+pb_iimdrv.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    density.o\
+                    pb_force.o
+
+pb_iimdrv.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h\
+                    density.LIBPBSA.o\
+                    pb_force.LIBPBSA.o
+pb_init.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    ../include/md.h\
+                    box.h\
+                    parms.o\
+                    np_force.o\
+                    pb_md.h
+
+pb_init.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    ../include/md.h\
+                    box.h\
+                    parms.LIBPBSA.o\
+                    np_force.LIBPBSA.o\
+                    pb_md.h
+pb_list.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    pb_constants.h\
+                    extra.h
+
+pb_list.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    pb_constants.h\
+                    extra.h
+pb_lsolver.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+pb_lsolver.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_constants.h
+pb_mpfrc.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h
+
+pb_mpfrc.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    pb_constants.h
+pb_nlsolver.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+pb_nlsolver.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_constants.h
+pb_p3m.o: \
+                    ../include/dprec.fh\
+                    density.o\
+                    pb_constants.h\
+                    pb_iimdrv.o
+
+pb_p3m.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    density.LIBPBSA.o\
+                    pb_constants.h\
+                    pb_iimdrv.LIBPBSA.o
+pb_read.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    pb_constants.h\
+                    files.h\
+                    box.h\
+                    ../include/md.h\
+                    decomp.o\
+                    pb_md.h\
+                    pb_force.o\
+                    np_force.o\
+                    sa_driver.o\
+                    pb_def.h
+
+pb_read.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.LIBPBSA.o\
+                    pb_constants.h\
+                    files.h\
+                    box.h\
+                    ../include/md.h\
+                    decomp.LIBPBSA.o\
+                    pb_md.h\
+                    pb_force.LIBPBSA.o\
+                    np_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    pb_def.h
+pb_write.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    files.h\
+                    ../include/md.h\
+                    decomp.o\
+                    extra.h\
+                    pb_force.o\
+                    sa_driver.o\
+                    pb_def.h\
+                    pb_md.h
+
+pb_write.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    files.h\
+                    ../include/md.h\
+                    decomp.LIBPBSA.o\
+                    extra.h\
+                    pb_force.LIBPBSA.o\
+                    sa_driver.LIBPBSA.o\
+                    pb_def.h\
+                    pb_md.h
+pbsa.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    files.h\
+                    timer.o\
+                    decomp.o\
+                    memory_module.o\
+                    parms.o\
+                    box.h\
+                    ../include/md.h\
+                    pb_md.h\
+                    timer.h
+
+pbsa.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    files.h\
+                    timer.LIBPBSA.o\
+                    decomp.LIBPBSA.o\
+                    memory_module.LIBPBSA.o\
+                    parms.LIBPBSA.o\
+                    box.h\
+                    ../include/md.h\
+                    pb_md.h\
+                    timer.h
+pbsa_lib.o: \
+                    copyright.h
+
+pbsa_lib.LIBPBSA.o: \
+                    copyright.h
+pbsaapi.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    parms.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    flocntrl.h\
+                    pb_force.o\
+                    np_force.o\
+                    decomp.o
+
+pbsaapi.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    parms.LIBPBSA.o\
+                    ../include/md.h\
+                    pb_md.h\
+                    flocntrl.h\
+                    pb_force.LIBPBSA.o\
+                    np_force.LIBPBSA.o\
+                    decomp.LIBPBSA.o
+phidev.o: \
+                    ../include/dprec.fh
+
+phidev.LIBPBSA.o: \
+                    ../include/dprec.fh
+project.o: \
+                    ../include/dprec.fh
+
+project.LIBPBSA.o: \
+                    ../include/dprec.fh
+pythag.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+pythag.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+qld.o: \
+                    ../include/dprec.fh
+
+rdparm.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    parms.o\
+                    ../include/md.h\
+                    files.h\
+                    box.h
+
+rdpqr.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    parms.o\
+                    pbsa_lib.o\
+                    ../include/md.h\
+                    box.h\
+                    pb_force.o\
+                    sa_driver.o
+
+regular.o: \
+                    ../include/dprec.fh
+
+rfree.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+
+rfree.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+rgroup.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+
+rgroup.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh
+runmd.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    files.h\
+                    ../include/md.h\
+                    box.h\
+                    extra.h\
+                    timer.h\
+                    pb_constants.h\
+                    pb_md.h\
+                    parallel.h
+
+runmin.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    memory_module.o\
+                    pb_constants.h\
+                    ../include/md.h\
+                    box.h\
+                    files.h\
+                    pb_md.h\
+                    extra.h\
+                    parallel.h
+
+sa_driver.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    timer.o
+
+sa_driver.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    pb_def.h\
+                    timer.h\
+                    pb_constants.h\
+                    timer.LIBPBSA.o
+svbksb.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+svbksb.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+svdcmp.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+
+svdcmp.LIBPBSA.o: \
+                    ../include/dprec.fh\
+                    pb_constants.h
+timer.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    timer.h
+
+timer.LIBPBSA.o: \
+                    copyright.h\
+                    ../include/dprec.fh\
+                    timer.h
+transf.o: \
+                    ../include/dprec.fh
+
+transf.LIBPBSA.o: \
+                    ../include/dprec.fh
+random.o: ../lib/random.F90 ../lib/random.h
+	$(FC) $(FPPFLAGS) -c $(FREEFORMAT_FLAG) $(FOPTFLAGS) $(FFLAGS) -o random.o ../lib/random.F90
+

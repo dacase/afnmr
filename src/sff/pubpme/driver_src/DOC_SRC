@@ -1,0 +1,126 @@
+
+OVERALL NOTES:
+1) all programs assume that input and output files are in your
+current working directory.
+2) all programs should die if their output files already exist
+
+FILTER:
+input:    "big.pdb"     output:    "small.pdb"
+
+This program cuts a piece out of "big.pdb" to make "small.pdb".
+All other programs read small.pdb which will be much quicker.
+Note that if small.pdb already exists, this program will croak.
+After reading in big.pdb (which may take a while, there are ~95000 atoms),
+it bins the atoms into increasing sized subboxxes, each going from 
+(0,0,0) to (i,i,i) where i goes from 1 to 100. It then tells you how
+many waters are in each subbox. (this is decided by examining the
+oxygen positions). It then asks you to choose how many waters you want
+in small.pdb. You respond and it matches that info with bins. Then
+it re-reads atoms and puts the ones that fit into small.pdb.
+It also puts in the box size and number of atoms at top.
+
+EXACT:
+input:    "small.pdb"   output:    "exact.bin"
+
+   This program reads in "small.pdb" and asks you for a direct space cutoff and
+a tolerance.
+   The cutoff should be less than half of the box size. The tolerance is an
+upper bound on the value of erfc(beta*r)/r for r >= cutoff, and is used
+to determine the ewald convergence coefficient beta. 
+   The ewald sum is the sum of two rapidly converging infinite series, 
+a direct space sum and a reciprocal space sum, plus a so called 
+"self energy" correction, and in the case of molecular systems such 
+as the water bath here, another correction series for all the atom pairs
+which shouldn't have minimum image coulombic interactions (e.g. oxygen and
+hydrogen or hydrogen and hydrogen on the same water molecule) but which
+should have interactions with other periodic images of each other.
+   If you have a neutral unit cell (true for water) and if you are
+evaluating the sum accurately, its value should be independent of the
+coefficient beta. The program "chk_exact" discussed below uses this fact
+as well as a result on the virial (the trace of the virial tensor is exactly
+the negative of the electrostatic energy), as a check on accuracy since 
+neither of these results is self evident.
+   This program attempts to do both the direct and reciprocal sums exactly,
+and computes as well the self energy and other correction terms.
+   First it decides on a direct space cutoff to get "exact" direct space
+sum, and the maximum value of the exponent in the reciprocal space weight
+function. From the latter it determines how many reciprocal vectors it
+will need to compute, and the value of mlimit1-3 which bound the reciprocal
+vectors.
+   Next it computes the reciprocal sum out to the limit and reports it.
+   Next it computes the self and correction terms.
+   Next it computes the direct sum out to the limit. Note that this
+code is not supposed to be "fast". In particular we are not trying to get
+the direct sum rapidly.
+   From these terms it then reports the total coulombic energy, the trace of
+the electrostatic virial, and the error in comparing them.
+   Next it computes an approximate direct sum based on cutoff and the value
+of the ewald coefficient. This sum is only over minimum image pairs that
+are less than "cutoff" apart. THe corresponding approximate reciprocal
+sum is done by the programs recip_reg and recip_pme.
+
+Following this everything is dumped to the binary output file "exact.bin"
+
+CHK_EXACT
+input: "exact.bin" & "exact1.bin"
+
+This program checks whether the output of EXACT is truly exact. A very
+good test of that is whether the result is independent of cutoff.
+Run EXACT twice with different cutoffs and or tolerances, resulting in
+two different values of the Ewald convergence parameter.
+After the first run move exact.bin to exact1.bin. CHK_EXACT reads in
+those two files and compares the total energies and forces. 
+Note the values of the four components of the ewald sum are all different.
+However the total result should be independent of the value of that parameter
+which is "ewaldcof" in the code, BUT ONLY if your unit cell is neutral, and only
+if you use a highly accurate erfc function, which we use here. You should get
+relative errors at 10^-13th or better (i.e. near machine precision ).
+
+REG_RECIP
+input: "exact.bin" & "small.pdb"
+
+   This program reads coordinates from "small.pdb" and previous results, 
+including ewaldcof from "exact.bin" . Next it asks you for a reciprocal 
+space tolerance.
+   From this and ewaldcof it computes a reciprocal space cutoff (the smaller the
+tolerance the larger the cutoff), the corresponding number of reciprocal 
+vectors, and computes the reciprocal sum over those vectors. 
+Next it reports the exact reciprocal energy, the approx reciprocal energy,
+the comparison of exact ene versus exact virial trace, the comparison of 
+approx ene (exact self,adjust,direct plus approx recip) versus approx
+virial trace using the same components, and finally the rms force error,
+i.e. as rms (approx recip force minus exact recip force compared to total
+exact force), and as rms (approx total force versus exact total force,where
+approx total force includes the approx direct force).
+   After this it asks you for a number of repeats to re-run  the approx
+reciprocal sum, for timing purposes. This code should be fast. We got it
+from CCP5. It is 8X faster than the regular ewald I wrote, and much faster
+than that from Allen & Tildesley's book. Note that this is method used
+for "exact" ewald. There however we use a very small tolerance.
+
+PME_RECIP
+input: "exact.bin" & "small.pdb"
+
+   This program reads coordinates from "small.pdb" and previous results, 
+including ewaldcof from "exact.bin" . Next it asks you for values of
+nfft and order. Nfft is the number of grid points along each dimension
+and order is the order of interpolation. (3 is quadratic, 4 is cubic etc.).
+Note that a 1 angstrom or finer grid is usually needed for precision, so 
+nfft ~= box. The bigger nfft, the more accurate, but the slower. Doubling
+nfft leads to 8X in run time. Also, try to make nfft a multiple of powers of
+2,3 and 5 for decent FFT performance.
+   The program first tells you its memory requirements,and whether it is
+using the public domain fft, the SGI library FFT, or the CRAY library
+FFT. Next it reports the exact reciprocal energy, the pme reciprocal energy,
+the comparison of exact ene versus exact virial trace, the comparison of 
+approx ene (exact self,adjust,direct plus approx recip) versus approx
+virial trace using the same components, and finally the rms force error,
+i.e. as rms (approx recip force minus exact recip force compared to total
+exact force), and as rms (approx total force versus exact total force,where
+approx total force includes the approx direct force).
+   After this it asks you for a number of repeats to re-run  the pme
+reciprocal sum, for timing purposes. 
+
+VPME_RECIP:
+same as pme_recip but supposedly for "vector" machines. About half as fast
+as PME_RECIP on sgi. Problem is memory traffic.

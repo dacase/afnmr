@@ -1,0 +1,138 @@
+#!/usr/bin/perl -w
+
+#***************************************************************
+# collect shifts from g09 outputs
+#   usage:  getshifts-g09 reference basename; rdb file fragments to stdout
+#***************************************************************
+
+sub numerically { $a <=> $b; }
+sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
+$resi = 0;
+
+$reference = "$ARGV[0]";
+$basename = "$ARGV[1]";
+
+if( $reference eq "seg0" ){
+   $reference_set = "OLYP seg0 ";
+   $ref{"H"} = 33.3;   # A2 H shifts (no H1/H3)
+   $ref{"C"} = 182.5;  # A2 C shifts
+   $ref{"N"} = 245.9;  # 1d3z1 N shifts"
+   $ref{"P"} = 300.0;
+   $ref{"S"} = 0.0;
+   $ref{"F"} = 131.33;
+} elsif( $reference eq "mseg2" ){
+   $reference_set = "OLYP mseg2 ";
+   $ref{"H"} = 31.3;   # A2 H shifts (no H1/H3)
+   $ref{"C"} = 178.1;  # A2 C shifts
+   $ref{"N"} = 233.8;  # 1d3z1 N shifts 
+   $ref{"P"} = 300.0;
+   $ref{"S"} = 0.0;
+   $ref{"F"} = 131.33;
+}
+
+if( $basename eq "header" ){
+   # document the reference shieldings being used:
+   printf( "# results from afnmr-g09:\n" );
+   printf( "# reference shifts used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
+       $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
+   printf( "res\tatomname\tresname\tshift\tdelta\teta\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\n" );
+   exit(0);
+}
+
+$_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
+
+# get atom and residue names from pqr file:
+
+open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+$iat = 0;
+while (<PQR>) {
+	next unless m/^ATOM  /; 
+    @f = split( ' ', $_ );
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
+    $x[$iat] = $f[5]; $y[$iat] = $f[6]; $z[$iat] = $f[7];
+	$rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+}
+close PQR;
+
+# read in the shift data
+
+open (LOG, "<", "$basename" . ".log") or die "cannot open $basename.log";
+
+while (<LOG>) {
+
+   if (m/ Isotropic = /) {
+       @f = split( ' ', $_ ); $iat = $f[0]; $elem = $f[1];
+       next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       #  get just the shifts in the "primary residue" (includes previous C):
+       next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
+                   ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
+       $siso = $f[4];
+       <LOG>; <LOG>; <LOG>;
+       $_ = <LOG>; @f = split( ' ', $_ );
+       $xx=$f[1]; $yy=$f[2]; $zz=$f[3];
+       @eigv = sort numerically $xx,$yy,$zz;
+       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
+          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
+       } else {
+          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
+       }
+
+#      eigenvectors:  (NB: fails if eigenvectors are not present!)
+       $_ = <LOG>;
+       $_= <LOG>; @f = split( ' ', $_ );
+       $v11 = $f[1]; $v12 = $f[2]; $v13 = $f[3];
+       $_= <LOG>; @f = split( ' ', $_ );
+       $v21 = $f[1]; $v22 = $f[2]; $v23 = $f[3];
+       $_= <LOG>; @f = split( ' ', $_ );
+       $v31 = $f[1]; $v32 = $f[2]; $v33 = $f[3];
+
+       if( $aname[$iat] eq "N" ){
+#         N-H vector:
+          $NHx = $x[4]-$x[3]; $NHy = $y[4]-$y[3]; $NHz = $z[4]-$z[3];
+          $NH = sqrt( $NHx*$NHx + $NHy*$NHy + $NHz*$NHz );
+          $NHx /= $NH; $NHy /= $NH; $NHz /= $NH;
+
+#         Angles to N-H vector:
+          $alpha1 = acos( $v11*$NHx + $v12*$NHy + $v13*$NHz)*180./3.14159;
+          $alpha2 = acos( $v21*$NHx + $v22*$NHy + $v23*$NHz)*180./3.14159;
+          $alpha3 = acos( $v31*$NHx + $v32*$NHy + $v33*$NHz)*180./3.14159;
+          if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+          if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+          if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+
+#         printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
+            $delta, $eta;
+#           $delta, $eta, $alpha1, $alpha2, $alpha3;
+
+       } elsif( $aname[$iat] eq "CA" ){
+#         CA-H vector:
+          $CHx = $x[6]-$x[5]; $CHy = $y[6]-$y[5]; $CHz = $z[6]-$z[5];
+          $CH = sqrt( $CHx*$CHx + $CHy*$CHy + $CHz*$CHz );
+          $CHx /= $CH; $CHy /= $CH; $CHz /= $CH;
+
+#         Angles to C-H vector:
+          $alpha1 = acos( $v11*$CHx + $v12*$CHy + $v13*$CHz)*180./3.14159;
+          $alpha2 = acos( $v21*$CHx + $v22*$CHy + $v23*$CHz)*180./3.14159;
+          $alpha3 = acos( $v31*$CHx + $v32*$CHy + $v33*$CHz)*180./3.14159;
+          if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+          if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+          if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+
+#         printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
+            $delta, $eta;
+#           $delta, $eta, $alpha1, $alpha2, $alpha3;
+
+      } else {
+#         printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
+            $delta, $eta;
+      }
+   }
+}
+close LOG;

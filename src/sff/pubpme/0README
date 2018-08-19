@@ -1,0 +1,32 @@
+
+The tar file contains source code and data for doing Ewald and PME on
+water boxes.  There is a huge pdb file of water, together with a filter
+program to cut it into smaller boxes. (its best to test on small boxes
+first, such as 3000 atoms or less. The exact code is very slow, i.e. 1 day
+or more on big boxes such as 30000 atoms or more). Then there are programs to
+compute "exact" ewald for accuracy tests, conventional ewald and
+PME. The ewald sum consists of a direct sum, reciprocal sum, self energy
+and an adjustment term. The latter is to correct for the fact that
+atoms belonging to the same water molecule don't feel Coulomb forces,
+but the reciprocal component of them are computed in the reciprocal sum.
+The direct sum in these codes is very inefficient, since I was interested
+here in PME, which is an approximation of the reciprocal sum. Besides,
+the direct sum would now be computed the same way as normal nonbonds are
+computed in MD programs, except the Coulombic pair interaction
+	q_i.q_j/r_ij   becomes    q_i.q_j.erfc(beta.r_ij)/r_ij,
+with a corresponding adjustment in force terms.
+
+Some pieces of code are specific to water, since I wanted to be
+independent of any force field (note however PME is in Amber4.1 and later)
+The PME reciprocal code itself is general however, and should work for any
+unit cell.
+
+The code as is will definitely work on SGI's. I think HP's also.
+If you have IBM there are a few minor problems that I recently helped
+someone with, but I haven't put the fixes into the code yet.
+
+Good Luck and e-mail me if you have problems,
+
+Tom Darden
+darden@niehs.nih.gov
+919-541-4933

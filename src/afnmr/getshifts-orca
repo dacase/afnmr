@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+
+#***************************************************************
+# collect shifts from orca outputs
+#   usage:  getshifts-orca basename; rdb file to stdout
+#***************************************************************
+
+sub numerically { $a <=> $b; }
+$resi = 0;
+
+#  reference shieldings; (these are basis/functional dependent!)
+$ref{"H"} = 32.02;  # ernst3, vdzp, HA, 0-63
+$ref{"C"} = 244.0;  # ernst3, vdzp, CB, 0-63
+$ref{"N"} = 321.4;  # enrst3, vdzp, 0-63
+$ref{"O"} = 0.0;
+$ref{"P"} = 0.0;
+$ref{"S"} = 0.0;
+
+if( @ARGV ==2 && $ARGV[0] eq "header" ){
+   # document the reference shieldings being used:
+   printf( "# results from afnmr-orca:\n" );
+   printf( "# reference shifts used for H,C,N: %6.2f %6.2f %6.2f\n",
+       $ref{"H"}, $ref{"C"}, $ref{"N"} );
+   printf( "res\tatomname\tresname\t%s\t%s_delta\t%s_eta\n",
+       $ARGV[1],$ARGV[1],$ARGV[1] );
+   printf( "4N\t8\t8\t10N\t10N\t10N\n" );
+   exit(0);
+}
+
+@ARGV == 1 or die " usage basename \n";
+
+$basename = "$ARGV[0]";
+$_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
+
+# get atom and residue names from pqr file:
+
+open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+$iat = 0;
+while (<PQR>) {
+	next unless m/^ATOM  /; 
+    @f = split( ' ', $_ );
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
+	$rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+}
+close PQR;
+
+# read in the shift data
+
+open (OUT, "<", "$basename" . ".out") or die "cannot open $basename.out";
+
+while (<OUT>) {
+
+   if (m/ Nucleus /) {
+       @f = split( ' ', $_ ); $_ = $f[1]; s/(\d+)(\w)/x/; 
+       $iat = $1 + 1;   $elem = $2;
+       <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>;
+       <OUT>; <OUT>; <OUT>; <OUT>;
+       $total = <OUT>; @f = split( ' ', $total );
+       $siso = $f[5]*1000000.; $xx=$f[1]*1000000.;
+       $yy =   $f[2]*1000000.; $zz=$f[3]*1000000.;
+       @eigv = sort numerically $xx,$yy,$zz;
+       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
+          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
+       } else {
+          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
+       }
+       printf "%d\t%s\t%s\t%8.1f\t%8.1f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
+            $delta, $eta;
+   }
+}
+close OUT;

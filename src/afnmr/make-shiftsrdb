@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#------------------------------------------------------------------------------
+#  set up usage statement:
+#------------------------------------------------------------------------------
+usage(){
+cat<<EOD
+
+Usage: make-shiftsrdb qpgm reference <basename>
+
+   where qpgm must be one of "-demon", "-demon3", "-g09" or "-orca"
+   reference is the name of a reference shielding set
+
+   Input are <basename>xxx.{out,log} files
+   Output goes to <basename>.rdb
+
+EOD
+}
+
+check_shiftshome() {
+   if [ -z "$SHIFTSHOME" ]; then
+      echo ""
+      echo "Your SHIFTSHOME environment variable is not set!"
+      exit 1
+   fi
+}
+
+#------------------------------------------------------------------------------
+#  Checking Arguments:
+#------------------------------------------------------------------------------
+
+check_shiftshome
+
+if [ $# -ne 3 ]; then usage; exit 1;  fi
+
+case "$1" in
+        -demon)       program="demon";;
+        -demon3)      program="demon3";;
+        -orca)        program="orca";;
+        -g09)         program="g09";;
+        -help)        usage; exit 0;;
+        --help)       usage; exit 0;;
+        -h)           usage; exit 0;;
+
+        -*) echo "Error: unknown flag: $1"
+            usage
+            exit 1;;
+esac
+
+reference=$2
+basename=$3
+
+#  header:
+getshifts-$program $reference header > $basename.rdb
+
+#  body:
+if [ "$program" = "demon" -o "$program" = "orca" -o "$program" = "demon3" ]
+then
+    for i in ${basename}???.out
+    do
+        $SHIFTSHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
+    done
+elif [ "$program" = "g09" ]; then
+    for i in ${basename}???.log
+    do
+        $SHIFTSHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
+    done
+fi
+
+#  now sort the shifts by residue and atom name:
+sort -k1n -k2 $basename.rdbi >> $basename.rdb
+/bin/rm $basename.rdbi

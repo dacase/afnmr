@@ -1,0 +1,53 @@
+#!/usr/bin/perl -w
+
+#*********************************************
+# obsolete: get shifts from old demon2 files
+#*********************************************
+
+sub numerically { $a <=> $b; }
+
+#  reference shieldings; (these are basis/functional dependent!)
+$ref[1] = 30.9;   # prelim: 1bna proton shifts 
+$ref[6] = 188.0;
+$ref[7] = 235.5;
+$ref[15] = 0.0;
+
+@ARGV == 1 or die " usage basename \n";
+
+$basename = "$ARGV[0]";
+$_ = $basename; s/.+(\d\d\d)$/$1/; $res = $_;
+
+# get atom and residue names from pqr file:
+
+open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+$iat = 0;
+while (<PQR>) {
+	next unless m/^ATOM  /; 
+    @f = split( ' ', $_ );
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
+	$rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+}
+close PQR;
+
+# read in the shift data
+
+open (MSMR, "<", "$basename" . ".msmr") or die "cannot open $basename.msmr";
+
+while (<MSMR>) {
+
+   if (m/ Z = /) {
+       @f = split( ' ', $_ ); $iat = $f[0]; $elem = $f[4];
+       $_ = <MSMR>; @f = split( ' ', $_ );
+       $siso = $f[0]; $xx=$f[1]; $yy=$f[2]; $zz=$f[3];
+       @eigv = sort numerically $xx,$yy,$zz;
+       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
+          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
+       } else {
+          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
+       }
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat], $ref[$elem] - $siso,
+            $delta, $eta;
+   }
+}
+close MSMR;
