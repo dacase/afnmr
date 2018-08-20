@@ -14,6 +14,10 @@ is_afnmrhome_defined:
 	@(if [ -z "$(AFNMRHOME)" ] ; then \
 	    echo "Error: AFNMRHOME is not defined !" ;\
 	    exit 2 ;\
+    elif [ ! "$(AFNMRHOME)" = `pwd` ]; then \
+        echo "Error: AFNMRHOME should be `pwd`, " ; \
+        echo "       but is currently $(AFNMRHOME); this needs to be fixed!" ; \
+	    exit 2 ;\
 	fi ;\
 	)
 
