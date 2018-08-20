@@ -381,15 +381,9 @@ int com_vw2zero(REAL_T *, REAL_T *,REAL_T *);
 
 REAL_T seconds(void)
 {
-#ifdef SUN
-   hrtime_t nsec;
-   nsec = gethrtime();
-   return (((REAL_T) nsec) * 1.0e-09);
-#else
    REAL_T t1;
    arsecond_( &t1);
    return t1;
-#endif
 }
 
 

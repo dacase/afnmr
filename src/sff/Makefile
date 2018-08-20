@@ -6,7 +6,7 @@ include ../config.h
 .cpp.o:
 	$(CXX) -c $(CXXOPTFLAGS) -o $@ $<
 	
-OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o \
+OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o wallclock.o \
 	   prm.o rand2.o sasad.o sff.o xminC.o ptrajmask.o AmberNetcdf_dummy.o
 
 install: libsff 
@@ -15,12 +15,6 @@ libsff: $(OBJS)
 	-rm -f $(LIBDIR)/libsff.a
 	$(AR) $(LIBDIR)/libsff.a $(OBJS)	
 	$(RANLIB) $(LIBDIR)/libsff.a
-	cp sff.h AmberNetcdf.h $(INCDIR)
-
-libsff_mpi: $(OBJS)
-	-rm -f $(LIBDIR)/libsff_mpi.a
-	$(AR) $(LIBDIR)/libsff_mpi.a $(OBJS)	
-	$(RANLIB) $(LIBDIR)/libsff_mpi.a
 	cp sff.h AmberNetcdf.h $(INCDIR)
 
 uninstall:
@@ -68,9 +62,6 @@ sff.o: sff.h memutil.h timer.h\
 xminC.o:  sff.h
 
 AmberNetcdf.o:  AmberNetcdf.h
-
-hcp_getpdb$(SFX): hcp_getpdb.c
-	$(CC) -o $(BINDIR)/hcp_getpdb$(SFX) hcp_getpdb.c
 
 .PHONY: ../rism/amber_rism_interface.NAB.o
 ../rism/amber_rism_interface.NAB.o:

@@ -1,7 +1,6 @@
 #  Simple hard-wired config.h file for gnu compilers
 
 #set AFNMRHOME here, or use an environment variable:
-AFNMRHOME=/home/case/afnmr
 
 BINDIR=$(AFNMRHOME)/bin
 LIBDIR=$(AFNMRHOME)/lib
@@ -9,7 +8,7 @@ INCDIR=$(AFNMRHOME)/include
 DATDIR=$(AFNMRHOME)/dat
 LOGDIR=$(AFNMRHOME)/logs
 
-FLIBS=-lsff -larpack -llapack -lblas -lgfortran
+FLIBS=-lsff -llapack -lblas -lgfortran
 
 CC=gcc
 CFLAGS=

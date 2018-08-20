@@ -5,8 +5,8 @@
 CWD=`pwd`
 h=afnmr-1.0
 tarfile=$h.tar
-TARC="gnutar cf $tarfile"
-TAR="gnutar rf $tarfile"
+TARC="gnutar cfX $tarfile $CWD/excludes"
+TAR="gnutar rfX $tarfile $CWD/excludes"
 
 cd ..
 ln -s $CWD $h
