@@ -1,44 +1,12 @@
-Except as noted below, the code in ambermini is provided under the GNU
+Except as noted below, the code in afnmr is provided under the GNU
 General Public License, version 3.  A copy of this license is given later
 in this file.
-
-* The netcdf codes are made available in accordance with the copyright
-  notice in src/netcdf-4.3.0/COPYRIGHT.
-
-* The "reduce" code is made available under its own license, taken from
-  its source code, and reproduced in src/reduce/LICENSE.
 
 * The lapack and blas libraries are in the public domain.  See these
   subdirectories for more information.
 
-* The arpack code is released under a BSD license.  See the src/arpack/LICENSE
-  file for more information.
-
-* The force field parameter files in the "../dat/leap" subdirectory have 
+* The force field parameter files in the "dat/leap" subdirectory have 
   been placed in the public domain by their authors.
-
-* The "BLEND" code used by 3D-RISM is provided under the GNU Lesser
-  General Public License, version 3.  See GNU_LGPL_v3 in this directory.
-
-* The libpbsa and libmdgx codes are provided under the GNU Lesser
-  General Public License, version 3.  See GNU_LGPL_v3 in this directory.
-  (Our intent is to allow these libraries to be linked to other programs
-  that might not be licensed under the GNU GPL.)
-
-* The fortranformat and chemistry.unit Python packages distributed with ParmEd
-  is provided under the MIT license. See http://opensource.org/licenses/MIT for
-  more information
-
-* The cifparse routines to deal with mmCIF formatted files were written by
-  John Westbrook, and are distributed with permission. See cifparse/README
-  for details.
-
-* The DFTB "slko" files in dat/slko are distributed under the Creative
-  Commons Attribution-ShareAlike License, 
-  http://creativecommons.org/licenses/by-sa/4.0/
-
-* The cusplibrary codes are distributed by the Apache License 2.0
-  (see src/cusplibrary-cuda9/LICENSE).
 
 Note especially the following, from the GPL file:
 
