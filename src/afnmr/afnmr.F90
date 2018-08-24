@@ -19,7 +19,8 @@ module comafnmr
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize
-   logical gaussian, orca, demon, demon5, qchem, terachem, solinprot, qopt
+   logical gaussian, orca, demon, demon5, qchem, terachem, xtb, &
+           solinprot, qopt
 
 end module
 
@@ -31,7 +32,7 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), D5 (Demon v5),
-!                     Q (Qchem), or T (TeraChem)
+!                     Q (Qchem), T (TeraChem), or X (xtb)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D)
 !            solinprot is T or F
@@ -140,6 +141,7 @@ program afnmr_x
       demon = .false.
       demon5 = .false.
       terachem = .false.
+      xtb = .false.
       solinprot = .false.
       qopt = .false.
       listsize = 0
@@ -176,6 +178,8 @@ program afnmr_x
          qchem = .true.
       else if( program .eq. 'T' ) then
          terachem = .true.
+      else if( program .eq. 'X' ) then
+         xtb = .true.
       else
          write(0,*) 'Bad input for program: ', program
          stop 1
@@ -418,6 +422,10 @@ program afnmr_x
           open(30,file=filek(1:lengthb+3)//'.opt')
           open(32,file=filek(1:lengthb+3)//'.pos')
           open(34,file=filek(1:lengthb+3)//'.xyz1')
+        else if ( xtb ) then
+          ! open(30,file=filek(1:lengthb+3)//'.opt')
+          ! open(32,file=filek(1:lengthb+3)//'.pos')
+          open(34,file=filek(1:lengthb+3)//'.xyz1)
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
@@ -509,6 +517,11 @@ program afnmr_x
           write(30,'(a)') 'nstep 10'
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
+
+        else if ( xtb ) then
+          write(34,'(a)') 'put number of atoms here!'
+          write(34,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
+               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
 
         endif
 
@@ -879,11 +892,18 @@ program afnmr_x
           end do
           write(30,'(a)') '$end'
 
+        else if ( xtb ) then  !  xtb is only for qopt calcs.
+          write(30,'(a)') '$set'
+          do i=nhighatom+1,iqmprot
+             write(30,'(i4)') i
+          end do
+          write(30,'(a)') '$end'
+
         end if
 
         close(30)
         if( orca ) close(32)
-        if( terachem ) then
+        if( terachem .or. xtb ) then
           close(32)
           close(34)
           open(34,file=filek(1:lengthb+3)//'.xyz1')
@@ -1001,7 +1021,7 @@ subroutine addatom( kk, iqm, basis )
                       // adjustl(i_char)
         if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
-      else if ( terachem ) then
+      else if ( terachem .or. xtb ) then
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
@@ -1037,7 +1057,7 @@ subroutine addH( iqm, x, y, z)
         dlabel(iqm) = 'H' // adjustl(i_char)
         dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
-      else if ( terachem ) then
+      else if ( terachem .or. xtb ) then
         write(34,1000)'H ',x,y,z
       else if ( gaussian ) then
         write(30,1000)'H ',x,y,z
