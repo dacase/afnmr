@@ -425,7 +425,7 @@ program afnmr_x
         else if ( xtb ) then
           ! open(30,file=filek(1:lengthb+3)//'.opt')
           ! open(32,file=filek(1:lengthb+3)//'.pos')
-          open(34,file=filek(1:lengthb+3)//'.xyz1)
+          open(34,file=filek(1:lengthb+3)//'.xyz1')
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
