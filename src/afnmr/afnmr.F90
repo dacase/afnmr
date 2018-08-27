@@ -62,7 +62,7 @@ program afnmr_x
 
       double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
       double precision chargef(MAXRES)
-      character*80 line,basename,pdbfile,filek,shiftshome,version
+      character(len=80) line,basename,pdbfile,filek,shiftshome,version
       integer lengthb,lengthc,natom
 #ifdef __INTEL_COMPILER
       integer system
@@ -893,11 +893,10 @@ program afnmr_x
           write(30,'(a)') '$end'
 
         else if ( xtb ) then  !  xtb is only for qopt calcs.
-          write(30,'(a)') '$set'
-          do i=nhighatom+1,iqmprot
-             write(30,'(i4)') i
-          end do
-          write(30,'(a)') '$end'
+          write(34,'(a)') '$set'
+          write(34,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
+          write(34,'(a)') 'fixfc 0'
+          write(34,'(a)') '$end'
 
         end if
 
@@ -911,7 +910,7 @@ program afnmr_x
           read(34,*)  ! skip dummy first line
           write(35,'(i4)') iqm   ! number of atoms goes on first line
           do i=1,9999
-            read(34,'(a80)', end=105) line
+            read(34,'(a)', end=105) line
             write(35,'(a)') line(1:len_trim(line))
           end do
   105     close(34)
