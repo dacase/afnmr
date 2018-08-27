@@ -62,7 +62,7 @@ program afnmr_x
 
       double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
       double precision chargef(MAXRES)
-      character(len=80) line,basename,pdbfile,filek,shiftshome,version
+      character(len=80) line,basename,pdbfile,filek,afnmrhome,version
       integer lengthb,lengthc,natom
 #ifdef __INTEL_COMPILER
       integer system
@@ -156,7 +156,7 @@ program afnmr_x
       print*,'Version: ', trim(version)
       print*,'**********************************************'
 
-      call get_environment_variable('SHIFTSHOME', shiftshome )
+      call get_environment_variable('AFNMRHOME', afnmrhome )
 
       if( command_argument_count() .lt. 5 ) then
          write(6,*) &
@@ -743,7 +743,7 @@ program afnmr_x
             !    write local basis set
             do i=1,nhighatom
               write(30,'(i3,a)') i,' 0'
-              open( UNIT=11, FILE=trim(shiftshome) // '/basis/pcSseg-1/' &
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-1/' &
                     // trim(dlabel(i)) // '.gbs')
               rewind(11)
               do kbas=1,9999
@@ -777,7 +777,7 @@ program afnmr_x
             write(30,*)
 
           else if( basis .eq. 'T' ) then
-            open( UNIT=11, FILE=trim(shiftshome) // &
+            open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcSseg-1/pcSseg-1.gbs')
             rewind(11)
             do kbas=1,9999
@@ -788,7 +788,7 @@ program afnmr_x
 63          continue
 
           else if( basis .eq. 'D' ) then
-            open( UNIT=11, FILE=trim(shiftshome) // &
+            open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcSseg-0/pcSseg-0.gbs')
             rewind(11)
             do kbas=1,9999
@@ -911,7 +911,7 @@ program afnmr_x
           write(35,'(i4)') iqm   ! number of atoms goes on first line
           do i=1,9999
             read(34,'(a)', end=105) line
-            write(35,'(a)') line(1:len_trim(line))
+            write(35,'(a)') trim(line)
           end do
   105     close(34)
           close(35)
@@ -1016,15 +1016,14 @@ subroutine addatom( kk, iqm, basis )
 
       if ( demon ) then
         write( i_char, '(i3)' ) iqm
-        dlabel(iqm) = element(kk)(1:len_trim(element(kk))) &
-                      // adjustl(i_char)
+        dlabel(iqm) = trim(element(kk)) // adjustl(i_char)
         if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
       else if ( terachem .or. xtb ) then
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
-        dlabel(iqm) = element(kk)(1:len_trim(element(kk)))
+        dlabel(iqm) = trim(element(kk))
       else
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
         if( orca .and. basis .eq. 'M' ) then
