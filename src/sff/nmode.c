@@ -394,7 +394,7 @@ static int thermo(int natoms, int n, int ilevel, REAL_T * c,
    /* Local variables */
    REAL_T e;
    int i;
-   REAL_T p, s, pi, cv, sn, rt, em1;
+   REAL_T p, pi, sn, rt, em1;
    int iff;
    REAL_T arg, gas;
    int iat;
@@ -405,7 +405,7 @@ static int thermo(int natoms, int n, int ilevel, REAL_T * c,
        econt, etran, scont, stran, tomet, rtemp, boltz, etovt, rtemp1,
        rtemp2, rtemp3, planck;
    int linear;
-   REAL_T tokcal, hartre, weight;
+   REAL_T tokcal, weight;
    int nimag;
    int mytaskid;
 
@@ -457,7 +457,6 @@ static int thermo(int natoms, int n, int ilevel, REAL_T * c,
 /*     avog:    avogadro constant, in mol**(-1). */
 /*     jpcal:   joules per calorie. */
 /*     tomet:   metres per Angstrom. */
-/*     hartre:  joules per hartree. */
 
    tokg = 1.660531e-27;
    boltz = 1.380622e-23;
@@ -465,7 +464,6 @@ static int thermo(int natoms, int n, int ilevel, REAL_T * c,
    avog = 6.022169e23;
    jpcal = 4.18674;
    tomet = 1e-10;
-   hartre = 4.35981e-18;
 
 /*     compute the gas constant, pi, pi**2, and e. */
 /*     compute the conversion factors cal per joule and kcal per joule. */
@@ -526,9 +524,7 @@ static int thermo(int natoms, int n, int ilevel, REAL_T * c,
 /*     for monatomics print and return. */
 
    if (natoms <= 1) {
-      s = stran * tocal;
       e = etran * tokcal;
-      cv = ctran * tocal;
       /* need print statement here */
       free_vector(vtemp, 1, n);
       free_vector(evibn, 1, n);
@@ -832,7 +828,6 @@ static void remtranrot(INT_T natom, INT_T nreal, REAL_T * x, REAL_T * z,
        dt;
    REAL_T *d = NULL, *a = NULL, *dbl = NULL;
    INT_T i, j, k, ip, it, iat, nr6, nr3, ik;
-   REAL_T sum3, sum6;
    int mytaskid;
    mytaskid = get_mytaskid();
 
@@ -909,9 +904,9 @@ static void remtranrot(INT_T natom, INT_T nreal, REAL_T * x, REAL_T * z,
       dnorm[ik] = 0.0;
 
 #if 0
-      sum3 = 0.0;
+      REAL_T sum3 = 0.0;
       for( i=0; i<nr3; i++ ) sum3 += z[i + ik*nr6]*z[i + ik*nr6];
-      sum6 = sum3;
+      REAL_T sum6 = sum3;
       for( i=nr6; i<nr6; i++ ) sum6 += z[i + ik*nr6]*z[i + ik*nr6];
       printf( "mode norm: %5d  %12.5f  %12.5f\n", k+1, sum3, sum6 );
 #endif
@@ -996,9 +991,9 @@ void setgam(INT_T natom, REAL_T * gamma, REAL_T * m, REAL_T eta,
 
    REAL_T *expos = NULL;
    REAL_T factor, largest, sxpita, etpita, ont, tat, delx, dely, delz, 
-       r, r2, cons, xi, yi, zi, det, rcond;
+       r, r2, cons, xi, yi, zi;
    INT_T i, j, iat, jat, iat3, jat3, index1, index2, nr3, nr6, test, po,
-       ix,iy,iz, jx,jy,jz, ntdim, job, ij, ia, ja;
+       ix,iy,iz, jx,jy,jz, ntdim, ij, ia, ja;
    
    char atom[5], cexp[5];
    char str[5];
@@ -1187,13 +1182,14 @@ void setgam(INT_T natom, REAL_T * gamma, REAL_T * m, REAL_T eta,
    }
    
 #if 0
-   job = 1;
+   int job = 1;
+   REAL_T det, rcond;
    dgeco_ (a, nr6, ntdim, a[nr6*(nr3+1)], rcond, a[1+nr6*nr3]);
 /*   equivalent LAPACK are said to be: 
          DLANGE    LU factorization and condition
          DGETRF    estimation of a general matrix
          DGECON
-/*
+*/
    dgedi_ (a, nr6, ntdim, a[nr6*(nr3+1)], det, a[1+nr6*nr3], job);
 /*
     equivalent LAPACK are said to be: 
@@ -1928,7 +1924,7 @@ int nmode(REAL_T * x, int n,
    /* my additions */
    int po, nr3, nr6, ldu;
    int nreal;
-   int index1, sizegamma;
+   int sizegamma;
    REAL_T eta;
    REAL_T *a = NULL, *gamma = NULL, *wr = NULL, *wi = NULL,
        *zo = NULL, *du = NULL, *xcom = NULL, *dnorm = NULL;
@@ -1945,7 +1941,7 @@ int nmode(REAL_T * x, int n,
 
    /* end of my additions */
 
-   int mytaskid, numtasks, gridim;
+   int mytaskid, gridim;
    int context_PxQ = -1, context_1x1 = -1, context_Nx1 = -1;
    int descH_PxQ[DLEN_], descG_PxQ[DLEN_], descG_1x1[DLEN_];
    FILE *vfp;
@@ -1987,7 +1983,7 @@ int nmode(REAL_T * x, int n,
    mytaskid = get_mytaskid();
 
 #ifdef SCALAPACK
-   numtasks = get_numtasks();
+   int numtasks = get_numtasks();
 #endif
 
    /* Allocate some dynamic vectors and matrices. */
