@@ -152,12 +152,12 @@ static void calc_rot_matrix(double alpha, double rotax_x, double rotax_y,
                             double rotax_z, double rotmat[3][3]);
 static void destroy_archive();
 static void diag(int n, double aa[3][3], double *d, double x[3][3], int *error_flag);
-static void hessdump(int *ndim, double *xyz, double *grad, int *return_flag, int *label);
+/* static void hessdump(int *ndim, double *xyz, double *grad, int * *return_flag, int *label); */
 static void load_archive(int *nconf, int ndim, double *xyz_array, int *error_flag);
 static void my_free(void *poi);
 static void *my_malloc(void *(*malloc_method) (size_t), const char *s,
                        size_t nmemb, size_t size, int *error_flag);
-static int read_archive(char *fname, int ndim, int *error_flag);
+/* static int read_archive(char *fname, int ndim, int *error_flag); */
 static int read_and_sort_archive(char *fname, int ndim, int *error_flag);
 static void restart_lmod(int ndim, int nmax, double *xyz);
 static double rmsfit(int ndim, double *ref, double *xyz, char *which, int *error_flag);
@@ -425,7 +425,7 @@ static void destroy_archive()
    conflib_archive = NULL;      /* label archive as empty */
 }
 
-
+#if 0
 static int read_archive(char *fname, int ndim, int *error_flag)
 {
    int ndat;
@@ -495,7 +495,7 @@ static int read_archive(char *fname, int ndim, int *error_flag)
    fclose(file);
    return ndat;
 }
-
+#endif
 
 static int read_and_sort_archive(char *fname, int ndim, int *error_flag) /* ndim = ndim_ext = 3 * natm_ext */
 {
@@ -1393,7 +1393,7 @@ hessvec_(int *ndim, double *vec_in, double *vec_out, double *xyz,
 }
 #endif
 
-
+#if 0
 static void
 hessdump(int *ndim, double *xyz, double *grad, int *return_flag,
          int *label)
@@ -1485,7 +1485,7 @@ hessdump(int *ndim, double *xyz, double *grad, int *return_flag,
    my_free(unit_vector);
    my_free(hessian_row);
 }
-
+#endif
 
 static void
 separate_close_pairs(int do_all_pairs, int do_ligs_only, int ndim,

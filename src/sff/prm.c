@@ -583,9 +583,9 @@ int hcp_pfind(FILE *file, char *label, int type)
 
 PARMSTRUCT_T* rdparm( STRING_T* name )
 {
-   REAL_T *H, *atype, sigmaw3, sigma_iw6, epsilon_iw;
-   REAL_T si_tmp, boxangle;
-   int i, j, k, idum, res, ifpert, iat, kat, lat, newparm, ier, iaci;
+   REAL_T *H;
+   REAL_T si_tmp;
+   int i, j, k, idum, res, ifpert, iat, kat, lat, newparm, ier;
    int ismall, ibig;
    int *iptmp, *dihtmp;
    FILE *file;
@@ -1815,15 +1815,15 @@ PARMSTRUCT_T* rdparm( STRING_T* name )
 #define RHOW (0.33428)
 #define PI (3.141592650)
 
-   atype = (REAL_T *) get(sizeof(REAL_T) * prm->Ntypes);
-   sigmaw3 = SIGMAW * SIGMAW * SIGMAW;
+   REAL_T *atype = (REAL_T *) get(sizeof(REAL_T) * prm->Ntypes);
+   REAL_T sigmaw3 = SIGMAW * SIGMAW * SIGMAW;
    for (i = 0; i < prm->Ntypes; i++) {
-      iaci = prm->Cno[prm->Ntypes * i + i] - 1;
+      int iaci = prm->Cno[prm->Ntypes * i + i] - 1;
       if (prm->Cn1[iaci] == 0.0 || prm->Cn2[iaci] == 0.0) {
          atype[i] = 0.0;
       } else {
-         sigma_iw6 = sigmaw3 * sqrt(prm->Cn1[iaci] / prm->Cn2[iaci]);
-         epsilon_iw =
+         REAL_T sigma_iw6 = sigmaw3 * sqrt(prm->Cn1[iaci] / prm->Cn2[iaci]);
+         REAL_T epsilon_iw =
              0.5 * sqrt(EPSILONW / prm->Cn1[iaci]) * prm->Cn2[iaci];
          atype[i] = -16. * PI * RHOW * epsilon_iw * sigma_iw6 / 3.;
 #   if 0

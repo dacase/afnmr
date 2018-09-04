@@ -81,3 +81,7 @@ clean:
 .cc.o:
 	$(CXX) -c -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS $<
 
+depend: $(MEAD_OBJECTS:.o=.cc)
+	$(CXX) -I.. -MM $^ > $@
+
+include depend
