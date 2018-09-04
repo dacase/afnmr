@@ -7,6 +7,4 @@ afnmr-1.0/excludes
 afnmr-1.0/doc/Makefile
 afnmr-1.0/doc/afnmr.lyx
 afnmr-1.0/doc/afnmr_workflow.png
-afnmr-1.0/src/pbsa
-afnmr-1.0/src/rism
 afnmr-1.0/src/sff/pubpme

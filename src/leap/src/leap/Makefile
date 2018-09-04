@@ -91,14 +91,8 @@ T_OBJ = $(OA) $(OG) $(OO) $(OL) test_parmSet.o
 
 UTILPROGS = utilMakeHelp$(SFX) utilDescribeTopology$(SFX) utilCrd2Off$(SFX) mol2_to_off$(SFX) utilConvertWaterBox$(SFX) utilLib2Pdb$(SFX)
 
-LEAPPROGS = teLeap$(SFX)
+LEAPPROGS = $(BINDIR)/teLeap$(SFX)
 PROGS = $(LEAPPROGS) $(UTILPROGS)
-
-DISTFILES=  $(LEAPPROGS) 
-
-SRCS= StrToPmap.c amber.c assoc.c atom.c bag.c basics.c block.c build.c byteArray.c chirality.c collection.c commands.c container.c database.c dictionary.c displayer.c elements.c fortran.c function.c getline.c avl.c graphUtil.c hash.c help.c hybrid.c internal.c library.c list.c loop.c mathop.c matrix.c mess.c minimizer.c model.c molecule.c nVector.c oDouble.c oInteger.c oString.c objekt.c octree.c parmLib.c parmSet.c pdbFile.c mol2File.c mol3File.c pdb_format.c pdb_read.c pdb_sprntf.c pdb_sscanf.c pdb_write.c residue.c restraint.c ring.c select.c sort.c stringExtra.c sysdepend.c tLeap.c test_dataBase.c test_parmSet.c tools.c tripos.c unit.c unitio.c utilConvertWaterBox.c utilCrd2Off.c utilDescribeTopology.c utilFixOff.c utilLib2Pdb.c utilMakeHelp.c mol2_to_off.c utilWrapRes.c varArray.c variables.c vector.c x3d.c xAction.c xBasics.c xTank.c xaAngleParmTable.c xaAtomParmTable.c xaAtomTable.c xaBondParmTable.c xaCommand.c xaHBondParmTable.c xaImproperParmTable.c xaLeapc.c xaParmEditor.c xaTable.c xaTools.c xaTorsionParmTable.c xaUnitEditor.c xaUtilMessageFilter.c XrawRegistr.c zMatrix.c
-
-HEADERS = amber.h assoc.h atom.h bag.h basics.h block.h build.h byteArray.h chirality.h classes.h collection.h commands.h config.h container.h database.h defaults.h dictionary.h displayer.h elements.h fortran.h function.h getline.h avl.h avl2.h graphUtil.h hash.h help.h hybrid.h internal.h leap.h library.h list.h loop.h machine.h mathop.h matrix.h mess.h minimizer.h model.h molecule.h nVector.h oDouble.h oInteger.h oString.h objekt.h octree.h parmLib.h parmSet.h parser.h pdb.h pdbFile.h mol2File.h mol3File.h pdb_int.h residue.h restraint.h ring.h select.h sort.h stringExtra.h sysdepend.h threed.h tools.h tripos.h unit.h unitio.h varArray.h vector.h x3d.h xAction.h xDisplayList.h xTank.h xTankP.h xaAngleParmTable.h xaAtomParmTable.h xaAtomTable.h xaBondParmTable.h xaCommand.h xaHBondParmTable.h xaLeap.h xaResources.h xaTable.h xaTools.h xaTorsionParmTable.h xaUnitEditor.h XrawRegistr.h zMatrix.h
 
 # ##############################################################
 #
@@ -113,13 +107,12 @@ HEADERS = amber.h assoc.h atom.h bag.h basics.h block.h build.h byteArray.h chir
 
 util:   $(UTILPROGS)
 
-install: teLeap$(SFX)
-	mv teLeap$(SFX) $(BINDIR)
+install: $(BINDIR)/teLeap$(SFX)
 
 uninstall:
 	-rm -f $(BINDIR)/teLeap$(SFX)
 
-teLeap$(SFX): $(TLEAP_OBJ)
+$(BINDIR)/teLeap$(SFX): $(TLEAP_OBJ)
 	$(CC) $(CFLAGS) $(AMBERCFLAGS) $(LDFLAGS) $(AMBERLDFLAGS) \
 	      -o $@ $(TLEAP_OBJ) $(LM) $(NETCDFLIB)
 
@@ -155,7 +148,7 @@ parser.c:       parser.y parser.h
 helptext.c: helptext.text utilMakeHelp$(SFX)
 	./utilMakeHelp$(SFX) helptext.text helptext.c
 
-depend::
-	./makedepend > depend
+depend: $(TLEAP_OBJ:.o=.c)
+	$(CC) -MM $^ > $@
 
 include depend
