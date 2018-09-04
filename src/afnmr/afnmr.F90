@@ -435,7 +435,7 @@ program afnmr_x
 
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
-          write(30,'(a)') '%nprocshared=1'
+          write(30,'(a)') '%nprocshared=4'
           write(30,'(a)', advance='no')  '# OLYP/Gen charge nosymm '
           if (qopt) then
             write(30,'(a)') 'Opt ReadOptimize '

@@ -2,7 +2,7 @@ include ../config.h
 
 install:  $(BINDIR)/lsq $(BINDIR)/ms $(BINDIR)/afnmr.x  \
           $(BINDIR)/gridprune $(BINDIR)/pair $(BINDIR)/txmin
-	/bin/cp afnmr getshifts-* multiafnmr.sh $(BINDIR)
+	/bin/cp afnmr getshifts-* make-shiftsrdb multiafnmr.sh $(BINDIR)
 
 $(BINDIR)/lsq: lsq.o conjgrad.o rand2.o memutil.o
 	$(CC) -o $@ lsq.o conjgrad.o rand2.o memutil.o $(LM)

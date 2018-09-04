@@ -17,10 +17,10 @@ Usage: make-shiftsrdb qpgm reference <basename>
 EOD
 }
 
-check_shiftshome() {
-   if [ -z "$SHIFTSHOME" ]; then
+check_afnmrhome() {
+   if [ -z "$AFNMRHOME" ]; then
       echo ""
-      echo "Your SHIFTSHOME environment variable is not set!"
+      echo "Your AFNMRHOME environment variable is not set!"
       exit 1
    fi
 }
@@ -29,7 +29,7 @@ check_shiftshome() {
 #  Checking Arguments:
 #------------------------------------------------------------------------------
 
-check_shiftshome
+check_afnmrhome
 
 if [ $# -ne 3 ]; then usage; exit 1;  fi
 
@@ -58,12 +58,12 @@ if [ "$program" = "demon" -o "$program" = "orca" -o "$program" = "demon3" ]
 then
     for i in ${basename}???.out
     do
-        $SHIFTSHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
+        $AFNMRHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
     done
 elif [ "$program" = "g09" ]; then
     for i in ${basename}???.log
     do
-        $SHIFTSHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
+        $AFNMRHOME/bin/getshifts-$program $reference ${i%.*} >> $basename.rdbi
     done
 fi
 
