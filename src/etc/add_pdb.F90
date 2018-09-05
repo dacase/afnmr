@@ -176,7 +176,7 @@ program add_pdb
    pdb_natom=0
    
    do
-      read(pdb_lun,'(A)') buf
+      read(pdb_lun,'(A)', end=99) buf
       if (buf(1:6)=='END   ') exit
       if (buf(1:6)=='ATOM  ' .or. buf(1:6)=='HETATM') then
          read(buf,'(6X,I5,1X,A4,A1,A3,1X,A1,I4,A1,3X,3F8.3,2F6.2,6X,2A4)') &
@@ -251,6 +251,7 @@ program add_pdb
          atom_element(i) = element
       end if
    end do
+99 continue
 
    ! For all atoms not in the PDB file, guess the element:
    do i=1,natom
