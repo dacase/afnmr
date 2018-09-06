@@ -1066,7 +1066,7 @@ int             i;
 STRING          sSpan;
 #endif
                 /* Fix the internal coordinates */
-    BuildFixInternals( cCont );
+    BuildFixInternals( (UNIT) cCont );
 
                 /* Loop through all ATOMs looking for those that */
                 /* do not have positions known and build externals */

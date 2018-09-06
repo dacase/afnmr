@@ -197,6 +197,11 @@ typedef struct  {
 
 extern  OBJEKT oGetObject( char *sName );
 extern  int     yyparse();
+
+/*  avoid compiler warnings:  */
+int yylex();
+int yyerror( char * );
+
 %}
 
 

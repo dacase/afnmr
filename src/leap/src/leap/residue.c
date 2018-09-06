@@ -463,7 +463,7 @@ FLAGS		fBondFlags;
 
         /* Build the coordinates for ATOMs that do not have them */
 
-    BuildFixInternals( rNew );
+    BuildFixInternals( (UNIT) rNew );
 
                 /* Loop through all ATOMs looking for those that */
                 /* do not have positions known and build externals */
