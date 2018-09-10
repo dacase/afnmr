@@ -9,7 +9,7 @@ module comafnmr
    logical::connect(MAXRES,MAXRES)
    logical::atomsign(MAXAT)
    logical::ter(0:MAXRES)
-   character(len=2):: element(MAXAT)
+   character(len=2):: element(MAXAT),dummyl
    character(len=3):: residue(MAXAT), residuename(MAXRES)
    character(len=4):: atomname(MAXAT)
    character(len=5):: dlabel(MAXAT)
@@ -19,24 +19,25 @@ module comafnmr
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize
-   logical gaussian, orca, demon, demon5, qchem, terachem, xtb, &
-           solinprot, qopt
+   logical :: gaussian, orca, demon, demon5, qchem, terachem, &
+              qopt, solinprot, xtb
 
 end module
 
 program afnmr_x
 
 !   (Note: generally the input for afnmr.x is created by the shell script
-!      "afnmr", which is in the ../bin directory.)
+!      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
 !   Usage: afnmr.x program basis solinprot qopt basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), D5 (Demon v5),
-!                     Q (Qchem), T (TeraChem), or X (xtb)
+!                     Q (Qchem), T (TeraChem)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D)
 !            solinprot is T or F
-!            qopt is T or F, to turn on or off quantum geometry optimization
+!            qopt is T or F, to turn on or off quantum geometry optimization,
+!                  or X (for internal optimization with xtb)
 !            <basename>.pqr gives the input structure; put all "general"
 !                  residues (water, ligands, etc.) after protein or
 !                  nucleic acid residues
@@ -46,19 +47,21 @@ program afnmr_x
       use comafnmr
       implicit none
 
-      character*6 sn(MAXAT)
-      double precision a,b,c,d,e,x,y,z,tempdis
-      integer ttnumber,strandno(MAXAT)
-      character*8 lpchar
-      character*1 program,basis,solinprotb,qoptb
-      integer selectC(0:MAXRES+2),charge(MAXRES),cfrag
-      integer selectCA(MAXRES+2), resmap(MAXRES)
-      integer lastprotres
-      integer i,j,k,ki,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
-      integer kfinal,ktemp,kkatom,kstart,kcount,kbas
-      integer n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
+      double precision :: a,b,c,d,e,x,y,z,tempdis
+      integer :: ttnumber,strandno(MAXAT)
+      character(len=8) :: lpchar
+      character(len=1) :: program,basis,solinprotb,qoptb
+      integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
+      integer :: selectCA(MAXRES+2), resmap(MAXRES)
+      integer :: lastprotres
+      integer :: i,j,k,ki,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
+      integer :: kfinal,ktemp,kkatom,kstart,kcount,kbas
+      integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
+      character(len=6) :: sn(MAXAT)
       character(len=3) :: rn
       character(len=1):: restype(MAXRES)
+      character(len=30) :: pqrstart
+      character(len=16) :: pqrend
 
       double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
       double precision chargef(MAXRES)
@@ -178,8 +181,6 @@ program afnmr_x
          qchem = .true.
       else if( program .eq. 'T' ) then
          terachem = .true.
-      else if( program .eq. 'X' ) then
-         xtb = .true.
       else
          write(0,*) 'Bad input for program: ', program
          stop 1
@@ -191,7 +192,14 @@ program afnmr_x
       if( solinprotb .eq. 'T' .or. solinprotb .eq. 'S' ) solinprot = .true.
 
       call get_command_argument( 4, qoptb, lengthb )
-      if( qoptb .eq. 'T' ) qopt = .true.
+      if( qoptb .eq. 'T' ) then
+         qopt = .true.
+      else if (qoptb .eq. 'X' ) then
+         xtb = .true.
+      else if (qoptb .ne. 'F' ) then
+         write(0,*) 'Bad input for qopt: ', qoptb
+         stop 1
+      endif
 
       call get_command_argument( 5, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
@@ -422,10 +430,9 @@ program afnmr_x
           open(30,file=filek(1:lengthb+3)//'.opt')
           open(32,file=filek(1:lengthb+3)//'.pos')
           open(34,file=filek(1:lengthb+3)//'.xyz1')
-        else if ( xtb ) then
-          ! open(30,file=filek(1:lengthb+3)//'.opt')
-          ! open(32,file=filek(1:lengthb+3)//'.pos')
-          open(34,file=filek(1:lengthb+3)//'.xyz1')
+        end if
+        if ( xtb ) then
+          open(44,file=filek(1:lengthb+3)//'.xyz1')
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
@@ -518,11 +525,12 @@ program afnmr_x
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
 
-        else if ( xtb ) then
-          write(34,'(a)') 'put number of atoms here!'
-          write(34,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
-               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
+        end if
 
+        if ( xtb ) then
+          write(44,'(a)') 'put number of atoms here!'
+          write(44,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
+               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
         endif
 
         do i=1,natom
@@ -892,17 +900,19 @@ program afnmr_x
           end do
           write(30,'(a)') '$end'
 
-        else if ( xtb ) then  !  xtb is only for qopt calcs.
-          write(34,'(a)') '$set'
-          write(34,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
-          write(34,'(a)') 'fixfc 0'
-          write(34,'(a)') '$end'
+        end if
 
+        if ( xtb ) then  !  xtb is only for qopt calcs.
+          write(44,'(a)') '$set'
+          write(44,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
+          write(44,'(a)') 'fixfc 0'
+          write(44,'(a)') '$end'
+          close(44)
         end if
 
         close(30)
         if( orca ) close(32)
-        if( terachem .or. xtb ) then
+        if( terachem ) then
           close(32)
           close(34)
           open(34,file=filek(1:lengthb+3)//'.xyz1')
@@ -918,6 +928,77 @@ program afnmr_x
           call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
                 // '.xyz1' )
         endif
+        if( xtb ) then
+          open(44,file=filek(1:lengthb+3)//'.xyz1')
+          open(45,file=filek(1:lengthb+3)//'.xyz2')
+          read(44,*)  ! skip dummy first line
+          write(45,'(i4)') iqm   ! number of atoms goes on first line
+          do i=1,9999
+            read(44,'(a)', end=205) line
+            write(45,'(a)') trim(line)
+          end do
+  205     close(44)
+          close(45)
+          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+                // '.xyz1' )
+
+          !  do the xtb minimization here:
+          ! call execute_command_line( 'xtb opt ' // filek(1:lengthb+3) &
+          !       // '.xyz2' )
+          write(6,*)
+          write(6,*) 'Doing geometry optimization with xtb'
+          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+                // '.xyz2' )
+
+          !  extract the coordinates from the xtb output file:
+          open(46,file='xtb_opt.xyz')
+          read(46,*) iqm
+          read(46,*)   ! title line
+          do i=1,iqm
+             read(46,*) dummyl, coord(1,i), coord(2,i), coord(3,i)
+          end do
+          close(46)
+
+          !  transfer the minimized coordinates to the .pqr file
+          open(47,file=filek(1:lengthb+3)//'.pqr')
+          open(48,file=filek(1:lengthb+3)//'.pqr1')
+          do i=1,iqm
+             read(47,'(a30,24x,a16)') pqrstart,pqrend
+             write(48,'(a30,3f8.3,a16)') pqrstart, &
+                 coord(1,i), coord(2,i), coord(3,i), pqrend
+          end do
+          close(47)
+          close(48)
+          call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+             // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+
+          if( demon ) then
+
+             !  transfer the minimized coordinates to the .inp file
+             open(47,file=filek(1:lengthb+3)//'.inp')
+             open(48,file=filek(1:lengthb+3)//'.inp1')
+             do i=1,9999
+                read(47,'(a)', end=210) line
+                write(48,'(a)') trim(line)
+                if( line(1:9) == 'GEOMETRY ' ) then
+                   do j=1,iqm
+                      read (47,*) 
+                      write(48,'(a,2x,3f12.5)') dlabel(j), &
+                             coord(1,j), coord(2,j), coord(3,j)
+                   end do
+                end if
+             end do
+  210        close(47)
+             close(48)
+             call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+                // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
+
+          else
+             write(6,*) "xtb only works with demon for now"
+             call exit(1)
+          end if
+
+        end if
 
 1315    format(3f10.4,2x,f12.8)
 1317    format(f12.8,2x,3f10.4)
@@ -1019,7 +1100,7 @@ subroutine addatom( kk, iqm, basis )
         dlabel(iqm) = trim(element(kk)) // adjustl(i_char)
         if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
-      else if ( terachem .or. xtb ) then
+      else if ( terachem ) then
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
@@ -1032,7 +1113,9 @@ subroutine addatom( kk, iqm, basis )
           write(30,'(a)') 'end;'
         endif
       endif
-!     write(6,'(2i4,a2,a4)') iqm,kk,element(kk),dlabel(iqm)
+      if( xtb ) then
+        write(44,1000)element(kk),(coord(j,kk),j=1,3)
+      endif
 
       write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3)') 'ATOM  ', &
         kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
@@ -1055,7 +1138,7 @@ subroutine addH( iqm, x, y, z)
         dlabel(iqm) = 'H' // adjustl(i_char)
         dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
-      else if ( terachem .or. xtb ) then
+      else if ( terachem ) then
         write(34,1000)'H ',x,y,z
       else if ( gaussian ) then
         write(30,1000)'H ',x,y,z
@@ -1063,6 +1146,10 @@ subroutine addH( iqm, x, y, z)
       else
         write(30,1000)'H ',x,y,z
       endif
+      if( xtb ) then
+        write(44,1000)'H ',x,y,z
+      end if
+
       modnum = modnum + 1
       if( modnum < 10 ) then
          write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3)') 'ATOM  ',  &

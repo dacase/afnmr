@@ -29,12 +29,12 @@ Optional flags:
    -solinprot      use the solinprot program to get surface charges (default)
    -demon, -deMon  Set up quantum input files to use with deMon (default)
    -demon5         Set up quantum input files for use with deMon2k, v5
-   -qopt           Do quantum optimization
+   -qopt           Do quantum optimization with same program as for shifts
+   -xtb            Set up quantum input files to use with xtb for optimization
    -orca           Set up quantum input files to use with Orca
    -gau            Set up quantum input files to use with Gaussian
    -qchem          Set up quantum input files to use with Q-Chem
    -tc             Set up quantum input files to use with TeraChem
-   -xtb            Set up quantum input files to use with xtb
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
                        (only works with -solinprot)
@@ -92,11 +92,11 @@ while [ $# -gt 0 ]; do
         -deMon)       program="D";;
         -demon5)      program="E";;
         -qopt)        qopt="T";;
+        -xtb)         qopt="X";;
         -orca)        program="O";;
         -gau)         program="G";;
         -qchem)       program="Q";;
         -tc)          program="T";;
-        -xtb)         program="X";;
         -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
