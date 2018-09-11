@@ -4,7 +4,7 @@ module comafnmr
 
    implicit none
    integer,parameter::MAXAT=50000,MAXRES=10000,MAXIQM=600
-   real(kind=8)::coord(3,MAXAT)
+   real(kind=8)::coord(3,MAXAT), fxyz(3,MAXIQM)
    real(kind=8):: qmcharge(MAXAT),rad(MAXAT)
    logical::connect(MAXRES,MAXRES)
    logical::atomsign(MAXAT)
@@ -904,8 +904,11 @@ program afnmr_x
 
         if ( xtb ) then  !  xtb is only for qopt calcs.
           write(44,'(a)') '$set'
+          write(44,'(a,i3)') 'chrg ', cfrag
+          write(44,'(a)') 'uhf   0'
           write(44,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
           write(44,'(a)') 'fixfc 0'
+          write(44,'(a)') 'maxopt 30'
           write(44,'(a)') '$end'
           close(44)
         end if
@@ -947,8 +950,8 @@ program afnmr_x
           write(6,*) 'Doing geometry optimization with xtb'
           call execute_command_line( 'xtb ' // filek(1:lengthb+3) &
                 // '.xyz2 -opt > ' // filek(1:lengthb+3) // '.xtb.log' )
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
-                // '.xyz2' )
+          ! call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+          !       // '.xyz2' )
           call execute_command_line( &
             '/bin/rm -f energy charges wbo xtbrestart xtbopt.log' )
 
@@ -957,10 +960,10 @@ program afnmr_x
           read(46,*) iqm
           read(46,*)   ! title line
           do i=1,iqm
-             read(46,*) dummyl, coord(1,i), coord(2,i), coord(3,i)
+             read(46,*) dummyl, fxyz(1,i), fxyz(2,i), fxyz(3,i)
           end do
           close(46)
-          call execute_command_line( '/bin/rm -f xtbopt.xyz' )
+          ! call execute_command_line( '/bin/rm -f xtbopt.xyz' )
 
           !  transfer the minimized coordinates to the .pqr file
           open(47,file=filek(1:lengthb+3)//'.pqr')
@@ -968,12 +971,12 @@ program afnmr_x
           do i=1,iqm
              read(47,'(a30,24x,a16)') pqrstart,pqrend
              write(48,'(a30,3f8.3,a16)') pqrstart, &
-                 coord(1,i), coord(2,i), coord(3,i), pqrend
+                 fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
           end do
           close(47)
           close(48)
-          call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-             // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+          ! call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+          !    // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
 
           if( demon ) then
 
@@ -987,7 +990,7 @@ program afnmr_x
                    do j=1,iqm
                       read (47,*) 
                       write(48,'(a,2x,3f12.5)') dlabel(j), &
-                             coord(1,j), coord(2,j), coord(3,j)
+                             fxyz(1,j), fxyz(2,j), fxyz(3,j)
                    end do
                 end if
              end do

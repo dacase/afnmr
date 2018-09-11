@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #set -xv
 
 #  Automate all the steps needed to take a system through af-nmr.  
