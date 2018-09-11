@@ -9,6 +9,7 @@ DATDIR=$(AFNMRHOME)/dat
 LOGDIR=$(AFNMRHOME)/logs
 
 FLIBS=-lsff -llapack -lblas -lgfortran
+LM=-lm
 
 CC=gcc
 CFLAGS=

@@ -21,7 +21,7 @@ $(BINDIR)/gridprune: gridprune.F90
 	$(FC) $(FFLAGS) $(FOPTFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
 
 $(BINDIR)/txmin: txmin.c
-	$(CC) $(CFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
+	$(CC) $(CFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS) $(LM)
 
 clean:
 	/bin/rm -f *.o *.mod 

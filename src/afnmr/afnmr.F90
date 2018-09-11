@@ -362,7 +362,7 @@ program afnmr_x
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
 !
-!               need to make sure that next residue is also connected if 
+!               need to make sure that net residue is also connected if 
 !               one of the atoms is beyond selectC:
 !
                 if( i.ge.selectC(resno(i)) .and. restype(resno(i)).ne.'G') then
@@ -943,21 +943,24 @@ program afnmr_x
                 // '.xyz1' )
 
           !  do the xtb minimization here:
-          ! call execute_command_line( 'xtb opt ' // filek(1:lengthb+3) &
-          !       // '.xyz2' )
           write(6,*)
           write(6,*) 'Doing geometry optimization with xtb'
+          call execute_command_line( 'xtb ' // filek(1:lengthb+3) &
+                // '.xyz2 -opt > ' // filek(1:lengthb+3) // '.xtb.log' )
           call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
                 // '.xyz2' )
+          call execute_command_line( &
+            '/bin/rm -f energy charges wbo xtbrestart xtbopt.log' )
 
           !  extract the coordinates from the xtb output file:
-          open(46,file='xtb_opt.xyz')
+          open(46,file='xtbopt.xyz')
           read(46,*) iqm
           read(46,*)   ! title line
           do i=1,iqm
              read(46,*) dummyl, coord(1,i), coord(2,i), coord(3,i)
           end do
           close(46)
+          call execute_command_line( '/bin/rm -f xtbopt.xyz' )
 
           !  transfer the minimized coordinates to the .pqr file
           open(47,file=filek(1:lengthb+3)//'.pqr')

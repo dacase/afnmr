@@ -42,9 +42,9 @@ test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 clean
 	@echo "Running test quantum fragmentation on ubiquitin with xtb:"
 	@echo
 	../../bin/afnmr -demon5 -xtb -nomin -list 6 1d3z1
-	@../dacdif -a 1.e-5 1d3z1006.inp.save 1d3z1006.inp
+	@../dacdif -r 1.e-6 1d3z1006.inp.save 1d3z1006.inp
 	@../dacdif 1d3z1006.pqr.save 1d3z1006.pqr
-	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr
+	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr 1d3z1006.xtb.log
 
 clean:
 
