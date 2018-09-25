@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-8/19/2018
+9/5/2018
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.0)
+(Version 1.0b1)
 \end_layout
 
 \begin_layout Author
@@ -339,6 +339,72 @@ J.
  
 \end_layout
 
+\begin_layout Enumerate
+X.
+ Jin, T.
+ Zhu, J.Z.H.
+ Zhang and X.
+ He.
+ A systematic study on RNA NMR chemical shift calculation based on the automated
+ fragmentation QM/MM approach.
+ 
+\emph on
+RSC Adv.
+
+\emph default
+ 
+\series bold
+6,
+\series default
+ 108590-108602 (2016).
+\end_layout
+
+\begin_layout Enumerate
+X.
+ Jin, T.
+ Zhu, J.Z.H.
+ Zhang and X.
+ He.
+ Automated Fragmentation QM/MM Calculation of NMR Chemical Shifts for Protein-Li
+gand Complexes.
+ 
+\emph on
+Front.
+ Chem.
+
+\emph default
+ 
+\series bold
+6,
+\series default
+ 150 (2018).
+\end_layout
+
+\begin_layout Enumerate
+H.
+ Shi, M.C.
+ Clay, A.
+ Rangadurai, B.
+ Sathyamoorthy, D.A.
+ Case, and H.M.
+ Al-Hashimi.
+ Atomic Structures of Excited State A-T Hoogsteen Base Pairs in Duplex DNA
+ by Combining NMR Relaxation Dispersion, Mutagenesis, and Chemical Shift
+ Calculations.
+ 
+\emph on
+J.
+ Biomol.
+ NMR
+\emph default
+ 
+\series bold
+70,
+\series default
+ 229-244 (2018).
+ 
+\end_layout
+
 \begin_layout Standard
 Ab initio chemical shifts can be computed using the automated fragment approach
  implemented in the AFNMR program and described in references [1], [2] and
@@ -347,7 +413,7 @@ Ab initio chemical shifts can be computed using the automated fragment approach
  future versions, but is not included in the present version; however, the
  current code works well for snapshots taken from MD simulations that include
  explicit water molecules.
- Paper [7] is a recent example of applications of the af-nmr method.
+ Papers [7-10] are recent examples of applications of the afnmr method.
 \end_layout
 
 \begin_layout Section
@@ -371,8 +437,11 @@ http://casegroup.rutgers.edu
 \end_layout
 
 \begin_layout Standard
-The first step in installing shifts is to extract files using the UNIX commands:
- 
+The first step in installing 
+\emph on
+afnmr
+\emph default
+ is to extract files using the UNIX commands: 
 \end_layout
 
 \begin_layout LyX-Code
@@ -393,7 +462,7 @@ setenv AFNMRHOME
 \begin_inset Quotes eld
 \end_inset
 
-insert-your-path-here/shifts-5.4
+insert-your-path-here/afnmr-1.0
 \begin_inset Quotes erd
 \end_inset
 
@@ -405,7 +474,7 @@ export AFNMRHOME=
 \begin_inset Quotes erd
 \end_inset
 
-insert-your-path-here/shifts-5.4
+insert-your-path-here/afnmr-1.0
 \begin_inset Quotes erd
 \end_inset
 
@@ -417,13 +486,17 @@ Next,
 \end_layout
 
 \begin_layout LyX-Code
+cd $AFNMRHOME
+\end_layout
+
+\begin_layout LyX-Code
 make install
 \end_layout
 
 \begin_layout Standard
 will make the required executable files, and put them into 
 \family typewriter
-$SHIFTSHOME/bin
+$AFNMRHOME/bin
 \family default
 .
  Again, this assumes that AmberTools has been properly installed.
@@ -443,7 +516,7 @@ nab
 \begin_layout Standard
 After you have installed 
 \emph on
-shifts
+afnmr
 \emph default
 , the command
 \end_layout
@@ -1046,7 +1119,11 @@ Sample commands to run with each of the programs is shown below for the
 \family typewriter
 test/
 \family default
- directory of the SHIFTS package.
+ directory of the 
+\emph on
+afnmr
+\emph default
+ package.
 \end_layout
 
 \begin_layout LyX-Code
