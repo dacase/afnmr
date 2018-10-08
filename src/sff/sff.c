@@ -42,7 +42,6 @@
 #include "debug.h"
 #include "timer.h"
 #include "gbneck.h"
-#include "AmberNetcdf.h"
 
 #if defined(MPI) || defined(SCALAPACK)
 #include "mpi.h"
@@ -299,7 +298,6 @@ static REAL_T vlimit = 10.0;    /* maximum velocity component */
 static REAL_T genmass = 10.;    /* general masses, for now all the same */
 static int ntpr_md = 10;        /* print frequency for KE,PE,temp */
 static int ntwx = 0;            /* trajectory snapshot frequency  */
-static struct AmberNetcdf NC;
 static char *ncfilename = NULL;
 static int zerov = 0;           /* if true, use zero initial velocities */
 static REAL_T tempi = 0.0;      /* initial temperature */
@@ -341,10 +339,6 @@ static REAL_T hcp_h2 = 50.0;      /* threshold distance (level 2) */
 static REAL_T hcp_h3 = 150.0;     /* threshold distance (level 3) */
 
 /* ********************** HCP variables end here ******************************/
-
-int netcdfCreate(struct AmberNetcdf *, char *, int, int);
-
-int netcdfWriteNextFrame( struct AmberNetcdf *, REAL_T *, REAL_T * );
 
 int rattle(REAL_T, REAL_T *, REAL_T *, REAL_T *, REAL_T *);
 
