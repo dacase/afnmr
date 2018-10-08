@@ -23,7 +23,7 @@ clean:
 	-/bin/rm -f $(OBJS) lex.mm_options.c
 
 lex.mm_options.c: mm_options.l
-	$(LEX) -t mm_options.l | sed -e 's/stdout/nabout/' > lex.mm_options.c
+	$(LEX) mm_options.l 
 
 depend: $(OBJS:.o=.c) lex.mm_options.c 
 	$(CC) -MM $^ > $@

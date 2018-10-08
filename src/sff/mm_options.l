@@ -1,11 +1,12 @@
 %option prefix="mmo"
+%option outfile="lex.mm_options.c"
 %option noyywrap
 
 %{
 extern int mytaskid;
 
 #undef ECHO
-#define ECHO yyout=stdout;if(mytaskid==0) fprintf(yyout, "\tmm_options:  %s\n",yytext)
+#define ECHO yyout=nabout;if(mytaskid==0) fprintf(yyout, "\tmm_options:  %s\n",yytext)
 
 char* setVarStr ( char *str);
 int setVarInt ( char *str);
