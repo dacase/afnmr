@@ -20,7 +20,7 @@ uninstall:
 	-rm -f $(INCDIR)/sff.h
 
 clean:
-	-/bin/rm -f $(OBJS) lex.mm_options.c
+	-/bin/rm -f $(OBJS) lex.mmo.c
 
 lex.mmo.c: mm_options.l
 	$(LEX) mm_options.l 
