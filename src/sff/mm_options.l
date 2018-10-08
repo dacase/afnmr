@@ -1,5 +1,4 @@
 %option prefix="mmo"
-%option outfile="lex.mm_options.c"
 %option noyywrap
 
 %{

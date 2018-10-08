@@ -2623,5 +2623,5 @@ int mme_rism_max_memory()
 
 /*   #include "shiftnbond.c"   */
 #include "rattle.c"
-#include "lex.mm_options.c"
+#include "lex.mmo.c"
 #include "com.c"

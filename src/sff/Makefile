@@ -22,10 +22,10 @@ uninstall:
 clean:
 	-/bin/rm -f $(OBJS) lex.mm_options.c
 
-lex.mm_options.c: mm_options.l
+lex.mmo.c: mm_options.l
 	$(LEX) mm_options.l 
 
-depend: $(OBJS:.o=.c) lex.mm_options.c 
+depend: $(OBJS:.o=.c) lex.mmo.c 
 	$(CC) -MM $^ > $@
 
 include depend
