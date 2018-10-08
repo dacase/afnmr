@@ -1270,7 +1270,9 @@ int mme_init_sff(PARMSTRUCT_T * prm_in, int *frozen_in, int *constrained_in,
    if (ncname != NULL){
       asprintf( &ncfilename, "%s", ncname );
       /* fprintf( stderr, "Creating netcdf trajectory file: %s\n", ncfilename); */
-      netcdfCreate( &NC, ncfilename, prm->Natom, 0 ); /* hard-wire isBox */
+      fprintf( stderr, "Error: no netcdf in this build\n" );
+      exit(1);
+      // netcdfCreate( &NC, ncfilename, prm->Natom, 0 ); /* hard-wire isBox */
    }
 
    constrained = constrained_in;
@@ -2296,25 +2298,6 @@ int get_masses(REAL_T * minv)
 }
 
 /***********************************************************************
-                            MM_OPTIONS()
-************************************************************************/
-
-/* Set the options for mme, md, etc. */
-
-int mm_options(char *opts)
-{
-   int mmolex(void);
-
-   gopts = opts;
-#ifdef flex
-   mmoinputlim = strlen(opts);
-   mmoinputptr = gopts;
-#endif
-   mmolex();
-   return (0);
-}
-
-/***********************************************************************
                             MM_SET_CHECKPOINT()
 ************************************************************************/
 
@@ -2606,7 +2589,9 @@ int md(int n, int maxstep, REAL_T * x, REAL_T * f, REAL_T * v,
          }
       }
       if (ntwx > 0 && nstep % ntwx == 0 && ncfilename != NULL)
-         netcdfWriteNextFrame( &NC, x, NULL );  /* hardwire no box info */
+         fprintf( stderr, "Error: no netcdf in this build\n" );
+         exit(1);
+         // netcdfWriteNextFrame( &NC, x, NULL );  /* hardwire no box info */
       t2 = seconds();
       *tmdIO += t2 - t1;
       t1 = seconds();

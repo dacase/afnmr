@@ -1,20 +1,8 @@
+%option prefix="mmo"
+%option noyywrap
+
 %{
 extern int mytaskid;
-
-#ifdef flex
-
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = mmo_yyinput(b, ms))
-int mmo_mmoinput( char*, int );
-
-#else
-
-#undef input
-#undef unput
-#define input() (*gopts++)
-#define unput(c) (*--gopts = c)
-
-#endif
 
 #undef ECHO
 #define ECHO yyout=stdout;if(mytaskid==0) fprintf(yyout, "\tmm_options:  %s\n",yytext)
@@ -25,7 +13,9 @@ double setVarDbl ( char *str);
 void setArrayStr ( char *str, char *a, int n, int len);
 void setArrayInt ( char *str, int *a, int n);
 void setArrayDbl ( char *str, double *a, int n);
+
 %}
+
 Float [+-]?((([0-9]+\.?[0-9]*)|([0-9]*\.?[0-9]+))([eE][-+]?[0-9]+)?)
 Int [+-]?[0-9]+
 PosInt [+]?[1-9][0-9]*
@@ -34,6 +24,7 @@ NonNegInt [+]?[0-9]+
 Str [^,\ =]+
 Assign (\ *=\ *|\ +)
 ListSep (\ *,\ *)
+
 %%
 
 cut{Assign}{Float}                 { ECHO; cut = setVarDbl(yytext); }
@@ -207,7 +198,6 @@ rattle{Assign}[012]             { ECHO; irattle = setVarInt(yytext); }
 [\ \n\t,]+                                                ;
 
 .                               {        
-#ifdef flex
   if(mytaskid==0){
     char c;
     fprintf( stderr, "Error: mm_option: unknown keyword or invalid value: %s", yytext );
@@ -215,40 +205,10 @@ rattle{Assign}[012]             { ECHO; irattle = setVarInt(yytext); }
       fprintf( stderr, "%c",c);
     fprintf( stderr,"\n");
   }
-#else
-  if(mytaskid==0)fprintf( stderr, "Error: mm_option: unknown keyword or invalid value: %s\n", --gopts );
-#endif
   
   exit( 1 );
 }
 %%
-
-int yywrap(){
-        return( 1 );
-}
-
-#ifdef flex
-
-
-int  mmo_yyinput( buf, max_size )
-
-char *buf;
-int  max_size;
-{
-    int n;
-
-    if( max_size > &gopts[mmoinputlim] - mmoinputptr ) 
-            n =  &gopts[mmoinputlim] - mmoinputptr;
-    else
-            n = max_size;
-
-    if( n>0 ){
-            memcpy( buf, mmoinputptr, n );
-            mmoinputptr += n;
-    }
-    return n;
-}
-#endif
 
 /**
  * Extract a single value from an option statement
@@ -405,3 +365,19 @@ void setArrayInt ( char *str, int *a, int n){
   }
   free(copy);
 }
+
+/***********************************************************************
+                            MM_OPTIONS()
+************************************************************************/
+
+/* Set the options for mme, md, etc. */
+
+int mm_options(char *opts)
+{
+
+   mmo_scan_string( opts );
+   mmolex();
+   yy_delete_buffer(YY_CURRENT_BUFFER);
+   return (0);
+}
+
