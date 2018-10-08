@@ -1,11 +1,8 @@
 include ../config.h
 
 .c.o:
-	$(CC) -c -Dflex $(COPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) $(RISMSFF) $(NETCDFINC) -o $@ $<
+	$(CC) -c $(COPTFLAGS) $(CFLAGS) -o $@ $<
 
-.cpp.o:
-	$(CXX) -c $(CXXOPTFLAGS) -o $@ $<
-	
 OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o wallclock.o \
 	   prm.o rand2.o sasad.o sff.o xminC.o ptrajmask.o
 

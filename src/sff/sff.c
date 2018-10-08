@@ -47,12 +47,6 @@
 #include "mpi.h"
 #endif
 
-#ifdef flex
-static char *mmoinputptr;
-static int mmoinputlim;
-#endif
-
-
 /* Here are offsets into the ScaLAPACK descriptor array. */
 
 #define DTYPE_ (0)
