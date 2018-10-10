@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-9/5/2018
+10/10/2018
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.0b1)
+(Version 1.0)
 \end_layout
 
 \begin_layout Author
@@ -888,6 +888,9 @@ solinprot
 
 \begin_layout Description
 -pbsa Compute the surface charges using the PBSA program from AmberTools
+ 
+\emph on
+(not implemented in this version)
 \end_layout
 
 \begin_layout Description
@@ -895,7 +898,9 @@ solinprot
 \begin_inset space ~
 \end_inset
 
--3drism use 3D-RISM to get surface charges
+-3drism use 3D-RISM to get surface charges 
+\emph on
+(not implemented in this version)
 \end_layout
 
 \end_deeper
@@ -912,6 +917,10 @@ quantum program to use:
 \end_inset
 
 -demon Set up QM input files to run with the deMon program, version 3 (default)
+\end_layout
+
+\begin_layout Description
+-demon5 Set up QM input files to run with the deMon program (version 5)
 \end_layout
 
 \begin_layout Description
@@ -932,6 +941,27 @@ quantum program to use:
  keeping the remaining residues in each fragment fixed.
 \end_layout
 
+\begin_layout Description
+-xtb Carry out a geometry optimization of each fragment using the 
+\emph on
+xtb
+\emph default
+ semi-empirical code; then create input files for one of the other programs
+ (deMon, ORCA, Gaussian, Qchem) to actually compute the shifts.
+ The 
+\emph on
+xtb
+\emph default
+ code must be in your PATH.
+ Note that this is an experimental option, and the precise way in which
+ minimizations are done is still under study.
+ You should examine the options sent to 
+\emph on
+xtb
+\emph default
+, and consider experimenting with changes.
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 
@@ -943,7 +973,11 @@ miscellaneous flags:
 \begin_layout Description
 -qopt do a quantum mechanical geometry optimization in place of a molecular
  mechanics optimization.
- (Work in progress: only fully implemented for terachem so far.)
+ (Work in progress: only fully implemented for 
+\emph on
+terachem
+\emph default
+ so far.)
 \end_layout
 
 \begin_layout Description
