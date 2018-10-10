@@ -1,3 +1,6 @@
+%option prefix="cifp"
+%option noyywrap
+
 %{ 
 /*
 
@@ -16,9 +19,6 @@ losses, liabilities, damages, costs, fees, and expenses including
 reasonable attorneys' fees resulting from or arising out of the
 use of this software.  This indemnification shall include, but is
 not limited to, any and all claims alleging products liability.
-
-This software may be used only for not-for-profit educational
-and research purposes.
 
 */
 
@@ -44,6 +44,7 @@ and research purposes.
     by D.A. Case,  12/97
   Further modified to recognize some NMR_STAR syntax used for NEF-style 
     restraints -- DAC, 11/14
+  Make use of name-prefix and file-prefix bison options, 
 
 */
 
@@ -289,12 +290,6 @@ int *bufLen;
   if (obuf[i-1] == '\n') i--;			   
   (*bufLen)-= (*bufLen-i);
   obuf[*bufLen] = '\0';
-}
-
-
-int cifpwrap()
-{
-   return(1);
 }
 
 static void alt_cifpmore()

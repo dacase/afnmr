@@ -1,3 +1,6 @@
+%name-prefix "cifp"
+%file-prefix "cifp"
+
 /*
 
 COPYRIGHT 1996 Rutgers - The State University of New Jersey
@@ -15,9 +18,6 @@ losses, liabilities, damages, costs, fees, and expenses including
 reasonable attorneys' fees resulting from or arising out of the
 use of this software.  This indemnification shall include, but is
 not limited to, any and all claims alleging products liability.
-
-This software may be used only for not-for-profit educational
-and research purposes.
 
 */
 
