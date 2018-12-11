@@ -192,7 +192,7 @@ echo "====== add_pdb:  ======================================================" \
 $AFNMRHOME/bin/add_pdb -i $1.parm7 -o foozzz.parm7 -p $1.pdb >> $1.afnmr.log
 /bin/mv foozzz.parm7 $1.parm7
 
-$AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext < $1.min.x > $1.min.pqr 2> /dev/null
+$AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.min.x > $1.min.pqr 2> /dev/null
 /bin/rm -f $1.pqr
 ln -s $1.min.pqr $1.pqr
 
