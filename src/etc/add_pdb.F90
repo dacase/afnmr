@@ -195,12 +195,14 @@ program add_pdb
                write(*,*)'PDB file has too many residues!'
                exit
             end if
+#if 0
             if (residue_label(pdb_nres) /= resName) then
                if (residue_label(pdb_nres) /= 'WAT') then
                   write(*,*) 'Warning: PDB resName "',resName, &
                        '" /= PRMTOP label "',residue_label(pdb_nres),'"'
                end if
             end if
+#endif
             residue_chainid(pdb_nres) = chainID
             residue_icode(pdb_nres) = iCode
             residue_number(pdb_nres) = resSeq
@@ -390,12 +392,14 @@ contains
       ! If guessing, prefer the 1-letter element if it is valid.
       else if (index("BCFHIKNOPSUVWY",lname(1:1))>0) then
          element = ' '//lname(1:1)
+#if 0
          if (lname(2:2)>='A' .and. lname(2:2)<='Z') then
             if (any(element_name == lname(1:2))) then
                write(*,*) &
                   'Warning: guessing atom "',name,'" as element "',element,'"'
             end if
          end if
+#endif
 
       !Otherwise it must be a 2-letter element.
       else
