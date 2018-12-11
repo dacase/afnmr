@@ -3,7 +3,7 @@
 #    make a tar file for users
 #
 CWD=`pwd`
-h=afnmr-1.0b1
+h=afnmr-1.0
 tarfile=$h.tar
 TARC="gnutar cfX $tarfile $CWD/excludes"
 TAR="gnutar rfX $tarfile $CWD/excludes"
