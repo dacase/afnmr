@@ -148,7 +148,7 @@ program afnmr_x
       solinprot = .false.
       qopt = .false.
       listsize = 0
-      version = '5.4.beta1'
+      version = '1.0'
 
       print*
       print*,'**********************************************'
@@ -392,6 +392,7 @@ program afnmr_x
 !
 !     Big loop over residues to create fragments:
 !
+!     write(0,*) (restype(i),i=1,nres), lastprotres
       do kcount=1,nres
 
         if( listsize > 0 ) then
