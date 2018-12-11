@@ -735,6 +735,14 @@ subroutine genpdb(natom,nres,coords,igraph,ipres,lbres,ititl,nf,arg1, &
          if( lbres(j).eq.'DA  ' ) lbres(j) = ' DA '
          if( lbres(j).eq.'U   ' ) lbres(j) = '  U '
          if( lbres(j).eq.'DT  ' ) lbres(j) = ' DT '
+         if( lbres(j).eq.'G5  ' ) lbres(j) = '  G '
+         if( lbres(j).eq.'C5  ' ) lbres(j) = '  C '
+         if( lbres(j).eq.'A5  ' ) lbres(j) = '  A '
+         if( lbres(j).eq.'U5  ' ) lbres(j) = '  U '
+         if( lbres(j).eq.'G3  ' ) lbres(j) = '  G '
+         if( lbres(j).eq.'C3  ' ) lbres(j) = '  C '
+         if( lbres(j).eq.'A3  ' ) lbres(j) = '  A '
+         if( lbres(j).eq.'U3  ' ) lbres(j) = '  U '
       end if
       
       do k=j1,j2
