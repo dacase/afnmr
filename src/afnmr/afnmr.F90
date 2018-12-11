@@ -148,7 +148,7 @@ program afnmr_x
       solinprot = .false.
       qopt = .false.
       listsize = 0
-      version = '1.0'
+      version = '1.1'
 
       print*
       print*,'**********************************************'
