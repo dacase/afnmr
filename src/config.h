@@ -8,7 +8,19 @@ INCDIR=$(AFNMRHOME)/include
 DATDIR=$(AFNMRHOME)/dat
 LOGDIR=$(AFNMRHOME)/logs
 
-FLIBS=-lsff -llapack -lblas -lgfortran
+OS=$(shell uname -s)
+ifeq "$(OS)" "Darwin"
+   # MacOSX rules for making shared objects
+   SHARED_SUFFIX=.dylib
+   MAKE_SHARED=-dynamiclib
+   LIBGFORTRAN=$(shell $(AFNMRHOME)/src/libgfortran.sh)
+else
+   # Linux rules for shared libraries:
+   SHARED_SUFFIX=.so
+   MAKE_SHARED=-shared
+endif
+
+FLIBS=-lsff -llapack -lblas -L$(LIBGFORTRAN) -lgfortran
 LM=-lm
 
 CC=gcc
