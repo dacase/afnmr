@@ -1,13 +1,13 @@
 #!/usr/bin/perl
 
 #******************************************************************************
-# collect shifts from demon3 outputs
-#   usage:  getshifts-demon3 reference basename; rdb file fragments to stdout
+# collect shifts from demon outputs
+#   usage:  getshifts-demon reference basename; rdb file fragments to stdout
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
 
-@ARGV == 2 or die " usage: getshifts-demon3 reference basename \n";
+@ARGV == 2 or die " usage: getshifts-demon reference basename \n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
 $fulltensor=1;
@@ -32,7 +32,7 @@ if( $reference eq "seg0" ){
 
 if( $basename eq "header" ){
    # document the reference shieldings being used:
-   printf( "# results from afnmr-demon3:\n" );
+   printf( "# results from afnmr-demon:\n" );
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
