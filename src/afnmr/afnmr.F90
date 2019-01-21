@@ -31,7 +31,7 @@ program afnmr_x
 !
 !   Usage: afnmr.x program basis solinprot qopt basename list
 !
-!      where program  is G (Gaussian), O (Orca), D (Demon v3,4), D5 (Demon v5),
+!      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), T (TeraChem)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D)
