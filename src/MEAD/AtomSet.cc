@@ -117,13 +117,12 @@ void AtomSet::read (const string& filename_string)
     AtomID key(at);
     if (contains(key)) {
       // Bergsma changed this to be a fatal error 5/2/01.
+  
+      cerr << "WARNING: AtomSet::read: Input file, " << filename
+  	<< ",\ncontains duplicate entries for the atom, " << key
+  	  << ".\nLast one will override previous" << endl;
+      //  (*this)[key] = at;
       ::error("AtomSet::read: attempt to insert a duplicate atom\n");
-/*
- *    cerr << "WARNING: AtomSet::read: Input file, " << filename
- *	<< ",\ncontains duplicate entries for the atom, " << key
- *	  << ".\nLast one will override previous" << endl;
- *    (*this)[key] = at;
- */
     }
     else {
       pair<iterator,bool> p = insert(at);
