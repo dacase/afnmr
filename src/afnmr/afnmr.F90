@@ -458,14 +458,17 @@ program afnmr_x
         else if ( orca ) then
 !         write(30,'(a)') '! PAL4'
           if( basis .eq. 'T' ) then
-            write(30,'(a)', advance='no') '! OLYP TZVP '
+            ! write(30,'(a)', advance='no') '! OLYP def2-TZVP '
+            write(30,'(a)', advance='no') '! O3LYP def2-TZVP '
           else
-            write(30,'(a)', advance='no') '! OLYP VDZP '
+            ! write(30,'(a)', advance='no') '! OLYP def2-SVP '
+            write(30,'(a)', advance='no') '! O3LYP def2-SVP '
           end if
           if( qopt ) then
             write(30,'(a)')  'TightSCF RI KDIIS Opt '
           else
-            write(30,'(a)')  'TightSCF RI KDIIS '
+            ! write(30,'(a)')  'TightSCF RI KDIIS '
+            write(30,'(a)')  'def2/J def2/JK TightSCF RIJCOSX KDIIS '
           endif
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
@@ -1116,7 +1119,7 @@ subroutine addatom( kk, iqm, basis )
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
         if( orca .and. basis .eq. 'M' ) then
           write(30,'(a)') 'NewGTO'
-          write(30,'(a)') '"TZVP"'
+          write(30,'(a)') '"def2-TZVP"'
           write(30,'(a)') 'end;'
         endif
       endif
