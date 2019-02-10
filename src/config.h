@@ -20,7 +20,7 @@ else
    MAKE_SHARED=-shared
 endif
 
-FLIBS=-lsff -llapack -lblas -L$(LIBGFORTRAN) -lgfortran
+FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
 LM=-lm
 
 CC=gcc
