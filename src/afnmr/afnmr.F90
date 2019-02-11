@@ -38,6 +38,7 @@ program afnmr_x
 !            solinprot is T or F
 !            qopt is T or F, to turn on or off quantum geometry optimization,
 !                  or X (for internal optimization with xtb)
+!            functional is a string giving the desired DFT functional
 !            <basename>.pqr gives the input structure; put all "general"
 !                  residues (water, ligands, etc.) after protein or
 !                  nucleic acid residues
@@ -62,6 +63,7 @@ program afnmr_x
       character(len=1):: restype(MAXRES)
       character(len=30) :: pqrstart
       character(len=16) :: pqrend
+      character(len=5) :: functional
 
       double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
       double precision chargef(MAXRES)
@@ -201,22 +203,24 @@ program afnmr_x
          stop 1
       endif
 
-      call get_command_argument( 5, basename, lengthb )
+      call get_command_argument( 5, functional, lengthb )
+
+      call get_command_argument( 6, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
 
-      if( command_argument_count() > 5 ) then
-         do i=6,command_argument_count()
+      if( command_argument_count() > 6 ) then
+         do i=7,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
-            read( lpchar, '(i4)' ) list(i-5)
+            read( lpchar, '(i4)' ) list(i-6)
          end do
-         listsize = command_argument_count() - 5
+         listsize = command_argument_count() - 6
       endif
 
       nbcut = 3.3
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
       write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a)') 'Input arguments: ', &
-           program, basis, solinprotb, qoptb, basename(1:lengthb)
+           program, basis, solinprotb, qoptb, functional, basename(1:lengthb)
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
 
@@ -444,7 +448,8 @@ program afnmr_x
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
           write(30,'(a)') '%nprocshared=4'
-          write(30,'(a)', advance='no')  '# OLYP/Gen charge nosymm '
+          write(30,'(a,a,a)', advance='no')  '# ', trim(functional), &
+              '/Gen charge nosymm '
           if (qopt) then
             write(30,'(a)') 'Opt ReadOptimize '
           else
@@ -458,18 +463,20 @@ program afnmr_x
         else if ( orca ) then
 !         write(30,'(a)') '! PAL4'
           if( basis .eq. 'T' ) then
-            ! write(30,'(a)', advance='no') '! OLYP def2-TZVP '
-            write(30,'(a)', advance='no') '! O3LYP def2-TZVP '
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' pcSseg-1 '
           else
-            ! write(30,'(a)', advance='no') '! OLYP def2-SVP '
-            write(30,'(a)', advance='no') '! O3LYP def2-SVP '
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' pcSseg-0 '
           end if
-          if( qopt ) then
-            write(30,'(a)')  'TightSCF RI KDIIS Opt '
+          if( functional(2:2) .eq. '3' ) then
+            write(30,'(a)', advance='no')  'AutoAux TightSCF RIJCOSX KDIIS '
           else
-            ! write(30,'(a)')  'TightSCF RI KDIIS '
-            write(30,'(a)')  'def2/J def2/JK TightSCF RIJCOSX KDIIS '
+            write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
+          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
+          write(30,'(a)') ''
+
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
                '.pos"'
@@ -507,7 +514,7 @@ program afnmr_x
           write(30,'(a)') 'GUESS TB'
           write(30,'(a)') 'ORBITALS CARTESIAN'
           write(30,'(a)') 'ERIS MULTIPOLE'
-          write(30,'(a)') 'VxcType Auxis OLYP'
+          write(30,'(a,a)') 'VxcType Auxis ', trim(functional)
           write(30,'(a)') 'GRID FINE'
           write(30,'(a)') 'QUADRATURE RANDOM'
           write(30,'(a)') 'MIXING -0.05'
