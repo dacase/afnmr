@@ -4,7 +4,8 @@ SRCDIR=..
 VPATH=
 
 .f.o:
-	$(FC) -c $(FOPTFLAGS) $(FFLAGS) -o $@ $<
+	@echo "[LAPACK]  FC  $<"
+	$(VB)$(FC) -c $(FOPTFLAGS) $(FFLAGS) -o $@ $<
 
 OBJS= dsyev.o dsygv.o dlansy.o dsytrd.o dorgtr.o dsteqr.o \
 	dsterf.o dlascl.o dlamch.o ilaenv.o dlassq.o dsytd2.o \
@@ -50,9 +51,10 @@ OBJS= dsyev.o dsygv.o dlansy.o dsytrd.o dorgtr.o dsteqr.o \
 install: $(LIBDIR)/liblapack.a
 
 $(LIBDIR)/liblapack.a: $(OBJS)
-	$(AR) liblapack.a $(OBJS)
-	$(RANLIB) liblapack.a
-	mv liblapack.a $(LIBDIR)
+	@echo "[LAPACK]  AR $@"
+	@/bin/rm -f $@
+	@$(AR) $@ $(OBJS) > /dev/null
+	@$(RANLIB) $@
 
 skip:
 	@echo "skipping compilation of LAPACK"
@@ -64,4 +66,5 @@ clean:
 	-/bin/rm -f *.o
 
 dlamch.o:  dlamch.f
-	$(FC) -c $(FNOOPTFLAGS) $(FFLAGS) -o $@ $<
+	@echo "[LAPACK]  FC  $<"
+	@$(FC) -c $(FNOOPTFLAGS) $(FFLAGS) -o $@ $<

@@ -4,7 +4,8 @@ SRCDIR=..
 VPATH=
 
 .f.o:
-	$(FC) $(FPPFLAGS) -c $(FOPTFLAGS) $(FFLAGS) -o $@ $<
+	@echo "[BLAS]  FC  $<"
+	$(VB)$(FC) $(FPPFLAGS) -c $(FOPTFLAGS) $(FFLAGS) -o $@ $<
 
 OBJS=    dasum.o daxpy.o dcabs1.o dcopy.o ddot.o \
          dgbmv.o dgemm.o dgemv.o dger.o dnrm2.o drot.o \
@@ -21,9 +22,10 @@ OBJS=    dasum.o daxpy.o dcabs1.o dcopy.o ddot.o \
 install: $(LIBDIR)/libblas.a
 
 $(LIBDIR)/libblas.a: $(OBJS)
-	$(AR) libblas.a $(OBJS)
-	$(RANLIB) libblas.a
-	mv libblas.a $(LIBDIR)
+	@echo "[LAPACK]  AR $@"
+	$(VB)/bin/rm -f $@
+	$(VB)$(AR) $@ $(OBJS) > /dev/null
+	$(VB)$(RANLIB) $@
 
 skip:
 	@echo "skipping compilation of BLAS"

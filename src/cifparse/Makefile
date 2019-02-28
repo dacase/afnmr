@@ -3,8 +3,11 @@ include ../config.h
 .SUFFIXES:
 .SUFFIXES:  .c .o
 
+LOCALFLAGS=-Wno-format
+
 .c.o:
-	$(CC) -c $(CNOOPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) $<
+	@echo "[CIFPARSE]  CC $<"
+	$(VB)$(CC) -c $(CNOOPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) $<
 
 CIFOBS=	\
 	lex.cifp.o \
@@ -12,20 +15,24 @@ CIFOBS=	\
 	cifparse.o
 
 $(LIBDIR)/libcifparse.a: $(CIFOBS)
-	/bin/rm -f $(LIBDIR)/libcifparse.a
-	$(AR) $(LIBDIR)/libcifparse.a $(CIFOBS)
-	-$(RANLIB) $(LIBDIR)/libcifparse.a
+	@echo "[CIFPARSE]  AR $@"
+	$(VB)/bin/rm -f $@
+	$(VB)$(AR) $@ $(CIFOBS) > /dev/null
+	$(VB)-$(RANLIB) $@
 
 cifp.tab.h: cifp.tab.c
 
 cifp.tab.c:  cifparse.y lex.cifp.c
-	$(YACC) -v -d cifparse.y
+	@echo "[CIFPARSE]  BISON $<"
+	$(VB)$(YACC) -v -d cifparse.y
 
 cifp.tab.o: cifp.tab.c
-	$(CC) -c -D$(LEX) $(CNOOPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) cifp.tab.c
+	@echo "[CIFPARSE]  CC $<"
+	$(VB)$(CC) -c -D$(LEX) $(CNOOPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) cifp.tab.c
 
 lex.cifp.c: cifparse.l 
-	$(LEX) cifparse.l
+	@echo "[CIFPARSE]  FLEX $<"
+	$(VB)$(LEX) cifparse.l
 
 install:  $(LIBDIR)/libcifparse.a
 

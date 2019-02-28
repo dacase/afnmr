@@ -37,6 +37,6 @@ FOPTFLAGS=-O3 -mtune=native
 
 AR=ar rv
 RANLIB=ranlib
-LEX=flex
+FLEX=flex
 YACC=bison -y
 VB=@

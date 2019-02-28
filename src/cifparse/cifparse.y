@@ -1,5 +1,5 @@
-%name-prefix "cifp"
-%file-prefix "cifp"
+%name-prefix="cifp"
+%file-prefix="cifp"
 
 /*
 

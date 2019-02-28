@@ -9,10 +9,12 @@ include ../config.h
 PROGS= $(BINDIR)/ambpdb $(BINDIR)/add_pdb
 
 $(BINDIR)/ambpdb: $(AOBJ)
-	$(FC) $(FFLAGS) -o $@ $(AOBJ)
+	@echo "[ETC]  FC $@"
+	$(VB)$(FC) $(FFLAGS) -o $@ $(AOBJ)
 
 $(BINDIR)/add_pdb: add_pdb.o nxtsec.o
-	$(FC) $(FFLAGS) -o $@ add_pdb.o nxtsec.o
+	@echo "[ETC]  FC $@"
+	$(VB)$(FC) $(FFLAGS) -o $@ add_pdb.o nxtsec.o
 
 install:	$(PROGS)
 
@@ -22,5 +24,6 @@ clean:
 #  default rules for Fortran and C compilation:
 
 .F90.o: $<
-	$(FC) $(FPPFLAGS) -c $(FREEFORMAT_FLAG) $(FNOOPTFLAGS) $(FFLAGS) $(AMBERFFLAGS) -o $@ $<
+	@echo "[ETC]  FC $<"
+	$(VB)$(FC) -c $(FNOOPTFLAGS) $(FFLAGS) -o $@ $<
 
