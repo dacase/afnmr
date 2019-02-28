@@ -1,18 +1,20 @@
 include ../config.h
 
 .c.o:
-	$(CC) -c $(COPTFLAGS) $(CFLAGS) -o $@ $<
+	@echo "[SFF]  CC $<"
+	$(VB)$(CC) -c $(COPTFLAGS) $(CFLAGS) -o $@ $<
 
 OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o wallclock.o \
 	   prm.o rand2.o sasad.o sff.o xminC.o ptrajmask.o
 
 install: $(LIBDIR)/libsff.a
-	cp sff.h $(INCDIR)
+	$(VB)cp sff.h $(INCDIR)
 
 $(LIBDIR)/libsff.a: $(OBJS)
-	-rm -f $(LIBDIR)/libsff.a
-	$(AR) $(LIBDIR)/libsff.a $(OBJS)	
-	$(RANLIB) $(LIBDIR)/libsff.a
+	@echo "[SFF]  AR $@"
+	$(VB)-rm -f $(LIBDIR)/libsff.a
+	$(VB)$(AR) $(LIBDIR)/libsff.a $(OBJS)	
+	$(VB)$(RANLIB) $(LIBDIR)/libsff.a
 
 uninstall:
 	-rm -f $(LIBDIR)/libsff.a
@@ -26,7 +28,8 @@ lex.mmo.c: mm_options.l
 	$(LEX) mm_options.l 
 
 depend: $(OBJS:.o=.c) lex.mmo.c 
-	$(CC) -MM $^ > $@
+	@echo "[SFF]  make depend"
+	$(VB)$(CC) -MM $^ > $@
 
 include depend
 
