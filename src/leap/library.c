@@ -177,8 +177,9 @@ OBJEKT          oObj;
     if ( oObj != NULL ) 
 	goto DONE;
     oObj = (OBJEKT)psParmSetLoad( ul->dbLibrary );
-    if ( oObj == NULL)
-	VPWARN(( "%s: nothing loaded\n", sName ));
+    if ( oObj == NULL){
+	   VPWARN(( "%s: nothing loaded\n", sName ));
+    }
 
 DONE:
     DBPopPrefix( ul->dbLibrary );

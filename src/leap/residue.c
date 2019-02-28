@@ -196,8 +196,9 @@ OBJEKT          oObj;
 STRING          sTemp;
 
     VP0(( "RESIDUE name: %s\n", rResidue->cHeader.sName ));
-    if ( bResidueFlagsSet( rResidue, RESIDUEUNKNOWN ) ) 
+    if ( bResidueFlagsSet( rResidue, RESIDUEUNKNOWN ) ){ 
         VPWARN(( "!!!This is an unknown residue!\n" ));
+    }
     VP0(( "RESIDUE sequence number: %d\n", 
                         iContainerSequence(rResidue) ));
     VP0(( "RESIDUE PDB sequence number: %d\n",
@@ -651,11 +652,13 @@ bResidueCrossLink( RESIDUE rA, int iConnectA,
 ATOM		aA, aB;
 
     aA = aResidueConnectAtom( rA, iConnectA );
-    if ( aA == NULL )
-	VPFATALEXIT(( " %s: no such connect atom\n", rA->sDescription ));
+    if ( aA == NULL ){
+	    VPFATALEXIT(( " %s: no such connect atom\n", rA->sDescription ));
+    }
     aB = aResidueConnectAtom( rB, iConnectB );
-    if ( aB == NULL )
-	VPFATALEXIT(( " %s: no such connect atom\n", rB->sDescription ));
+    if ( aB == NULL ){
+	   VPFATALEXIT(( " %s: no such connect atom\n", rB->sDescription ));
+    }
     if ( aA == NULL || aB == NULL ) {
 	return(FALSE);
     }

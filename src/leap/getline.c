@@ -1,7 +1,3 @@
-#ifndef lint
-static char    *copyright = "Copyright (C) 1991, 1992, 1993, Chris Thewalt";
-#endif
-
 /* Note - make sure 'unix' for leap (linux/XFree86 R6 3.1.2 */
 #ifndef unix
 #define unix

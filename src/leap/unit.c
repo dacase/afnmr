@@ -195,7 +195,6 @@ int             iTemp = PARM_NOT_FOUND;
 IGNORE1:
         ;
 
-DONTIGNORE1:
         if ( bAtomFlagsSet( aAtom1, ATOMPERTURB ) ||
                 bAtomFlagsSet( aAtom2, ATOMPERTURB ) ||
                 bAtomFlagsSet( aAtom3, ATOMPERTURB ) ) {

@@ -3205,8 +3205,6 @@ return(1); } else return (0);
 OBJEKT
 oCmd_showDefault( int iArgCount, ASSOC aaArgs[] )
 {
-LISTLOOP        llElements;
-ASSOC           aAssoc;
 char            *sString;
 char            sStrings[]="all";
 int             ALL, ind, found;
@@ -3247,7 +3245,7 @@ int             ALL, ind, found;
         found += PrntOpt(sString, "dielectric", "Dielectric", s1,ind, ALL);
         found += PrntOnOff(sString, "residueimpropers", "ResidueImpropers", GDefaults.iResidueImpropers, ALL);
         found += PrntOnOff(sString, "deleteextrapointangles", "DeleteExtraPointAngles", GDefaults.iDeleteExtraPointAngles, ALL);
-        if (!found) VPWARN(( "can't parse %s\n", sString ));
+        if (!found) {VPWARN(( "can't parse %s\n", sString ));}
 
     return(NULL);
 }
@@ -6420,7 +6418,7 @@ oCmd_addIonsRand( int iArgCount, ASSOC aaArgs[] )
   // Check ion size and position
   iUnknown = 0;
   lAtoms = lLoop( (OBJEKT)uIon1, ATOMS );
-  for(i=0; aAtom = (ATOM)oNext(&lAtoms); i++) {
+  for(i=0; (aAtom = (ATOM)oNext(&lAtoms)); i++) {
     if ( iAtomSetTmpRadius( aAtom ) )
       VP0(( "Using default radius %5.2f for ion %s\n",
             ATOM_DEFAULT_RADIUS, sAssocName( aaArgs[1] ) ));
@@ -6445,7 +6443,7 @@ oCmd_addIonsRand( int iArgCount, ASSOC aaArgs[] )
   if ( uIon2 ) {
     iUnknown = 0;
     lAtoms = lLoop( (OBJEKT)uIon2, ATOMS );
-    for(i=0; aAtom = (ATOM)oNext(&lAtoms); i++) {
+    for(i=0; (aAtom = (ATOM)oNext(&lAtoms)); i++) {
       if ( iAtomSetTmpRadius( aAtom ) )
         VP0(( "Using default radius %5.2f for ion %s\n",
               ATOM_DEFAULT_RADIUS, sAssocName( aaArgs[3] ) ));

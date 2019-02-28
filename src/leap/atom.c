@@ -52,13 +52,9 @@
  */
  
 
-
-
 #include        "basics.h"
 #include        "defaults.h"
-
 #include        "classes.h"
-
 #include        "elements.h"
 
 extern int      iFatal;
@@ -1193,7 +1189,7 @@ double  dR1, dR2, dDist, dX, dY, dZ;
     dX = dVX(&vAtomPosition( aAtom1 )) - dVX(&vAtomPosition( aAtom2 )) ;
     dY = dVY(&vAtomPosition( aAtom1 )) - dVY(&vAtomPosition( aAtom2 )) ;
     dZ = dVZ(&vAtomPosition( aAtom1 )) - dVZ(&vAtomPosition( aAtom2 )) ;
-    if ( abs(dX) < dDist  &&  abs(dY) < dDist  &&  abs(dZ) < dDist ) {
+    if ( fabs(dX) < dDist  &&  fabs(dY) < dDist  &&  fabs(dZ) < dDist ) {
         /*
          *  check actual distance
          */

@@ -1821,11 +1821,12 @@ zbUnitIOIndexTorsionParameters(PARMLIB plLib, UNIT uUnit,
                     *Pint1 = saPAngleT->iAtom3;
                     *Pint2 = saPAngleT->iAtom1;
                 }
-                if (add_key(&e14, &scr14_index) != IX_OK)
+                if (add_key(&e14, &scr14_index) != IX_OK){
                     VPNOTE(("1-4: angle %d %d %s %s\n",
                          *Pint1, *Pint2,
                          "duplicates bond ('triangular' bond)",
                          "or angle ('square' bond)\n"));
+                }
             }
         }
     } else {
@@ -4165,8 +4166,7 @@ static int copyatoms(int atoms[], SAVETORSIONt * sa4, SAVETORSIONt * sb4,
 
 static int cmpresname1(UNIT u, SAVEATOMt * sa4, WRD reslist[], int nres)
 {
-    int i, j;
-    int l;
+    int i;
     char *sname;
 
     sname = PVAI(u->vaResidues, SAVERESIDUEt, sa4->iResidueIndex - 1)->sName;
@@ -4182,8 +4182,6 @@ static int cmpresname1(UNIT u, SAVEATOMt * sa4, WRD reslist[], int nres)
 static int cmpresname4(UNIT u, SAVEATOMt * sa4[], WRD reslist[], int nres)
 {
     int i, j;
-    int l;
-    char *sname;
 
     for (j = 0; j < 4; j++) {
         if ((i = cmpresname1(u, sa4[j], reslist, nres)) > 0)
@@ -4217,7 +4215,7 @@ static int cmp4vs4(SAVEATOMt * sa4[], WRD atm4[])
 static int cmp_residx(SAVEATOMt * sa4[], SAVEATOMt * sb4[], int *residx)
 {
     int i, l1, l2;
-    int l, idx0, idx1;
+    int idx0, idx1;
 
     idx0 = sa4[0]->iResidueIndex;
     idx1 = residx[0];
@@ -4245,16 +4243,13 @@ static void SaveAmberParmCMAP(UNIT uUnit, FILE * fOut)
     // CMAP parameters, Mengjuei Hsieh and Yong Duan
     //
     int i, j, k, l;
-    int iterCMAP, iterRes, mapid, mapcount, maptypes;
+    int mapid, mapcount, maptypes;
     int *mapflag, *mapidx;
     int iNumDIH;
-    int *prospect, nprospect, ires;
-    ATOM aE, aF, aG, aH;
-    SAVEATOMt *saA, *saB, *saC, *saD, *saE, *saF, *saG, *saH;
+    int nprospect, ires;
     SAVEATOMt *sa4[4], *sb4[4];
-    SAVETORSIONt *stPTorsion2, *stPTorsion, *stPTorsiont, *stPTorsion2t;
-    SAVETORSIONtp *stdptt, *stdpt0;
-    CMNT *cmntt;
+    SAVETORSIONt *stPTorsion2, *stPTorsion;
+    SAVETORSIONtp *stdpt0;
     STRING sTmp;
     PHIPSI *phipsi;
     CMAPLST *cmaplstt;
@@ -4586,7 +4581,7 @@ void zUnitIOSaveAmberNetcdf(UNIT uUnit, char *filename)
 #   else
 
     int ncid;                   // netcdf file handle
-    int did_spatial, did_atom, did_frame;       // dimension IDs
+    int did_spatial, did_atom;       // dimension IDs
     int vid_spatial, vid_coord; // variable IDs
     int did_cell_spatial, did_cell_angular, did_label;
     int vid_cell_spatial, vid_cell_angular, vid_cell_length, vid_cell_angle,
@@ -4750,8 +4745,6 @@ void zUnitIOSaveAmberNetcdf(UNIT uUnit, char *filename)
     double *data = (double *) malloc(3 * iAtomCount * sizeof(double));
     int counter = 0;
     VECTOR vPos;
-    ATOM aAtom;
-    LOOP lAtoms = lLoop((OBJEKT) uUnit, ATOMS);
 
 // Write time = 0
     double time = 0.0;
@@ -4845,7 +4838,7 @@ void zUnitIOSaveAmberParmFormat(UNIT uUnit, FILE * fOut, char *crdName,
     double dMass, dPolar, dR, dKb, dR0, dKt, dT0, dTkub, dRkub, dKp, dP0, dC,
         dD, dTemp;
     double dScEE, dScNB;
-    double dScreenF, dSceeScaleFactor;
+    double dScreenF;
     STRING sAtom1, sAtom2, sAtom3, sAtom4, sType1, sType2;
     int iN, iAtoms, iMaxAtoms, iTemp, iAtom, iCalc14, iProper;
     int iElement, iHybridization, iStart, iFirstSolvent;

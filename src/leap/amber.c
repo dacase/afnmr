@@ -190,9 +190,9 @@ STRING          sHybridization;
                                                 mMass.sType, dPolar ));
                     continue;
                 }
-                if ( dPolar > 15.0 )
-                    VPWARN(( "%s: polarization %lf\n",
-                                                mMass.sType, dPolar ));
+                if ( dPolar > 15.0 ){
+                    VPWARN(( "%s: polarization %lf\n", mMass.sType, dPolar ));
+                }
                 mMass.dPolar = dPolar;
             case 2:
                 break;
@@ -297,16 +297,14 @@ int             iRead,myiPOL;
 static void
 zAmberReadParmSetCMAP( VARARRAY *vaFoo, FILE *fIn )
 {
-    int    iRead, flag;
+    int    flag;
     STRING sLine,sLine0;
-    STRING saStr[10];
     STRING tmpchar1, tmpchar2;
     int imap;
     int tmpint1;
     int i;
     CMNT *cmntt, *cmnt, *cmnt0;
     CMAPLST *cmaplstt;
-    CMAP *cmapt;
     static int called = 0;
 
     if (!called) {
@@ -513,9 +511,9 @@ static void
 zAmberReadParmSetPropers( PARMSET psParms, FILE *fIn )
 {
 STRING          sLine;
-int             iRead, iN, nLine;
+int             iRead, iN;
 STRING          saStr[10], taStr[10];
-double          dDivisions, dKp, dP0, dN, dScEE, dScNB, tScEE, tScNB;
+double          dDivisions, dKp, dP0, dN, dScEE, dScNB;
 char            *cScEE, *cScNB;
 
     memset(saStr, 0, sizeof(saStr));                    /* for Purify */
@@ -578,12 +576,6 @@ char            *cScEE, *cScNB;
         zAmberConvertWildCard( saStr[2] );
         zAmberConvertWildCard( saStr[3] );
 
-//        tScEE = 0.0;
-//        tScNB = 0.0;
-//        if ( iN > 0 ) {
-//             tScEE = dScEE;
-//             tScNB = dScNB;
-//           }
         iParmSetAddProperTerm( psParms, 
                                 saStr[0], saStr[1], saStr[2], saStr[3],
                                 abs(iN), dKp, dP0*DEGTORAD, dScEE,
@@ -682,8 +674,9 @@ BOOL            bPrintLine;
                                 saStr[0], saStr[1], saStr[2], saStr[3],
                                 iN, dKp, dP0*DEGTORAD, dScEE, dScNB, "" );
     }
-    if ( iRead > 0 )
+    if ( iRead > 0 ){
         VPWARN(( "Incomplete Improper Torsion line:\n%s", sLine ));
+    }
 }
 
         
@@ -989,9 +982,10 @@ int             i, j, k, iRead, iSet;
                 break;
             sRemoveFirstString( sLine, eEquiv.saEquivs[i] );
         }
-        if ( strlen(sLine)!=0 ) 
-                VPWARN(( "Parmset: equiv %s: Unrecognized equivs (> %d)!!\n",
+        if ( strlen(sLine)!=0 ){
+             VPWARN(( "Parmset: equiv %s: Unrecognized equivs (> %d)!!\n",
                         eEquiv.sName, MAXEQUIV ));
+        }
         eEquiv.iEquivs = i;
         VarArrayAdd( vaEquivs, (GENP)&eEquiv );
     }
@@ -1620,9 +1614,10 @@ MESSAGE(( "============\n" ));
         VPNOTE(( "(no charges read on atoms lines in %s)\n",
                                                 sResidueDescription(rRes) ));
     } else {
-        if ( iCharges != iAtoms )
+        if ( iCharges != iAtoms ){
             VPWARN(( "%d of %d atoms missing charges on atoms lines: %s\n",
                     iAtoms-iCharges, iAtoms, sResidueDescription(rRes) ));
+        }
         iChgWarn = 1;
         iCharges = 0;
     }
@@ -1693,9 +1688,10 @@ MESSAGE(( "============\n" ));
                 goto ERROR;
             }
         } else if ( strcmp( saStr[1], "CHARGE" )==0 ) {
-            if ( iChgWarn )
+            if ( iChgWarn ){
                 VPWARN(( "Per-line charges being overridden by CHARGE block in %s\n",
                         sResidueDescription(rRes) ));
+            }
             iCharge = 3;
             while (1) {
                 FGETS( sLine, fIn );

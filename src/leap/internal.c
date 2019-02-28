@@ -518,7 +518,7 @@ bInternalGoodTorsion( INTERNAL iInt, ATOM aAtom, INTERNAL *iPTorsion,
 BOOL		bFound;
 
     bFound = FALSE;
-    if ( (aAtom == aInternalAtom1(iInt)) ) {
+    if ( aAtom == aInternalAtom1(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom3(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom4(iInt), ATOMPOSITIONKNOWN ) ) {
@@ -528,7 +528,7 @@ BOOL		bFound;
              *iPBond = iInternalFindBond( aAtom, aInternalAtom2(iInt) );
              bFound = TRUE;
         }
-    } else if ( (aAtom == aInternalAtom4(iInt)) ) {
+    } else if ( aAtom == aInternalAtom4(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom1(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom3(iInt), ATOMPOSITIONKNOWN ) ) {
@@ -610,7 +610,7 @@ INTERNAL        iNew;
 
     aAtom2 = NULL;
     bGotOne = FALSE;
-    if ( (aAtom == aInternalAtom1(iInt)) ) {
+    if ( aAtom == aInternalAtom1(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom3(iInt), ATOMPOSITIONKNOWN ) ) {
              *iPAngle1 = iInt;
@@ -620,7 +620,7 @@ INTERNAL        iNew;
              bGotOne = TRUE;
         }
     }
-    if ( (aAtom == aInternalAtom3(iInt)) ) {
+    if ( aAtom == aInternalAtom3(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom1(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN )) {
              *iPAngle1 = iInt;
@@ -688,7 +688,7 @@ bInternalGoodAngle( INTERNAL iInt, ATOM aAtom, INTERNAL *iPAngle,
 			INTERNAL *iPBond )
 {
 
-    if ( (aAtom == aInternalAtom1(iInt)) ) {
+    if ( aAtom == aInternalAtom1(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom3(iInt), ATOMPOSITIONKNOWN ) ) {
              *iPAngle = iInt;
@@ -696,7 +696,7 @@ bInternalGoodAngle( INTERNAL iInt, ATOM aAtom, INTERNAL *iPAngle,
              return(TRUE);
         }
     }
-    if ( (aAtom == aInternalAtom3(iInt)) ) {
+    if ( aAtom == aInternalAtom3(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom1(iInt), ATOMPOSITIONKNOWN ) &&
              bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN )) {
              *iPAngle = iInt;
@@ -732,13 +732,13 @@ bInternalGoodAngle( INTERNAL iInt, ATOM aAtom, INTERNAL *iPAngle,
 BOOL
 bInternalGoodBond( INTERNAL iInt, ATOM aAtom, INTERNAL *iPBond )
 {
-    if ( (aAtom == aInternalAtom1(iInt)) ) {
+    if ( aAtom == aInternalAtom1(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom2(iInt), ATOMPOSITIONKNOWN )) {
              *iPBond = iInt;
              return(TRUE);
         }
     }
-    if ( (aAtom == aInternalAtom2(iInt)) ) {
+    if ( aAtom == aInternalAtom2(iInt) ) {
         if ( bAtomFlagsSet( aInternalAtom1(iInt), ATOMPOSITIONKNOWN )) {
              *iPBond = iInt;
              return(TRUE);

@@ -212,7 +212,7 @@ VECTOR		vNew;
 
         dF2 = -2.0*dCosX*dSinA*dSinC*
 		   (-dCosB + dCosA*dCosC + dCosX*dSinA*dSinC) + 
-		  2.0*pow2(dSinA)*pow2(dSinC)*pow2(dSinX);
+		  2.0*dSinA*dSinA*dSinC*dSinC*dSinX*dSinX;
 
         MESSAGE( ( "Iteration %d dF1=%lf  dF2=%lf  dB=%lf\n",
                          iCount, dF1, dF2, dX ) );
