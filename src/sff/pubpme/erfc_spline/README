@@ -1,3 +1,0 @@
-This code is not mixed into the water tests. It is what I use in my dynamics 
-code, to speed up the calls to erfc. The erfc_locmem is how I set up amber
-memory management for these arrays.

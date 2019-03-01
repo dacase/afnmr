@@ -1,3 +1,0 @@
-Kluged together a 3DFFT out of 1D code from netlib
-Doesn't parallelize. Some bug I never tracked.
-Fairly efficient on serial machines.
