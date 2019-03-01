@@ -71,7 +71,7 @@ libmead.a: $(MEAD_OBJECTS)
 
 solinprot: libmead.a
 	@echo "[MEAD]  CXX $@"
-	$(VB)$(CXX) -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS -o $(BINDIR)/solinprot solinprot.cc libmead.a
+	$(VB)$(CXX) -I.. $(COPTFLAGS) $(LDFLAGS) -DUSE_EXCEPTIONS -o $(BINDIR)/solinprot solinprot.cc libmead.a
 
 clean:
 	-$(RM) -f libmead.a tlibmead.a *.o depend

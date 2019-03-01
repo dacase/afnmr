@@ -10,11 +10,11 @@ PROGS= $(BINDIR)/ambpdb $(BINDIR)/add_pdb
 
 $(BINDIR)/ambpdb: $(AOBJ)
 	@echo "[ETC]  FC $@"
-	$(VB)$(FC) $(FFLAGS) -o $@ $(AOBJ)
+	$(VB)$(FC) $(FFLAGS) $(LDFLAGS) -o $@ $(AOBJ)
 
 $(BINDIR)/add_pdb: add_pdb.o nxtsec.o
 	@echo "[ETC]  FC $@"
-	$(VB)$(FC) $(FFLAGS) -o $@ add_pdb.o nxtsec.o
+	$(VB)$(FC) $(FFLAGS) $(LDFLAGS) -o $@ add_pdb.o nxtsec.o
 
 install:	$(PROGS)
 

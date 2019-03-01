@@ -10,18 +10,21 @@ LOGDIR=$(AFNMRHOME)/logs
 
 OS=$(shell uname -s)
 ifeq "$(OS)" "Darwin"
-   # MacOSX rules for making shared objects
+   # MacOSX rules:
    SHARED_SUFFIX=.dylib
    MAKE_SHARED=-dynamiclib
    LIBGFORTRAN=$(shell $(AFNMRHOME)/src/libgfortran.sh)
+   LDFLAGS=
+   LM=
 else
-   # Linux rules for shared libraries:
+   # Linux rules:
    SHARED_SUFFIX=.so
    MAKE_SHARED=-shared
+   LDFLAGS=-static
+   LM=-lm
 endif
 
 FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
-LM=-lm
 
 CC=gcc
 CFLAGS=

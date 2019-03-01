@@ -15,7 +15,7 @@ public:
   virtual ChargeCubeRep* get_cuberep(const CubeLatSpec&,
 				     bool warn_outside=false);
   virtual float total_charge() const { return _pc.charge; }
-  virtual int has_charges() const { return ! _pc.charge==0.0; }
+  virtual int has_charges() const { return ! (_pc.charge==0.0); }
   virtual size_t number_points() const { return 1; }
 
   float get_charge() const {return _pc.charge;}

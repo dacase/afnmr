@@ -8,28 +8,28 @@ install:  $(BINDIR)/lsq $(BINDIR)/ms $(BINDIR)/afnmr.x  \
 
 $(BINDIR)/lsq: lsq.o conjgrad.o rand2.o memutil.o
 	@echo "[AFNMR]  CC $@"
-	$(VB)$(CC) -o $@ lsq.o conjgrad.o rand2.o memutil.o $(LM)
+	$(VB)$(CC) $(LDFLAGS) -o $@ lsq.o conjgrad.o rand2.o memutil.o $(LM)
 
 $(BINDIR)/ms: ms.f
 	@echo "[AFNMR]  FC $@"
-	$(VB)$(FC) $(FFLAGS) -o $@ $<
+	$(VB)$(FC) $(FFLAGS) $(LDFLAGS) -o $@ $<
 
 $(BINDIR)/pair: pair.o number.o pof.o strings.o checkio.o 
 	@echo "[AFNMR]  CC $@"
-	$(VB)$(CC) $(CFLAGS) -o $@ pair.o number.o pof.o strings.o \
+	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ pair.o number.o pof.o strings.o \
             checkio.o $(LM)
 
 $(BINDIR)/afnmr.x: afnmr.F90
 	@echo "[AFNMR]  FC $@"
-	$(VB)$(FC) $(FFLAGS) -o $@ $<
+	$(VB)$(FC) $(FFLAGS) $(LDFLAGS) -o $@ $<
 
 $(BINDIR)/gridprune: gridprune.F90
 	@echo "[AFNMR]  FC $@"
-	$(VB)$(FC) $(FFLAGS) $(FOPTFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
+	$(VB)$(FC) $(FFLAGS) $(FOPTFLAGS) $(LDFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
 
 $(BINDIR)/txmin: txmin.c
 	@echo "[AFNMR]  CC $@"
-	$(VB)$(CC) $(CFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS) $(LM)
+	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS) $(LM)
 
 .c.o:
 	@echo "[AFNMR]  CC $<"
