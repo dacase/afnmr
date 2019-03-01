@@ -63,25 +63,29 @@ include ../config.h
 install: solinprot
 
 libmead.a: $(MEAD_OBJECTS)
-	rm -f t$@
-	$(AR) t$@ $(MEAD_OBJECTS) 
-	$(RANLIB) t$@
-	rm -f $@ && mv t$@ $@
+	@echo "[MEAD]  AR $@"
+	$(VB)rm -f t$@
+	$(VB)$(AR) t$@ $(MEAD_OBJECTS) > /dev/null
+	$(VB)$(RANLIB) t$@
+	$(VB)rm -f $@ && mv t$@ $@
 
 solinprot: libmead.a
-	$(CXX) -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS -o $(BINDIR)/solinprot solinprot.cc libmead.a
+	@echo "[MEAD]  CXX $@"
+	$(VB)$(CXX) -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS -o $(BINDIR)/solinprot solinprot.cc libmead.a
 
 clean:
-	-$(RM) -f libmead.a tlibmead.a *.o
+	-$(RM) -f libmead.a tlibmead.a *.o depend
 
 .SUFFIXES:
 .SUFFIXES: .cc .o
 
 # The rule for making .o files from C++ source files:
 .cc.o:
-	$(CXX) -c -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS $<
+	@echo "[MEAD]  CXX $<"
+	$(VB)$(CXX) -c -I.. $(COPTFLAGS) -DUSE_EXCEPTIONS $<
 
 depend: $(MEAD_OBJECTS:.o=.cc)
-	$(CXX) -I.. -MM $^ > $@
+	@echo "[MEAD]  make depend"
+	$(VB)$(CXX) -I.. -MM $^ > $@
 
 include depend

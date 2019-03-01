@@ -13,7 +13,7 @@ install: $(LIBDIR)/libsff.a
 $(LIBDIR)/libsff.a: $(OBJS)
 	@echo "[SFF]  AR $@"
 	$(VB)-rm -f $(LIBDIR)/libsff.a
-	$(VB)$(AR) $(LIBDIR)/libsff.a $(OBJS)	
+	$(VB)$(AR) $(LIBDIR)/libsff.a $(OBJS)	> /dev/null
 	$(VB)$(RANLIB) $(LIBDIR)/libsff.a
 
 uninstall:
@@ -22,7 +22,7 @@ uninstall:
 	-rm -f $(INCDIR)/sff.h
 
 clean:
-	-/bin/rm -f $(OBJS) lex.mmo.c
+	-/bin/rm -f $(OBJS) lex.mmo.c depend
 
 lex.mmo.c: mm_options.l
 	$(LEX) mm_options.l 
