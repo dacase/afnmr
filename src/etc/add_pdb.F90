@@ -143,7 +143,7 @@ program add_pdb
       read(crd_lun,*) i
       if (i /= natom) then
          write(*,*) 'INPCRD file has mismatched atom count'
-         stop 666
+         call exit(1)
       end if
       allocate(coor(3,natom))
       read(crd_lun,'(6F12.7)') coor
@@ -210,7 +210,7 @@ program add_pdb
          i = find_atom(pdb_nres,adjustl(name))
          if (i<0) then
             write(*,*) 'Atom not found: ',trim(buf)
-            stop
+            call exit(1)
          end if
          if (crd_infile /= '') then
             d = sqrt(sum(coor(:,i)-xyz)**2)
@@ -218,11 +218,14 @@ program add_pdb
                write(*,*)'Atom is ',d,' from PDB coordinate'
                write(*,*) coor(:,i)
                write(*,*) trim(buf)
-               stop
+               call exit(1)
             end if
          end if
          
-         if (element(1:1) == char(0)) stop 'BAD ELEMENT'
+         if (element(1:1) == char(0)) then
+            write(6,*) 'BAD ELEMENT'
+            call exit(1)
+         endif
          ! This element determination requires that names are element-aligned
          ! unless file contains explicit element+charge data.
          if (element == ' ') then
@@ -248,7 +251,7 @@ program add_pdb
          end if
          if (atom_element(i) /= '????') then
             write(*,*) 'Duplicate atom: ',trim(buf)
-            stop
+            call exit(1)
          end if
          atom_element(i) = element
       end if
@@ -341,7 +344,7 @@ contains
             '             (default assumes proper element-aligned names)', &
             '', &
             'Residues not in the PDB file are assigned chainID="*" and resSeq=0'
-      stop
+      call exit(1)
    end subroutine usage
 
    function find_atom(res_index,name) result(atom_index)
