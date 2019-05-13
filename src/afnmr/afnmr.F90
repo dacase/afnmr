@@ -335,9 +335,11 @@ program afnmr_x
         enddo
       enddo
 
+      write(6,*) 'residue charges:'
       do i=1,nres
         connect(i,i)=.true.
         charge(i) = nint( chargef(i) )
+        write(6,'(i4,i3,f8.3)')  i, charge(i), chargef(i)
       enddo
 
 !----------------------------------------------------------------------------
@@ -366,7 +368,7 @@ program afnmr_x
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
 !
-!               need to make sure that net residue is also connected if 
+!               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
 !
                 if( i.ge.selectC(resno(i)) .and. restype(resno(i)).ne.'G') then
@@ -391,12 +393,15 @@ program afnmr_x
         end do
       end do
       stop 1
+      write(0,*) (restype(i),i=1,nres), lastprotres
+      write(6,*) 'select C values:'
+      write(6,'(2i5)') (i,selectC(i), i=0,nres)
 #endif
 
 !
 !     Big loop over residues to create fragments:
 !
-!     write(0,*) (restype(i),i=1,nres), lastprotres
+
       do kcount=1,nres
 
         if( listsize > 0 ) then
