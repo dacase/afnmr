@@ -141,7 +141,7 @@ AFNMR_OPTIONS="$program $basis $solinprot $qopt $functional"
 
 check_afnmrhome
 
-echo "Running afnmr with arguments $args\n" > $1.afnmr.log
+echo "Running afnmr with arguments $args" > $1.afnmr.log
 
 if [ $build = "yes" ]; then
 
@@ -324,10 +324,8 @@ EOF2
 
 chmod +x runms.solsurf
 
-echo "Here is the runms.solsurf file:" >> $1.afnmr.log
-echo "---------------------------------------------------------------------" >> $1.afnmr.log
-cat runms.solsurf >> $1.afnmr.log
-echo "---------------------------------------------------------------------" >> $1.afnmr.log
+# echo "====== runms.solsurf: ===============================================" >> $1.afnmr.log
+# cat runms.solsurf >> $1.afnmr.log
 
 #============================================================================
 #   Use the solinprot method to get the environment influence
@@ -378,6 +376,8 @@ chmod +x runsolinprot
 #============================================================================
 #  Run the fragment program to create the quantum chemistry input files;
 #============================================================================
+
+echo "====== afnmr command line: ==========================================" >> $1.afnmr.log
 echo "afnmr.x $AFNMR_OPTIONS $1 $list"
 echo "afnmr.x $AFNMR_OPTIONS $1 $list" > afnmr.out
 $AFNMRHOME/bin/afnmr.x  $AFNMR_OPTIONS  $1 $list >> afnmr.out
