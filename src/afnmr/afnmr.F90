@@ -3,7 +3,7 @@ module comafnmr
 !  some global variables go here
 
    implicit none
-   integer,parameter::MAXAT=50000,MAXRES=10000,MAXIQM=600
+   integer,parameter::MAXAT=60000,MAXRES=20000,MAXIQM=600
    real(kind=8)::coord(3,MAXAT), fxyz(3,MAXIQM)
    real(kind=8):: qmcharge(MAXAT),rad(MAXAT)
    logical::connect(MAXRES,MAXRES)
@@ -244,10 +244,9 @@ program afnmr_x
            read(line,100)sn(i),ttnumber,atomname(i),residue(i),  &
              resno_user(i),(coord(j,i),j=1,3),qmcharge(i),rad(i),element(i)
 100        format(a6,1x,I4,1x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
-           element(i) = adjustl(element(i))
-           if( element(i)(1:1) .eq. 'E' ) then   ! skip "extra points"
+           if( element(i) .eq. ' E' ) then  ! skip extra points
 !              .or. element(i).eq.'NA' .or. element(i).eq.'CL' &
-!              .or. element(i).eq.'K ' .or. element(i).eq.'BR' ) then
+!              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
               i = i - 1
               cycle
            endif
@@ -297,8 +296,8 @@ program afnmr_x
 !     real kludge, for pqr files with no element info and no 2-letter elements:
       do i=1,natom
         if( element(i).eq.'  ' ) then
-           element(i)(1:1) = atomname(i)(2:2)
-           element(i)(2:2) = ' '
+           element(i)(1:1) = ' '
+           element(i)(2:2) = atomname(i)(2:2)
         endif
       enddo
 !
@@ -335,11 +334,9 @@ program afnmr_x
         enddo
       enddo
 
-      write(6,*) 'residue charges:'
       do i=1,nres
         connect(i,i)=.true.
         charge(i) = nint( chargef(i) )
-        write(6,'(i4,i3,f8.3)')  i, charge(i), chargef(i)
       enddo
 
 !----------------------------------------------------------------------------
@@ -354,12 +351,9 @@ program afnmr_x
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
-            if( (dis.le.nbcut .and. element(i)(1:1).ne.'H' .and.  &
-                                    element(j)(1:1).ne.'H') )then
+            if( (dis.le.nbcut .and. element(i).ne.' H' .and.  &
+                                    element(j).ne.' H') )then
 
-!                                   element(j)(1:1).ne.'H') .or.  &
-!               (dis.le.(nbcut-0.5) .and. (element(i)(1:1).eq.'H' .or.  &
-!                                         element(j)(1:1).eq.'H')) )then
 #if 0
                 write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
                            atomname(i), resno_user(i), &
@@ -387,15 +381,15 @@ program afnmr_x
 #if 0
       ! debug connectivity table:
       write(6,*) 'connectivities:'
-      do i=1,nres
+      do i=1,30
         do j=1,nres
           if( connect(i,j) ) write(6,*)  i,j, connect(i,j)
         end do
       end do
+      !write(6,*) (restype(i),i=1,nres), lastprotres
+      !write(6,*) 'select C values:'
+      !write(6,'(2i5)') (i,selectC(i), i=0,nres)
       stop 1
-      write(0,*) (restype(i),i=1,nres), lastprotres
-      write(6,*) 'select C values:'
-      write(6,'(2i5)') (i,selectC(i), i=0,nres)
 #endif
 
 !
@@ -697,9 +691,9 @@ program afnmr_x
           if( .not. atomsign(kk) ) then
             if( solinprot ) then
                if ( restype(resno(kk)).ne.'G' ) &
-               write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3)') 'ATOM  ', &
-               kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3), &
-               qmcharge(kk),rad(kk)
+               write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
+                  'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
+                  (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
             else if( gaussian .or. qchem .or. demon ) then
               write(30,1315)(coord(j,kk),j=1,3),qmcharge(kk)
             endif
@@ -1139,9 +1133,9 @@ subroutine addatom( kk, iqm, basis )
         write(44,1000)element(kk),(coord(j,kk),j=1,3)
       endif
 
-      write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3)') 'ATOM  ', &
+      write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
         kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
-        qmcharge(kk),rad(kk)
+        qmcharge(kk),rad(kk),element(kk)
 
       return
 1000  format(a2,4x,3f10.4)
@@ -1174,11 +1168,11 @@ subroutine addH( iqm, x, y, z)
 
       modnum = modnum + 1
       if( modnum < 10 ) then
-         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3)') 'ATOM  ',  &
-           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2
+         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
       else
-         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3)') 'ATOM  ',  &
-           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2
+         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
       endif
 
       return

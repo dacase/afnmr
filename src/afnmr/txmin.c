@@ -46,7 +46,7 @@ int main( int argc, char *argv[] )
 
    mm_options( "ntpr=1, gb=1, kappa=0.10395, rgbmax=99., cut=99.0, wcons=2. " );
 
-   // nothing frozen or constrained for now:
+   // nothing frozen; constrain non-hydrogens:
    int* frozen = parseMaskString( "@ZZZ", prm, xyz, 2 );
    int* constrained = parseMaskString( "!@H*", prm, xyz, 2 );
 
