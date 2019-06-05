@@ -270,6 +270,7 @@ int main(int argc, char* argv[])
   // Done with comand line processing
   // Print summary of input info from the command line:
   cout << "Starting " << argv[0] << " for molecule named " << molname << "\n";
+#if 0
   cout << "using the following physical conditions:\n";
   PhysCond::print();
   cout << "  Solute interior dielectric, epsin1 = " << epsin1
@@ -287,6 +288,7 @@ int main(int argc, char* argv[])
   else if (blab2pt == &cout) cout << "Blab level set to " << 2 << endl;
   else if (blab1pt == &cout) cout << "Blab level set to " << 1 << endl;
   else cout << "No blab level set (so no blabbing)" << endl;
+#endif
 
 //  cout << "Malloc stats before reading atoms" << endl;
 //  malloc_stats();
@@ -346,11 +348,11 @@ int main(int argc, char* argv[])
   ElstatPot phi(fdm, eps, rhogen, ely);
   phi.solve();
   prod_sol = phi * rhogen;
-  cout << "prod_sol = " << prod_sol << endl;
+  // cout << "prod_sol = " << prod_sol << endl;
   protein_interaction = phi * rhofeel;
   protein_interaction *=  PhysCond::get_econv();
-  cout << "Interaction of solute with protein charges = "
-    << protein_interaction << "\n(probably in kcal/mole)" << endl;
+  // cout << "Interaction of solute with protein charges = "
+  //   << protein_interaction << "\n(probably in kcal/mole)" << endl;
 
 
   float safe_eps_sol = PhysCond::get_epsext(); // What for?
@@ -360,13 +362,12 @@ int main(int argc, char* argv[])
   ElstatPot vac_phi(fdm, vac_eps, rhogen, vac_ely);
   vac_phi.solve();
   float prod_vac = vac_phi * rhogen;
-  cout << "prod_vac = " << prod_vac << endl;
+  // cout << "prod_vac = " << prod_vac << endl;
   float reac_energy = (prod_sol - prod_vac) / 2 * PhysCond::get_econv();
-  cout << "\n\nReaction field component of solvation = " << reac_energy
-    << "\n(probably in kcal/mole)" << endl;
+  // cout << "\n\nReaction field component of solvation = " << reac_energy
+  //   << "\n(probably in kcal/mole)" << endl;
   float solvation_energy = reac_energy + protein_interaction;
-  cout << "\n\nSOLVATION ENERGY IN PROTEIN = " << solvation_energy
-    << "\n(probably in kcal/mole)" << endl;
+  cout << "\n\nSOLVATION ENERGY IN PROTEIN = " << solvation_energy << endl;
 
   if (doReactionField) {
     string fieldpoint_filename = molname + ".fpt" ;
