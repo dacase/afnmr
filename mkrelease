@@ -5,12 +5,12 @@
 CWD=`pwd`
 h=afnmr-1.1
 tarfile=$h.tar
-TARC="gnutar cfX $tarfile $CWD/excludes"
-TAR="gnutar rfX $tarfile $CWD/excludes"
+TARC="gnutar cf $tarfile"
+TAR="gnutar rf $tarfile"
 
 cd ..
 ln -s $CWD $h
-$TARC $h/*
+$TARC $h/{LICENSE,Makefile,basis,dat,doc/afnmr.pdf,mkdirs,src,test}
 bzip2 -v $tarfile
 /bin/rm $h
 
