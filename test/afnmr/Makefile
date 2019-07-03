@@ -47,4 +47,5 @@ test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 clean
 #	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr 1d3z1006.xtb.log
 
 clean:
+	/bin/rm -f 1d3z1.0.pdb
 
