@@ -147,7 +147,7 @@ ostream& Shell::write_top_in_binary(ostream& bfile)
         tmp = tmp -> next;
        }
    }
- delete topology_data;
+ delete[] topology_data;
  return bfile;
 }
 

@@ -241,7 +241,7 @@ AvsScalarField::read_rectilinear_coord(ifstream& data, int n) const
       << "in values for coord " << n << endl;
     data.clear(ios::failbit);
   }
-  delete coord_array;
+  delete[] coord_array;
   return data;
 }
 

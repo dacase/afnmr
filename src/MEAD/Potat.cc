@@ -120,7 +120,7 @@ int InPotat::read_oldstyle(const string& filename_string)
   if (!potatfile) {
     cerr << "WARNING: InPotat::read_oldstyle: Some kind of error occurred "
       << "while reading potat info from " << filename << endl;
-    delete bigarr;
+    delete[] bigarr;
     return 0;
   }
   if (potatfile.get() != EOF) {
@@ -133,7 +133,7 @@ int InPotat::read_oldstyle(const string& filename_string)
     Atom a = b->second;
     if (n>=nat) {
       ::error("WARNING OutPotat::write_oldstyle: too many atoms in atset\n");
-      delete bigarr;
+      delete[] bigarr;
       return 0;
     }
     float *file_atom_entry = bigarr + n*6;
@@ -167,7 +167,7 @@ int InPotat::read_oldstyle(const string& filename_string)
 	cerr << "WARNING InPotat::read_oldstyle:\n"
 	     << "There seems to be either a duplicate atom for "
 	     << key << ",\n or superposed atoms in the input." << endl;
-	delete bigarr;
+	delete[] bigarr;
 	return 0;
       }
     }
@@ -175,12 +175,12 @@ int InPotat::read_oldstyle(const string& filename_string)
       cerr << "WARNING InPotat::read_oldstyle:\n"
 	   <<"   Discrepencies between atom info in file, " << filename
 	   << "\n   and atom info expeced." << endl;
-      delete bigarr;
+      delete[] bigarr;
       return 0;
     }
     ++n;
   }
-  delete bigarr;
+  delete[] bigarr;
   blab2 << "Successfully read a potat from file, " << filename << endl;
   defined = 1;
   return 1;
@@ -222,7 +222,7 @@ int OutPotat::write_oldstyle(const string& filename) const
     if (ipot == _map.end()) {
       cerr << "ERROR OutPotat::write_oldstyle: The atom, " << key
 	<< ",\nis supposed to be in this potat, but isn't" << endl;
-      delete bigarr;
+      delete[] bigarr;
       return 1;
     }
     if (n>=nat)
@@ -239,7 +239,7 @@ int OutPotat::write_oldstyle(const string& filename) const
   safeopen(potatfile, filename);
   potatfile.write((char *) &nat, sizeof (int));
   potatfile.write((char *) bigarr, (sizeof (float)) * nat * 6);
-  delete bigarr;
+  delete[] bigarr;
   if (potatfile.good()) {
     blab2 << "Successfully wrote a potat to file, " << filename << endl;
     return 1;

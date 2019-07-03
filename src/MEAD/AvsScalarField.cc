@@ -256,9 +256,9 @@ AvsScalarField::write_rectilinear_coord(ostream& data) const
   data.write((char *) zcoor, grid_dim*sizeof(float));
   data.write((char *) ycoor, grid_dim*sizeof(float));
   data.write((char *) xcoor, grid_dim*sizeof(float));
-  delete xcoor;
-  delete ycoor;
-  delete zcoor;
+  delete[] xcoor;
+  delete[] ycoor;
+  delete[] zcoor;
   return data;
 }
 

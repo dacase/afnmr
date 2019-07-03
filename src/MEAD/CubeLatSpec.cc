@@ -93,6 +93,8 @@ ostream & CubeLatSpec::print(ostream& ost) const
     case ON_GEOM_CENT:
       ost << "ON_GEOM_CENT";
       break;
+    case SPECIFIC:
+      break;
     }
     if (resolved)
       ost << " resolved to " << center << ")";
