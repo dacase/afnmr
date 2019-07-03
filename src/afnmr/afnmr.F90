@@ -516,7 +516,7 @@ program afnmr_x
           write(30,'(a,a)') 'VxcType Auxis ', trim(functional)
           write(30,'(a)') 'GRID FINE'
           write(30,'(a)') 'QUADRATURE RANDOM'
-          write(30,'(a)') 'MIXING -0.05'
+          write(30,'(a)') 'MIXING -0.2'
           write(30,'(a)') 'SHIFT -0.2'
           write(30,'(a)') 'DIIS ON TOL=0.002'
 
