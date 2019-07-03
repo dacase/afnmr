@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-10/10/2018
+3 July 2019
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.0)
+(Version 1.1)
 \end_layout
 
 \begin_layout Author
@@ -445,7 +445,7 @@ afnmr
 \end_layout
 
 \begin_layout LyX-Code
-tar zxvj afnmr-1.0.tar.bz2
+tar zxvj afnmr-1.1.tar.bz2
 \end_layout
 
 \begin_layout Standard
@@ -462,7 +462,7 @@ setenv AFNMRHOME
 \begin_inset Quotes eld
 \end_inset
 
-insert-your-path-here/afnmr-1.0
+insert-your-path-here/afnmr-1.1
 \begin_inset Quotes erd
 \end_inset
 
@@ -474,7 +474,7 @@ export AFNMRHOME=
 \begin_inset Quotes erd
 \end_inset
 
-insert-your-path-here/afnmr-1.0
+insert-your-path-here/afnmr-1.1
 \begin_inset Quotes erd
 \end_inset
 
@@ -499,18 +499,6 @@ will make the required executable files, and put them into
 $AFNMRHOME/bin
 \family default
 .
- Again, this assumes that AmberTools has been properly installed.
- If you see an error about a file config.h that does not exist or if the
- 
-\begin_inset Quotes eld
-\end_inset
-
-nab
-\begin_inset Quotes erd
-\end_inset
-
- command cannot be found, then your AmberTools installation either does
- not exist or is incomplete.
 \end_layout
 
 \begin_layout Standard
@@ -669,9 +657,16 @@ name "fig:afnmr-workflow"
 \end_layout
 
 \begin_layout Standard
-AF-NMR currently provides three ways to compute surface charges to model
- solvent effects.
- 
+AF-NMR provides three ways to compute surface charges to model solvent effects.
+ Only the second option is implemented in this release; see the 
+\emph on
+shifts
+\emph default
+ program (at 
+\family typewriter
+http://casegroup.rutgers.edu/shifts.html
+\family default
+) for information about options 1 and 3.
 \end_layout
 
 \begin_layout Enumerate
@@ -706,15 +701,15 @@ outside
 \emph on
 solinprot
 \emph default
- program that is bundled with 
+ program that is part of the 
 \emph on
 MEAD
 \emph default
- (see 
+ package (see 
 \family typewriter
 http://stjuderesearch.org/site/lab/bashford
 \family default
-).
+), and is included here as well.
  This is the default option, and the one that has been most extensively
  tested.
 \end_layout
@@ -866,6 +861,24 @@ best
 \end_inset
 
  way to carry out shift calculations is still an active area of research.
+ Also, the deMon program does not come with the pcSseg-# basis functions
+ installed by default.
+ We have provided a 
+\family typewriter
+BASIS
+\family default
+ file (in the 
+\family typewriter
+basis
+\family default
+ folder) that can replace the file of the same name in your deMon installation,
+ and which adds these basis sets.
+ For Gaussian, we have included 
+\family typewriter
+.gbs
+\family default
+ files (from the Basis Set Exchange web site) for these basis functions,
+ and they are written directly into the Gaussian input files.
 \end_layout
 
 \end_deeper
