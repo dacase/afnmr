@@ -5,8 +5,8 @@
 CWD=`pwd`
 h=afnmr-1.1
 tarfile=$h.tar
-TARC="gnutar cf $tarfile"
-TAR="gnutar rf $tarfile"
+TARC="tar cf $tarfile"
+TAR="tar rf $tarfile"
 
 cd ..
 ln -s $CWD $h
