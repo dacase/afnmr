@@ -40,7 +40,7 @@ void initial (int argc, char **argv) {
     int    argnum;
     char    *optr;
     /*  struct    sgttyb    ttystatus;  */
-    strncpy (program, argv[0], 1024);
+    strncpy (program, argv[0], 1023);
     checkstdin (argv[0]);
 #if 0
     if (gtty (fileno (stdout), &ttystatus) == 0 && ttystatus.sg_ospeed <= B1200)
