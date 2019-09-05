@@ -796,7 +796,7 @@ program afnmr_x
 
           else if( basis .eq. 'T' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
-                '/basis/pcSseg-1/pcSseg-1.gbs')
+                '/basis/pcsseg-2.1.gbs')
             rewind(11)
             do kbas=1,9999
                read(11,'(a80)',end = 63) line
