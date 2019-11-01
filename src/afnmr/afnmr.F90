@@ -29,7 +29,7 @@ program afnmr_x
 !   (Note: generally the input for afnmr.x is created by the shell script
 !      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
-!   Usage: afnmr.x program basis solinprot qopt basename list
+!   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), T (TeraChem)
@@ -39,6 +39,7 @@ program afnmr_x
 !            qopt is T or F, to turn on or off quantum geometry optimization,
 !                  or X (for internal optimization with xtb)
 !            functional is a string giving the desired DFT functional
+!            nbcut is the heavy-atom nonbonded cutoff for fragment creation
 !            <basename>.pqr gives the input structure; put all "general"
 !                  residues (water, ligands, etc.) after protein or
 !                  nucleic acid residues
@@ -64,6 +65,7 @@ program afnmr_x
       character(len=30) :: pqrstart
       character(len=16) :: pqrend
       character(len=5) :: functional
+      character(len=6) :: nbcutb
 
       double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
       double precision chargef(MAXRES)
@@ -106,7 +108,7 @@ program afnmr_x
       nresn(28) = 'DT3'
       nresn(29) = 'DC3'
       nresn(30) = 'gtp'
-      nresn(31) = 'MDA'
+      nresn(31) = 'DMA'
 
       presn(1) = 'ALA'
       presn(2) = 'ARG'
@@ -205,18 +207,19 @@ program afnmr_x
 
       call get_command_argument( 5, functional, lengthb )
 
-      call get_command_argument( 6, basename, lengthb )
+      call get_command_argument( 6, nbcutb, lengthb )
+      read( nbcutb, * ) nbcut
+
+      call get_command_argument( 7, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
 
-      if( command_argument_count() > 6 ) then
-         do i=7,command_argument_count()
+      if( command_argument_count() > 7 ) then
+         do i=8,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
-            read( lpchar, '(i4)' ) list(i-6)
+            read( lpchar, '(i4)' ) list(i-7)
          end do
-         listsize = command_argument_count() - 6
+         listsize = command_argument_count() - 7
       endif
-
-      nbcut = 3.3
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
       write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a)') 'Input arguments: ', &
