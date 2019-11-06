@@ -182,6 +182,7 @@ program add_pdb
          read(buf,'(6X,I5,1X,A4,A1,A3,1X,A1,I4,A1,3X,3F8.3,2F6.2,6X,2A4)') &
                serial,name,altLoc,resName,chainID,resSeq,iCode, &
                xyz,occupancy,tempFactor,segID,element
+         if( chainID .eq. ' ' ) chainID = '*'
          pdb_natom=pdb_natom+1
          ! If any of these properties change, a new residue has begun.
          if (prev_resSeq /= resSeq .or. prev_chainID /= chainID &
@@ -304,9 +305,9 @@ program add_pdb
          '%FORMAT'//fmt
       write(out_lun,fmt) residue_icode
    else
-      write(out_lun,'(A)') &
-         '%COMMENT Residue insertion code (iCode) not present in PDB file', &
-         '%COMMENT If present: %FLAG RESIDUE_ICODE, %FORMAT'//fmt
+!     write(out_lun,'(A)') &
+!        '%COMMENT Residue insertion code (iCode) not present in PDB file', &
+!        '%COMMENT If present: %FLAG RESIDUE_ICODE, %FORMAT'//fmt
    end if
    
    fmt='(20a4)'
