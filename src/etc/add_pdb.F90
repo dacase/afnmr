@@ -318,6 +318,7 @@ program add_pdb
    write(out_lun,fmt) atom_element
    
    close(out_lun)
+   call exit(0)
    
 contains
    subroutine get_next_arg(string)
