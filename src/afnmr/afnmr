@@ -196,6 +196,10 @@ cat $1.min.o >> $1.afnmr.log
 echo "====== add_pdb:  ======================================================" \
      >> $1.afnmr.log
 $AFNMRHOME/bin/add_pdb -i $1.parm7 -o foozzz.parm7 -p $1.pdb >> $1.afnmr.log
+if [ "$?" -gt 0 ]; then 
+   echo "Error in add_pdb: check $1.afnmr.log"
+   exit 1
+fi
 /bin/mv foozzz.parm7 $1.parm7
 
 $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.min.x > $1.min.pqr 2> /dev/null
@@ -235,6 +239,10 @@ else
     #========================================================================
     echo "====== add_pdb:  ======================================================" \ >> $1.afnmr.log
     $AFNMRHOME/bin/add_pdb -i $1.parm7 -o foozzz.parm7 -p $1.pdb >> $1.afnmr.log
+    if [ "$?" -gt 0 ]; then 
+       echo "Error in add_pdb: check $1.afnmr.log"
+       exit 1
+    fi
     /bin/mv foozzz.parm7 $1.parm7
 
     $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.x > $1.pqr 2> /dev/null
