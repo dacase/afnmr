@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 #******************************************************************************
 # collect shifts from demon outputs
@@ -6,11 +6,12 @@
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
+sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 
 @ARGV == 2 or die " usage: getshifts-demon reference basename \n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor=1;
+$fulltensor=0;
 
 if( $reference eq "seg0" ){
    $reference_set = "OLYP seg0 ";
@@ -38,9 +39,9 @@ if( $basename eq "header" ){
 
    if( $fulltensor ){
       printf("res\tatomname\tresname\tshift\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n");
-      printf( "8N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\teta\td11\td22\td33\n" );
+      printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
       printf( "8N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    }
 
@@ -52,17 +53,17 @@ if( $basename eq "header" ){
 open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
 $iat = 0;
 while (<PQR>) {
-	next unless m/^ATOM  /; 
+    next unless m/^ATOM  /; 
     @f = split( ' ', $_ );
 	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
 	$rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+    $x[$iat] = $f[5]; $y[$iat] = $f[6]; $z[$iat] = $f[7];
 }
 close PQR;
 
 # read in the shift data
 
 open (OUT, "<", "$basename" . ".out") or die "cannot open $basename.out";
-$sys = substr( $basename, 0, length( $basename ) -3 );
 
 while ($_ = <OUT>) {
 
@@ -86,29 +87,74 @@ while ($_ = <OUT>) {
        <OUT>; <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
        $diso = $ref{$elem} - $f[3];
 
-       #  get the principal shieldings:
+       #  get the principal shifts:
        <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
        $d11=$ref{$elem} - $f[0]; 
        $d22=$ref{$elem} - $f[1]; 
        $d33=$ref{$elem} - $f[2]; 
 
-       @eigv = sort numerically $d11,$d22,$d33;
-       if( abs($diso - $eigv[0]) > abs($diso - $eigv[2]) ){
-          $delta  = -$diso + $eigv[0];  $eta = ($eigv[1]-$eigv[2])/$delta;
+       # get the eigenvectors:
+       $_ = <OUT>; @f = split( ' ', $_ ); 
+       $v11 = $f[0]; $v21 = $f[1]; $v31 = $f[2];
+       $_ = <OUT>; @f = split( ' ', $_ ); 
+       $v12 = $f[0]; $v22 = $f[1]; $v32 = $f[2];
+       $_ = <OUT>; @f = split( ' ', $_ ); 
+       $v13 = $f[0]; $v23 = $f[1]; $v33 = $f[2];
+
+       @eigval = sort numerically $d11,$d22,$d33;
+       if( abs($diso - $eigval[0]) > abs($diso - $eigval[2]) ){
+          $delta  = -$diso + $eigval[0];  $eta = ($eigval[1]-$eigval[2])/$delta;
        } else {
-          $delta  = -$diso + $eigv[2];  $eta = ($eigv[1]-$eigv[0])/$delta;
+          $delta  = -$diso + $eigval[2];  $eta = ($eigval[1]-$eigval[0])/$delta;
        }
+       # use solution-state definition of delta:
+       $delta *= -1.5;
 
        if( $fulltensor ){
           printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
             $res[$iat],$aname[$iat],$rname[$iat],$diso,$sxx,$sxy,$sxz,
             $syx,$syy,$syz,$szx,$szy,$szz;
        } else {
-          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
-             $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta,
-             $d11, $d22, $d33;
-       }
+           if( $aname[$iat] eq "N" ){
+              # N-H vector:
+              $NHx = $x[4]-$x[3]; $NHy = $y[4]-$y[3]; $NHz = $z[4]-$z[3];
+              $NH = sqrt( $NHx*$NHx + $NHy*$NHy + $NHz*$NHz );
+              $NHx /= $NH; $NHy /= $NH; $NHz /= $NH;
 
+              # Angles to N-H vector:
+              $alpha1 = acos( $v11*$NHx + $v12*$NHy + $v13*$NHz)*180./3.14159;
+              $alpha2 = acos( $v21*$NHx + $v22*$NHy + $v23*$NHz)*180./3.14159;
+              $alpha3 = acos( $v31*$NHx + $v32*$NHy + $v33*$NHz)*180./3.14159;
+              if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+              if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+              if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+
+              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+                $res[$iat],$aname[$iat],$rname[$iat], $diso,
+                $delta, $eta, $alpha1, $alpha2, $alpha3;
+
+           } elsif( $aname[$iat] eq "CA" ){
+              # CA-H vector:
+              $CHx = $x[6]-$x[5]; $CHy = $y[6]-$y[5]; $CHz = $z[6]-$z[5];
+              $CH = sqrt( $CHx*$CHx + $CHy*$CHy + $CHz*$CHz );
+              $CHx /= $CH; $CHy /= $CH; $CHz /= $CH;
+
+              # Angles to C-H vector:
+              $alpha1 = acos( $v11*$CHx + $v12*$CHy + $v13*$CHz)*180./3.14159;
+              $alpha2 = acos( $v21*$CHx + $v22*$CHy + $v23*$CHz)*180./3.14159;
+              $alpha3 = acos( $v31*$CHx + $v32*$CHy + $v33*$CHz)*180./3.14159;
+              if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+              if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+              if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+                $res[$iat],$aname[$iat],$rname[$iat], $diso,
+                $delta, $eta, $alpha1, $alpha2, $alpha3;
+           } else {
+             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+                $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta,
+                $d11, $d22, $d33;
+           }
+       }
    }
 }
 close OUT;

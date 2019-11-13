@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-#***************************************************************
+#******************************************************************************
 # collect shifts from g09 outputs
 #   usage:  getshifts-g09 reference basename; rdb file fragments to stdout
-#***************************************************************
+#******************************************************************************
 
 sub numerically { $a <=> $b; }
 sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
@@ -38,13 +38,13 @@ if( $basename eq "header" ){
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
    if( $fulltensor ){
-      printf(
-       "res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
+      printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
       printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    } else {
       printf( "res\tatomname\tresname\tshift\tdelta\teta\n" );
       printf( "4N\t8\t8\t10N\t10N\t10N\n" );
    }
+
    exit(0);
 }
 
@@ -57,9 +57,9 @@ $iat = 0;
 while (<PQR>) {
     next unless m/^ATOM  /; 
     @f = split( ' ', $_ );
-    $iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
-    $x[$iat] = $f[5]; $y[$iat] = $f[6]; $z[$iat] = $f[7];
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
     $rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+    $x[$iat] = $f[5]; $y[$iat] = $f[6]; $z[$iat] = $f[7];
 }
 close PQR;
 
