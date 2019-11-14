@@ -125,11 +125,9 @@ while (<LOG>) {
               if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
               if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
 
-              # printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
-              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-                $delta, $eta;
-                # $delta, $eta, $alpha1, $alpha2, $alpha3;
+                $delta, $eta, $alpha1, $alpha2, $alpha3;
 
            } elsif( $aname[$iat] eq "CA" ){
               # CA-H vector:
@@ -144,13 +142,14 @@ while (<LOG>) {
               if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
               if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
               if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+                $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
+                $delta, $eta, $alpha1, $alpha2, $alpha3;
 
           } else {
-             #  printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
                 $delta, $eta;
-                # $delta, $eta, $alpha1, $alpha2, $alpha3;
 
           }
       }

@@ -2,7 +2,7 @@
 
 #******************************************************************************
 # collect shifts from demon outputs
-#   usage:  getshifts-demon reference basename; rdb file fragments to stdout
+#   usage:  getshifts-demon reference basename; rdb file stdout
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
@@ -73,15 +73,15 @@ while ($_ = <OUT>) {
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        <OUT>; <OUT>; <OUT>; <OUT>; 
 
-       #  get full shift tensor:
+       #  get full shielding tensor:
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $sxx=$ref{$elem}-$f[1]; $sxy=$ref{$elem}-$f[2]; $sxz=$ref{$elem}-$f[3];
+       $sxx=$f[1]; $sxy=$f[2]; $sxz=$f[3];
 
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $syx=$ref{$elem}-$f[1]; $syy=$ref{$elem}-$f[2]; $syz=$ref{$elem}-$f[3];
+       $syx=$f[1]; $syy=$f[2]; $syz=$f[3];
 
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $szx=$ref{$elem}-$f[1]; $szy=$ref{$elem}-$f[2]; $szz=$ref{$elem}-$f[3];
+       $szx=$f[1]; $szy=$f[2]; $szz=$f[3];
 
        #  grab and print the isotropic shift:
        <OUT>; <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
@@ -150,9 +150,8 @@ while ($_ = <OUT>) {
                 $res[$iat],$aname[$iat],$rname[$iat], $diso,
                 $delta, $eta, $alpha1, $alpha2, $alpha3;
            } else {
-             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
-                $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta,
-                $d11, $d22, $d33;
+             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
+                $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta
            }
        }
    }
