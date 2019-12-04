@@ -208,13 +208,13 @@ ln -s $1.min.pqr $1.pqr
 
 
 #cpptraj is missing from ambermini (for now?)
-if false; then
+if true; then
 #============================================================================
 #  Check how far the struture has moved from the initial conformation:
 #============================================================================
 backbone="@C,CA,N,P,O3',O5',C3',C4',C5'"  # should work for both proteins
                                           # and nucleic acids
-$AFNMRHOME/bin/cpptraj $1.parm7 <<EOF > cpptraj.out
+$AMBERHOME/bin/cpptraj $1.parm7 <<EOF > cpptraj.out
 reference $1.x
 trajin $1.min.x
 rms all_heavy reference !@H= out rms.dat
