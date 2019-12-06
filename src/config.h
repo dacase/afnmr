@@ -20,7 +20,7 @@ else
    # Linux rules:
    SHARED_SUFFIX=.so
    MAKE_SHARED=-shared
-   LDFLAGS=-static
+   LDFLAGS=
    LM=-lm
 endif
 
@@ -42,4 +42,4 @@ AR=ar rv
 RANLIB=ranlib
 FLEX=flex
 YACC=bison -y
-VB=@
+VB=
