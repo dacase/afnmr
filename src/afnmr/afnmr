@@ -23,12 +23,12 @@ Optional flags:
                    for residues 1 up to the last protein or nucleic acid
                    residue
    -mixedb         use a mixed basis with the primary residue at TZP,
-                   others at DZP (default)
+                   others at DZP
    -tzp            all quantum residues are treated at the TZP level
-   -dzp            all quantum residues are treated at the DZP level
+   -dzp            all quantum residues are treated at the DZP level (default)
    -solinprot      use the solinprot program to get surface charges (default)
-   -demon, -deMon  Set up quantum input files to use with deMon (default)
-   -demon5         Set up quantum input files for use with deMon2k, v5
+   -demon, -deMon  Set up quantum input files to use with deMon
+   -demon5         Set up quantum input files to use with deMon, v5 (default)
    -o3lyp          Use O3LYP in place of OLYP; requires -gau or -orca
    -qopt           Do quantum optimization with same program as for shifts
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
@@ -44,6 +44,8 @@ Optional flags:
                        <basename>.pdb
    -frcmod <file>  An additional frcmod file to load in to tleap
    -offlib <file>  An additional library file to load in to tleap
+   -afterloadpdb "string"  Additional command(s) to give to tleap after
+                   the pdbfile is loaded
 
 ===========================================================
 EOD
@@ -60,7 +62,7 @@ check_afnmrhome() {
 
 implicit_solvent="solinprot"
 solinprot="T"
-program="D"
+program="E"
 qopt="F"
 basis="M"
 workdir="no"
@@ -69,6 +71,7 @@ build="yes"
 functional="OLYP"
 nbcut="3.3"
 list=""
+afterloadpdb=""
 
 #------------------------------------------------------------------------------
 #  Checking Arguments:
@@ -109,6 +112,7 @@ while [ $# -gt 0 ]; do
         -nomin)       min="no";;
         -frcmod)      shift; echo "loadAmberParams $1" >> leap.in;;
         -offlib)      shift; echo "loadOFF $1" >> leap.in;;
+        -afterloadpdb)  shift; afterloadpdb=$1;;
         -help)        usage; exit 0;;
         --help)       usage; exit 0;;
         -h)           usage; exit 0;;
@@ -156,6 +160,7 @@ echo "Running AFNMR on $1.pdb"
 echo "Running tleap"
 cat <<EOF >> leap.in
 x = loadpdb $1.pdb
+$afterloadpdb
 saveamberparm x $1.parm7 $1.x
 quit
 EOF
