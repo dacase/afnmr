@@ -42,4 +42,4 @@ AR=ar rv
 RANLIB=ranlib
 FLEX=flex
 YACC=bison -y
-VB=
+VB=@
