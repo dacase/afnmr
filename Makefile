@@ -8,6 +8,9 @@ install: is_afnmrhome_defined
 clean:
 	-(cd src && make clean)
 
+uninstall: clean
+	/bin/rm -rf bin lib logs include share
+
 test::
 	cd test && make test
 
