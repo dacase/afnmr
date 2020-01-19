@@ -21,6 +21,7 @@ module comafnmr
    integer :: modnum, ier, listsize
    logical :: gaussian, orca, demon, demon5, qchem, terachem, &
               qopt, solinprot, xtb
+   logical :: first=.true.
 
 end module
 
@@ -55,7 +56,7 @@ program afnmr_x
       character(len=1) :: program,basis,solinprotb,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
-      integer :: lastprotres
+      integer :: firstprotres, lastprotres
       integer :: i,j,k,ki,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
       integer :: kfinal,ktemp,kkatom,kstart,kcount,kbas
       integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
@@ -223,8 +224,9 @@ program afnmr_x
       endif
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
-      write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a)') 'Input arguments: ', &
-           program, basis, solinprotb, qoptb, functional, basename(1:lengthb)
+      write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
+           'Input arguments: ', program, basis, solinprotb, qoptb, &
+           functional, nbcut, trim(basename(1:lengthb))
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
 
@@ -253,6 +255,10 @@ program afnmr_x
 !              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
               i = i - 1
               cycle
+           endif
+           if( first ) then
+              firstprotres = resno_user(i)
+              first = .false.
            endif
            if( resno_user(i) .ne. prev_resno_user ) then ! found new residue
               nptemp = nptemp + 1
@@ -407,7 +413,7 @@ program afnmr_x
            kuser = list( kcount )
         else
            if( kcount > lastprotres ) exit
-           kuser = kcount
+           kuser = firstprotres + kcount - 1
         endif
         ! We need both "kuser" (user's file number) and "k" (a
         !    sequential residue number:
