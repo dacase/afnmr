@@ -1163,7 +1163,7 @@ subroutine addH( iqm, x, y, z)
         write( i_char, '(i3)' ) iqm
         dlabel(iqm) = 'H' // adjustl(i_char)
         dlabel(iqm)(5:5) = ' ' 
-        write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
+        write(30,'(1x,a,x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,1000)'H ',x,y,z
       else if ( gaussian ) then
