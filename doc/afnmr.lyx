@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-3 July 2019
+17 February 2020
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.1)
+(Version 1.2)
 \end_layout
 
 \begin_layout Author
@@ -420,35 +420,17 @@ Ab initio chemical shifts can be computed using the automated fragment approach
 Installation
 \end_layout
 
-\begin_layout Standard
-The 
-\emph on
-afnmr
-\emph default
- package is available on the web at:
+\begin_layout Enumerate
+To begin, clone this repository to some directory on your local machine:
 \end_layout
 
+\begin_deeper
 \begin_layout LyX-Code
-http://casegroup.rutgers.edu
+git clone https://github.com/dacase/afnmr.git
 \end_layout
 
-\begin_layout Standard
-(Click on the "AFNMR" menu item.) 
-\end_layout
-
-\begin_layout Standard
-The first step in installing 
-\emph on
-afnmr
-\emph default
- is to extract files using the UNIX commands: 
-\end_layout
-
-\begin_layout LyX-Code
-tar zxvj afnmr-1.1.tar.bz2
-\end_layout
-
-\begin_layout Standard
+\end_deeper
+\begin_layout Enumerate
 The path to this new directory should be defined as the environment variable
  
 \family typewriter
@@ -457,12 +439,13 @@ $
 AFNMRHOME.
 \end_layout
 
+\begin_deeper
 \begin_layout LyX-Code
 setenv AFNMRHOME 
 \begin_inset Quotes eld
 \end_inset
 
-insert-your-path-here/afnmr-1.1
+insert-your-path-here/afnmr
 \begin_inset Quotes erd
 \end_inset
 
@@ -474,17 +457,23 @@ export AFNMRHOME=
 \begin_inset Quotes erd
 \end_inset
 
-insert-your-path-here/afnmr-1.1
+insert-your-path-here/afnmr
 \begin_inset Quotes erd
 \end_inset
 
  # sh, bash, ksh, or zsh
 \end_layout
 
-\begin_layout Standard
-Next,
+\end_deeper
+\begin_layout Enumerate
+Next, build and install the program , putting executable files into 
+\family typewriter
+$AFNMRHOME/bin
+\family default
+:
 \end_layout
 
+\begin_deeper
 \begin_layout LyX-Code
 cd $AFNMRHOME
 \end_layout
@@ -494,30 +483,22 @@ make install
 \end_layout
 
 \begin_layout Standard
-will make the required executable files, and put them into 
+You will probably want to add 
 \family typewriter
-$AFNMRHOME/bin
-\family default
-.
+$AFNMRHOME/bin to your $PATH.
 \end_layout
 
-\begin_layout Standard
-After you have installed 
-\emph on
-afnmr
-\emph default
-, the command
+\end_deeper
+\begin_layout Enumerate
+You can now run some test calculations and report results:
 \end_layout
 
+\begin_deeper
 \begin_layout LyX-Code
 make test
 \end_layout
 
-\begin_layout Standard
-will run some test calculations and report results.
- This is important to make sure that your installation is working correctly.
-\end_layout
-
+\end_deeper
 \begin_layout Section
 AFNMR
 \end_layout
@@ -779,6 +760,18 @@ general
 \begin_layout Itemize
 
 \emph on
+get help:
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+-help
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
 residues to analyze:
 \end_layout
 
@@ -842,7 +835,7 @@ pcS-seg1
 \emph on
 pcS-seg0
 \emph default
- by default) for all residues
+ by default) for all residues; this is the default if no basis flag is present.
 \end_layout
 
 \begin_layout Description
@@ -929,11 +922,15 @@ quantum program to use:
 \begin_inset space ~
 \end_inset
 
--demon Set up QM input files to run with the deMon program, version 3 (default)
+-demon Set up QM input files to run with the deMon program, version 3
 \end_layout
 
 \begin_layout Description
--demon5 Set up QM input files to run with the deMon program (version 5)
+-demon5 Set up QM input files to run with the deMon program, version 5 (
+\emph on
+default
+\emph default
+)
 \end_layout
 
 \begin_layout Description
@@ -1006,7 +1003,12 @@ terachem
 \end_layout
 
 \begin_layout Description
--nobuild Skip all steps requiring the Amber force field
+-nobuild Skip all steps requiring the Amber force field; assumes that a
+ 
+\emph on
+basename.pqr
+\emph default
+ file is present
 \end_layout
 
 \begin_layout Description

@@ -1,4 +1,4 @@
-test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 clean
+test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 m6ab_test1 clean
 
 1d3z_test1::
 	@echo "Running test quantum fragmentation on ubiquitin:"
@@ -45,6 +45,14 @@ test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 clean
 	@../dacdif -r 1.e-6 1d3z1006.inp.save 1d3z1006.inp
 	@../dacdif 1d3z1006.pqr.save 1d3z1006.pqr
 #	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr 1d3z1006.xtb.log
+
+m6ab_test1::
+	@echo "Running test quantum fragmentation on RNA with demon"
+	@echo
+	../../bin/afnmr -nobuild -list 6 m6ab.1
+	@../dacdif -r 1.e-6 m6ab.1006.inp.save m6ab.1006.inp
+	@../dacdif m6ab.1006.pqr.save m6ab.1006.pqr
+	@/bin/rm -f m6ab.1.afnmr.log 
 
 clean:
 	/bin/rm -f 1d3z1.0.pdb
