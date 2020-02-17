@@ -16,7 +16,7 @@ Usage: `basename $0` [flags] basename
 Optional flags:
    -list           list of residues to create fragments for; uses bash 
                    syntax and must be quoted, e.g.:
-                       "{1,2,{4..9},13}" or "46" or "{5..8}"
+                       "{1,2,{4..9},13}" or "6 13" or "{5..8}"
                    Residue numbers are those in the pdb file, and must
                       be unique: afnmr does not process chainID's
                    If this flag is not present, fragments will be created
