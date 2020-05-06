@@ -1,5 +1,5 @@
-TITLE AF-NMR fragment for residue    3; version = 1.1; nbcut =  3.30
-SCFTYPE  RKS Tol=3.0e-6 MAX=200
+TITLE AF-NMR fragment for residue    3; version = 1.2; nbcut =  3.30
+SCFTYPE  RKS Tol=3.0e-6 MAX=150
 GUESS TB
 ORBITALS CARTESIAN
 ERIS MULTIPOLE
@@ -85,7 +85,7 @@ GEOMETRY CARTESIAN ANGSTROM
  H71       43.54700   -85.64400     7.32200
  C72       43.77200   -84.76500     5.36800
  H73       44.22400   -83.85700     5.73900
-H74        45.54895   -83.42287     1.63786
+ H74       45.54895   -83.42287     1.63786
 END
 EMBED READ
       48.199000     -86.506000      10.232000    0.02712755
@@ -419,46 +419,8 @@ EMBED READ
       44.021000     -83.423000      -0.465000    0.21202165
       45.549000     -83.423000      -0.962000    0.27189199
 END
-BASIS  (DZVP)
- C1   (pcSseg-1)
- O2   (pcSseg-1)
- N3   (pcSseg-1)
- H4   (pcSseg-1)
- C5   (pcSseg-1)
- H6   (pcSseg-1)
- C7   (pcSseg-1)
- H8   (pcSseg-1)
- C9   (pcSseg-1)
- H10  (pcSseg-1)
- H11  (pcSseg-1)
- H12  (pcSseg-1)
- C13  (pcSseg-1)
- H14  (pcSseg-1)
- H15  (pcSseg-1)
- C16  (pcSseg-1)
- H17  (pcSseg-1)
- H18  (pcSseg-1)
- H19  (pcSseg-1)
-AUXIS  (A2)
- C1   (GEN-A2*)
- O2   (GEN-A2*)
- N3   (GEN-A2*)
- H4   (GEN-A2*)
- C5   (GEN-A2*)
- H6   (GEN-A2*)
- C7   (GEN-A2*)
- H8   (GEN-A2*)
- C9   (GEN-A2*)
- H10  (GEN-A2*)
- H11  (GEN-A2*)
- H12  (GEN-A2*)
- C13  (GEN-A2*)
- H14  (GEN-A2*)
- H15  (GEN-A2*)
- C16  (GEN-A2*)
- H17  (GEN-A2*)
- H18  (GEN-A2*)
- H19  (GEN-A2*)
+BASIS  (pcSseg-0)
+AUXIS  (GEN-A2)
 NMR READ SHIELDING
  C1    O2    N3    H4    C5    H6    C7    H8    C9    H10   H11   H12   &
  C13   H14   H15   C16   H17   H18   H19   
