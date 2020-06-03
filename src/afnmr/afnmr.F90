@@ -1,3 +1,4 @@
+#define SHAPE 1
 module comafnmr
 
 !  some global variables go here
@@ -433,6 +434,9 @@ program afnmr_x
 !
         if( gaussian ) then
           open(30,file=filek(1:lengthb+3)//'.com')
+#ifdef SHAPE
+          open(35,file=filek(1:lengthb+3)//'.surf.pqr')
+#endif
         else if ( orca ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
           open(32,file=filek(1:lengthb+3)//'.pos')
@@ -457,6 +461,9 @@ program afnmr_x
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
           write(30,'(a)') '%nprocshared=4'
+#ifdef SHAPE
+          write(30,'(a)') '# HF/6-31G(d) charge nosymm Pop=MK'
+#else
           write(30,'(a,a,a)', advance='no')  '# ', trim(functional), &
               '/Gen charge nosymm '
           if (qopt) then
@@ -464,6 +471,7 @@ program afnmr_x
           else
             write(30,'(a)') 'nmr(printeigenvectors) integral(grid=ultrafine)'
           endif
+#endif
           write(30,*)
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -756,17 +764,25 @@ program afnmr_x
           read(23,*,end=60)a,b,c,d
           if( gaussian .or. qchem .or. demon ) then
             write(30,1316)a,b,c,d
+#ifdef SHAPE
+            write(35,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.2,6x,a2)') &
+               'ATOM  ', iitemp,' H  ','SRF',1, a,b,c,d, 1.0, ' H'
+#endif
           else if( orca .or. terachem) then
             write(32,1318)d,a,b,c
           endif
         enddo
 60      continue
         close(23)
+#ifdef SHAPE
+        close(35)
+#endif
 
         !  More program-dependent keywords and instructions:
 
         if( gaussian ) then
           write(30,*)
+#ifndef SHAPE
           if( basis .eq. 'M' ) then
             !    write local basis set
             do i=1,nhighatom
@@ -806,7 +822,7 @@ program afnmr_x
 
           else if( basis .eq. 'T' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
-                '/basis/pcsseg-2.1.gbs')
+                '/basis/pcsseg-1.1.gbs')
             rewind(11)
             do kbas=1,9999
                read(11,'(a80)',end = 63) line
@@ -827,6 +843,7 @@ program afnmr_x
 64          continue
 
           endif
+#endif
 
           if (qopt) then
             write(30,'(a,i4,a,i4,a,i4)') 'noatoms  atoms=1-', nhighatom, &
@@ -1167,7 +1184,7 @@ subroutine addH( iqm, x, y, z)
       else if ( terachem ) then
         write(34,1000)'H ',x,y,z
       else if ( gaussian ) then
-        write(30,1000)'H ',x,y,z
+        write(30,1000)' H',x,y,z
         dlabel(iqm) = 'H'
       else
         write(30,1000)'H ',x,y,z
