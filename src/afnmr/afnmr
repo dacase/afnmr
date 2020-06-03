@@ -408,7 +408,7 @@ cat afnmr.out >> $1.afnmr.log
 #============================================================================
 #  Some fine file clean-ups  (optional)
 #============================================================================
-/bin/rm -f $1.min.x $1???.prot.pqr \
+/bin/rm -f $1.min.x \
        srfchg.pos runms.solsurf runsolinprot leap.log
 
 if [ "$build" = "yes" ]; then
