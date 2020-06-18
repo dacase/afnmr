@@ -1,4 +1,3 @@
-#define SHAPE 1
 module comafnmr
 
 !  some global variables go here
@@ -21,7 +20,7 @@ module comafnmr
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize
    logical :: gaussian, orca, demon, demon5, qchem, terachem, &
-              qopt, solinprot, xtb
+              qopt, solinprot, xtb, sqm
    logical :: first=.true.
 
 end module
@@ -34,7 +33,7 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
-!                     Q (Qchem), T (TeraChem)
+!                     Q (Qchem), T (TeraChem), S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D)
 !            solinprot is T or F
@@ -152,6 +151,7 @@ program afnmr_x
       demon5 = .false.
       terachem = .false.
       xtb = .false.
+      sqm = .false.
       solinprot = .false.
       qopt = .false.
       listsize = 0
@@ -188,6 +188,8 @@ program afnmr_x
          qchem = .true.
       else if( program .eq. 'T' ) then
          terachem = .true.
+      else if( program .eq. 'S' ) then
+         sqm = .true.
       else
          write(0,*) 'Bad input for program: ', program
          stop 1
@@ -434,9 +436,9 @@ program afnmr_x
 !
         if( gaussian ) then
           open(30,file=filek(1:lengthb+3)//'.com')
-#ifdef SHAPE
-          open(35,file=filek(1:lengthb+3)//'.surf.pqr')
-#endif
+        else if ( sqm ) then
+          open(30,file=filek(1:lengthb+3)//'.sqmin')
+          ! open(35,file=filek(1:lengthb+3)//'.surf.pqr')
         else if ( orca ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
           open(32,file=filek(1:lengthb+3)//'.pos')
@@ -461,7 +463,7 @@ program afnmr_x
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
           write(30,'(a)') '%nprocshared=4'
-#ifdef SHAPE
+#if 0   /* for getting Gaussian atomic charges  */
           write(30,'(a)') '# HF/6-31G(d) charge nosymm Pop=MK'
 #else
           write(30,'(a,a,a)', advance='no')  '# ', trim(functional), &
@@ -592,6 +594,12 @@ program afnmr_x
         else if ( terachem ) then
           write(30,'(a,i3)')'charge  ',cfrag
           write(30,'(a)') 'end'
+        else if ( sqm ) then
+          write(30, '(a)' ) filek(1:lengthb+3)
+          write(30, '(a)' ) ' &qmmm'
+          write(30, '(a,i3,a)' ) " qm_theory='AM1', qmcharge=", cfrag, &
+                ', maxcyc=0, qmmm_int=1,'
+          write(30, '(a)' ) ' /'
         end if
 
         nhighatom=0
@@ -701,6 +709,8 @@ program afnmr_x
         else if ( demon ) then
           write(30,'(a)') 'END'
           write(30,'(a)') 'EMBED READ'
+        else if ( sqm ) then
+          write(30,'(a)') '#EXCHARGES'
         endif
 
 !       write out the protein positions and charges:
@@ -764,29 +774,29 @@ program afnmr_x
           read(23,*,end=60)a,b,c,d
           if( gaussian .or. qchem .or. demon ) then
             write(30,1316)a,b,c,d
-#ifdef SHAPE
-            write(35,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.2,6x,a2)') &
-               'ATOM  ', iitemp,' H  ','SRF',1, a,b,c,d, 1.0, ' H'
-#endif
           else if( orca .or. terachem) then
             write(32,1318)d,a,b,c
+          else if ( sqm ) then
+            !  write out surface charge distributions, for visualization
+            ! write(35,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.2,6x,a2)') &
+            !  'ATOM  ', iitemp,' H  ','SRF',1, a,b,c,d, 1.0, ' H'
+            write(30, 1319) ' 1  H ', a,b,c,d
           endif
         enddo
 60      continue
         close(23)
-#ifdef SHAPE
-        close(35)
-#endif
+        ! close(35)
 
         !  More program-dependent keywords and instructions:
 
         if( gaussian ) then
           write(30,*)
-#ifndef SHAPE
           if( basis .eq. 'M' ) then
             !    write local basis set
             do i=1,nhighatom
               write(30,'(i3,a)') i,' 0'
+              write(0,'(a)') trim(afnmrhome) // '/basis/pcSseg-1/' &
+                    // trim(dlabel(i)) // '.gbs'
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-1/' &
                     // trim(dlabel(i)) // '.gbs')
               rewind(11)
@@ -843,7 +853,6 @@ program afnmr_x
 64          continue
 
           endif
-#endif
 
           if (qopt) then
             write(30,'(a,i4,a,i4,a,i4)') 'noatoms  atoms=1-', nhighatom, &
@@ -851,6 +860,8 @@ program afnmr_x
             write(30,*)
           endif
 
+        else if ( sqm ) then
+          write(30,'(a)') '#END'
         else if ( demon ) then
           write(30,'(a)') 'END'
           if( nhighatom == 0 ) nhighatom = 4
@@ -1048,6 +1059,7 @@ program afnmr_x
 50      format(1x,I3,2x,I2)
 1316    format(3f15.6,2x,f12.8)
 1318    format(f12.8,2x,3f15.6)
+1319    format(a,3f15.6,2x,f12.8)
 
         if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
 
@@ -1135,8 +1147,9 @@ subroutine addatom( kk, iqm, basis )
       implicit none
       integer, intent(in) ::  kk,iqm
       character*1, intent(in) ::  basis
-      integer j
+      integer j, atno
       character*3  i_char
+      character*1  elem
 
       if ( demon ) then
         write( i_char, '(i3)' ) iqm
@@ -1147,7 +1160,17 @@ subroutine addatom( kk, iqm, basis )
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
-        dlabel(iqm) = trim(element(kk))
+        dlabel(iqm) = element(kk)(2:2)
+      else if ( sqm ) then
+        elem = element(kk)(2:2)
+        if ( elem == 'H' ) atno = 1
+        if ( elem == 'C' ) atno = 6
+        if ( elem == 'N' ) atno = 7
+        if ( elem == 'O' ) atno = 8
+        if ( elem == 'F' ) atno = 9
+        if ( elem == 'P' ) atno = 15
+        if ( elem == 'S' ) atno = 16
+        write(30,1001) atno, element(kk),(coord(j,kk),j=1,3)
       else
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
         if( orca .and. basis .eq. 'M' ) then
@@ -1166,6 +1189,7 @@ subroutine addatom( kk, iqm, basis )
 
       return
 1000  format(a2,4x,3f10.4)
+1001  format(i2,2x,a2,4x,3f10.4)
 end subroutine addatom
 
 subroutine addH( iqm, x, y, z)
@@ -1186,6 +1210,8 @@ subroutine addH( iqm, x, y, z)
       else if ( gaussian ) then
         write(30,1000)' H',x,y,z
         dlabel(iqm) = 'H'
+      else if ( sqm ) then
+        write(30,1000)' 1  H ',x,y,z
       else
         write(30,1000)'H ',x,y,z
       endif
@@ -1204,5 +1230,6 @@ subroutine addH( iqm, x, y, z)
 
       return
 1000    format(a2,4x,3f10.4)
+1001    format(a6,4x,3f10.4)
 end subroutine addH
 
