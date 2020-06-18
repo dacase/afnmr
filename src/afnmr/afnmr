@@ -37,6 +37,7 @@ Optional flags:
    -gau            Set up quantum input files to use with Gaussian
    -qchem          Set up quantum input files to use with Q-Chem
    -tc             Set up quantum input files to use with TeraChem
+   -sqm            Set up quantum input files to use with sqm
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
                        (only works with -solinprot)
@@ -106,6 +107,7 @@ while [ $# -gt 0 ]; do
         -gau)         program="G";;
         -qchem)       program="Q";;
         -tc)          program="T";;
+        -sqm)         program="S";;
         -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
