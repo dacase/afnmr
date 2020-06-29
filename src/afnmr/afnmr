@@ -27,6 +27,7 @@ Optional flags:
    -tzp            all quantum residues are treated at the TZP level
    -dzp            all quantum residues are treated at the DZP level (default)
    -solinprot      use the solinprot program to get surface charges (default)
+   -rism, -3drism  use 3D-RISM to get surface charges
    -demon, -deMon  Set up quantum input files to use with deMon
    -demon5         Set up quantum input files to use with deMon, v5 (default)
    -o3lyp          Use O3LYP in place of OLYP; requires -gau or -orca
@@ -109,6 +110,8 @@ while [ $# -gt 0 ]; do
         -tc)          program="T";;
         -sqm)         program="S";;
         -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
+        -rism)        solinprot="F"; implicit_solvent="3drism";;
+        -3drism)      solinprot="F"; implicit_solvent="3drism";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
         -nomin)       min="no";;
@@ -346,6 +349,41 @@ chmod +x runms.solsurf
 # echo "====== runms.solsurf: ===============================================" >> $1.afnmr.log
 # cat runms.solsurf >> $1.afnmr.log
 
+if [ "$implicit_solvent" = "3drism" ]; then
+
+#============================================================================
+# get rism charge distribution:
+#============================================================================
+echo "MS"
+./runms.solsurf $1.pqr >> $1.afnmr.log
+/bin/rm runms.solsurf
+
+echo "RISM"
+$AFNMRHOME/bin/rism3d.snglpnt --pdb $1.pqr --prmtop $1.parm7 \
+   --xvv ${AFNMRHOME}/dat/spc-nacl-3.xvv \
+   --chgdist chgdist --buffer 12. --grdspc 0.5,0.5,0.5 --verbose 1 \
+   --volfmt xyzv > rism3d.out
+if [ "$?" -gt 0 ]; then
+   echo "Error in 3drism: check 3drism.out"
+   exit 1
+fi
+cat 3drism.out >> $1.afnmr.log
+/bin/mv chgdist.1.xyzv input.xyzv
+/bin/rm 3drism.out
+
+echo "gridprune"
+$AFNMRHOME/bin/gridprune < $1.pqr > gridprune.out
+if [ "$?" -gt 0 ]; then
+   echo "Error in gridprune: check gridprune.out"
+   exit 1
+fi
+cat gridprune.out >> $1.afnmr.log
+$AFNMRHOME/bin/pair < check.dat >> $1.afnmr.log
+/bin/rm input.xyzv surf.pos gridprune.out check.dat
+
+
+elif [ "$implicit_solvent" = "solinprot" ]; then
+
 #============================================================================
 #   Use the solinprot method to get the environment influence
 #============================================================================
@@ -391,6 +429,8 @@ exit 0
 
 EOF3
 chmod +x runsolinprot
+
+fi
 
 #============================================================================
 #  Run the fragment program to create the quantum chemistry input files;
