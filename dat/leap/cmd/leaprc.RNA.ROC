@@ -33,6 +33,7 @@ addAtomTypes {
 	{ "CA"  "C" "sp2" }
 	{ "CB"  "C" "sp2" }
 	{ "CC"  "C" "sp2" }
+	{ "CF"  "C" "sp3" }
 	{ "CN"  "C" "sp2" }
 	{ "CM"  "C" "sp2" }
 	{ "CK"  "C" "sp2" }

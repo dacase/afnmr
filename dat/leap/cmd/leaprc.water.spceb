@@ -11,6 +11,8 @@ addAtomTypes {
 	{ "K+"  "K"  "sp3" }
 	{ "Rb+"  "Rb"  "sp3" }
 	{ "Cs+"  "Cs"  "sp3" }
+    { "OW"   "O"   "sp3" }
+    { "HW"   "H"   "sp3" }
 }
 loadOff atomic_ions.lib
 loadOff solvents.lib

@@ -22,6 +22,8 @@ addAtomTypes {
 	{ "o"  "O" "sp2" }
 	{ "o2"  "O" "sp2" }
 	{ "oh"  "O" "sp3" }
+	{ "op"  "O" "sp3" }
+	{ "oq"  "O" "sp3" }
 	{ "os"  "O" "sp3" }
 	{ "ow"  "O" "sp3" }
 	{ "c"  "C" "sp2" }
@@ -54,13 +56,23 @@ addAtomTypes {
 	{ "ne"  "N" "sp2" }
 	{ "nf"  "N" "sp2" }
 	{ "nh"  "N" "sp2" }
+	{ "ni"  "N" "sp2" }
+	{ "nj"  "N" "sp2" }
+	{ "nk"  "N" "sp3" }
+	{ "nl"  "N" "sp3" }
+	{ "nm"  "N" "sp2" }
+	{ "nn"  "N" "sp2" }
 	{ "no"  "N" "sp2" }
+	{ "np"  "N" "sp3" }
+	{ "nq"  "N" "sp3" }
 	{ "s"   "S" "sp2" }
 	{ "s2"   "S" "sp2" }
 	{ "s3"   "S" "sp3" }
 	{ "s4"   "S" "sp3" }
 	{ "s6"   "S" "sp3" }
 	{ "sh"   "S" "sp3" }
+	{ "sp"   "S" "sp3" }
+	{ "sq"   "S" "sp3" }
 	{ "ss"   "S" "sp3" }
 	{ "sx"   "S" "sp3" }
 	{ "sy"   "S" "sp3" }
