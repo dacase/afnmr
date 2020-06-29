@@ -20,7 +20,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-#include "../sff/AmberNetcdf.h"
+#ifdef BINTRAJ
+#  include "../sff/AmberNetcdf.h"
+#endif
 #include "../sff/sff.h"
 #include "../sff/timer.h"
 
@@ -415,7 +417,9 @@ int main(int argc, char **argv)
 	}
 #endif
 
+#ifdef BINTRAJ
     struct AmberNetcdf nc;
+#endif
     double time = 0., dgrad, fret;
     int i, j;
     double ftmp;
@@ -698,6 +702,7 @@ int main(int argc, char **argv)
     mme_init_sff(prm, frozen, constrained, NULL, NULL);
 
     if (mdOpt.traj) {
+#ifdef BINTRAJ
         // Try NetCDF first.
         if (netcdfLoad(&nc, mdOpt.traj) == 0) {
             netcdfLoad(&nc, mdOpt.traj);
@@ -711,6 +716,7 @@ int main(int argc, char **argv)
             }
             netcdfClose(&nc);
         } else {
+#endif
             // Assume ASCII.
             if (mytaskid == 0) {
                 if (numtasks > 1) {
@@ -743,7 +749,9 @@ int main(int argc, char **argv)
                 }
                 mme(p_xyz, f_xyz, &iframe);
             }
+#ifdef BINTRAJ
         }
+#endif
 
     } else if (mdOpt.rst) {
 

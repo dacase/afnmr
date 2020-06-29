@@ -24,7 +24,13 @@ else
    LM=-lm
 endif
 
-FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
+ifeq "$(MKLROOT)" ""
+   FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
+   RISM=skip
+else
+   FLIBS=-lsff -llapack -lblas -lrism $(LIBGFORTRAN) -lgfortran
+   RISM=install
+endif
 
 CC=gcc
 CFLAGS=
@@ -35,7 +41,11 @@ CXXFLAGS=
 CXXOPTFLAGS=-O3
 
 FC=gfortran
-FFLAGS=-I$(INCDIR)
+ifeq "$(MKLROOT)" ""
+   FFLAGS=-I$(INCDIR)
+else
+   FFLAGS=-I$(INCDIR) -I$(MKLROOT)/include -I$(MKLROOT)/include/fftw
+endif
 FOPTFLAGS=-O3 -mtune=native
 
 AR=ar rv

@@ -3,10 +3,7 @@ include ../config.h
 
 # ------- rism3d information: ----------------------------------------------
 
-LIBOBJ = rism1d_c.o solvmdl_c.o rism1d_potential_c.o\
-	rism1d_closure_c.o rism1d_kh_c.o rism1d_hnc_c.o rism1d_py_c.o \
-	rism1d_mv0_c.o rism1d_psen_c.o rism1d_nub_c.o rism1d_polyt_c.o \
-        rism1d_devb_c.o \
+LIBOBJ = \
 	quaternion.o array_util.o rism_util.o rism_report_c.o \
 	rism3d_grid_c.o rism3d_closure_c.o \
 	rism3d_kh_c.o rism3d_hnc_c.o rism3d_psen_c.o \
@@ -20,30 +17,35 @@ LIBOBJ = rism1d_c.o solvmdl_c.o rism1d_potential_c.o\
 	dqagie.o dqelg.o dqk15i.o dqpsrt.o d1mach.o i1mach.o \
 	xermsg.o xerprn.o xersve.o xerhlt.o xercnt.o xgetua.o fdump.o j4save.o	#pmepot/pmepot.o #rism3d_debug_c.o
 
-librism: $(LIBOBJ)
+$(LIBDIR)/librism.a: $(LIBOBJ)
 	@echo "[RISM]  AR $@"
-	$(VB)$(AR) $(LIBDIR)/$@.a $(LIBOBJ) > /dev/null
-	$(VB)$(RANLIB) $(LIBDIR)/$@.a
-
+	$(VB)$(AR) $@ $(LIBOBJ) > /dev/null
+	$(VB)$(RANLIB) $@
 
 lex.rism.c:  rism_options.l
 	$(LEX) rism_options.l
+
+SPSRC:=rism3d.snglpnt.c lex.rism.c
+SPOBJ:=$(SPSRC:.c=.o)
 
 $(SPOBJ): %.o : %.c
 	@echo "[RISM]  CC $<"
 	$(VB)$(CC) -c $(COPTFLAGS) $(CFLAGS) $(AMBERCFLAGS) -I$(INCDIR) -I. -o $@ $<
 
-rism3d.snglpnt$(SFX): $(SPOBJ)
+$(BINDIR)/rism3d.snglpnt: $(SPOBJ) $(LIBDIR)/librism.a
 	@echo "[RISM]  CC $@"
 	$(VB)$(CC) $(CFLAGS) $^ -L$(LIBDIR) $(FLIBS) $(LM) \
        $(LDFLAGS) -o $(BINDIR)/rism3d.snglpnt$(SFX)
 
+install: $(BINDIR)/rism3d.snglpnt
+
+skip::
+	@echo "Skipping 3D-RISM"
+
 # --------------------------------------------------------------------------
 
-install_rism3d.snglpnt: librism rism3d.snglpnt$(SFX)
-
 clean:
-	-/bin/rm -f *.o  pmepot/*.o *.mod 
+	-/bin/rm -f *.o  *.mod 
 
 doc:
 	doxygen rism.Doxyfile
@@ -53,6 +55,4 @@ depend::
 
 include depend
 
-# pmepot.o: pmepot/pmepot.cpp pmepot/pmepot.hpp
-# 	$(CXX) -c -std=c++11 -O3 -I$(INCDIR) pmepot/pmepot.cpp
 # DO NOT DELETE

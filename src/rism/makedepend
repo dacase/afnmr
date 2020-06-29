@@ -68,6 +68,7 @@ foreach $file ( <*.F90> ) {
     #  Construct the header and module dependency rules:
 
     open( F, "$file" ) || die "unable to open $file\n";
+    printf STDERR "working on $file\n";
     while ( <F> ) {
 
         if ( /^ *use /i ) {
@@ -88,6 +89,7 @@ foreach $file ( <*.F90> ) {
         }
         if (/^# *include/) {
             ($head,$included) = /(# *include) +"(.*)"/;
+            printf STDERR "head/included: $head  $included\n"; 
             next if $included eq "mpif.h";
             if ( !defined $used{ $fileroot,$included } ) {
                 $deps .= "\\\n                    " . $included ;

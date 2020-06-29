@@ -6,7 +6,8 @@ install:
 	(cd etc && make install )
 	(cd sff && make install )
 	(cd MEAD && make install)
-	(cd afnmr && make install)
+	(cd rism && make $(RISM) )
+	(cd afnmr && make install )
 
 clean::
 	-(cd blas && make clean )
@@ -15,5 +16,6 @@ clean::
 	-(cd etc && make clean )
 	-(cd sff && make clean )
 	-(cd MEAD && make clean)
+	-(cd rism && make clean)
 	-(cd afnmr && make clean)
 
