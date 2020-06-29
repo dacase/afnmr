@@ -27,20 +27,26 @@ endif
 ifeq "$(MKLROOT)" ""
    FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
    RISM=skip
+   RISMSFF=""
+   BLAS=install
+   LAPACK=install
 else
-   FLIBS=-lsff -llapack -lblas -lrism $(LIBGFORTRAN) -lgfortran
+   FLIBS=-lsff -llapack -lblas -lrism -lmpi
    RISM=install
+   BLAS=skip
+   LAPACK=skip
+   RISMSFF=-DRISMSFF
 endif
 
-CC=gcc
+CC=icc
 CFLAGS=
-COPTFLAGS=-O3 -mtune=native
+COPTFLAGS=-O3 
 
-CXX=g++
+CXX=icpc
 CXXFLAGS=
 CXXOPTFLAGS=-O3
 
-FC=gfortran
+FC=ifort
 ifeq "$(MKLROOT)" ""
    FFLAGS=-I$(INCDIR)
 else
