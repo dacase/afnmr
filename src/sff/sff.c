@@ -35,13 +35,12 @@
 #endif
 
 #include "sff.h"
-#ifdef PBSA
-#   include "../pbsa/interface.h"
-#endif
+#include "../pbsa/interface.h"
 #include "memutil.h"
 #include "debug.h"
 #include "timer.h"
 #include "gbneck.h"
+#include "AmberNetcdf.h"
 
 #if defined(MPI) || defined(SCALAPACK)
 #include "mpi.h"
@@ -154,7 +153,6 @@ static int gb2_debug = 0;       /* non-zero if extra printout for GB 2nd deriv. 
 static int gbsa_debug = 0;      /* non-zero if extra printout for GBSA  */
 static int e_debug = 0;         /* non-zero if extra printout for energies   */
 
-#ifdef PBSA
 /* epbsa */
 
 PBOPTSTRUCT_T* pbopt;
@@ -169,7 +167,6 @@ static REAL_T iprob = -9999, accept = -9999, fillratio = -9999, space = -9999;
 static REAL_T cutnb = -9999, sprob = -9999;
 static REAL_T ivalence = -9999, arcres = -9999;
 static REAL_T cavity_surften = -9999, cavity_offset = -9999;
-#endif
 
 /* 3D RISM section. */
 static RismData rismData = {
@@ -215,8 +212,24 @@ static RismData rismData = {
     .ntwrism = -9999,
     .verbose = -9999,
     .progress = -9999,
+    .molReconstruct = 0, 
     .write_thermo = -9999,
-    .selftest = 0
+    .selftest = 0,
+    .treeDCF = 1,
+    .treeTCF = 1,
+    .treeCoulomb = 1,
+    .treeDCFOrder = -9999,
+    .treeTCFOrder = -9999,
+    .treeCoulombOrder = -9999,
+    .treeDCFN0 = -9999,
+    .treeTCFN0 = -9999,
+    .treeCoulombN0 = -9999,
+    .treeDCFMAC = -9999.,
+    .treeTCFMAC = -9999.,
+    .treeCoulombMAC = -9999.,
+    .asympKSpaceTolerance = -9999.,
+    .ljTolerance = -9999.,
+    .chargeSmear = -9999.,
 };
 
 #define CLOSURELEN 8
@@ -292,6 +305,7 @@ static REAL_T vlimit = 10.0;    /* maximum velocity component */
 static REAL_T genmass = 10.;    /* general masses, for now all the same */
 static int ntpr_md = 10;        /* print frequency for KE,PE,temp */
 static int ntwx = 0;            /* trajectory snapshot frequency  */
+static struct AmberNetcdf NC;
 static char *ncfilename = NULL;
 static int zerov = 0;           /* if true, use zero initial velocities */
 static REAL_T tempi = 0.0;      /* initial temperature */
@@ -334,6 +348,10 @@ static REAL_T hcp_h3 = 150.0;     /* threshold distance (level 3) */
 
 /* ********************** HCP variables end here ******************************/
 
+int netcdfCreate(struct AmberNetcdf *, char *, int, int);
+
+int netcdfWriteNextFrame( struct AmberNetcdf *, REAL_T *, REAL_T * );
+
 int rattle(REAL_T, REAL_T *, REAL_T *, REAL_T *, REAL_T *);
 
 int rattle2(REAL_T, REAL_T *, REAL_T *, REAL_T *);
@@ -369,9 +387,15 @@ int com_vw2zero(REAL_T *, REAL_T *,REAL_T *);
 
 REAL_T seconds(void)
 {
+#ifdef SUN
+   hrtime_t nsec;
+   nsec = gethrtime();
+   return (((REAL_T) nsec) * 1.0e-09);
+#else
    REAL_T t1;
    arsecond_( &t1);
    return t1;
+#endif
 }
 
 
@@ -977,11 +1001,7 @@ int mme_init_sff(PARMSTRUCT_T * prm_in, int *frozen_in, int *constrained_in,
 
    /* Before proceding, check that the boundary conditions are
       consistent with solvation method requested. */
-#ifdef PBSA
    if (prm->IfBox && (gb || pbsa)) {
-#else
-   if (prm->IfBox && gb) {
-#endif
      if (get_mytaskid() == 0) {
        fprintf(nabout, "Error: %s is incompatible with periodic boundary conditions.\n",
                (gb ? "gb>0" : "ipb>0"));
@@ -1258,9 +1278,7 @@ int mme_init_sff(PARMSTRUCT_T * prm_in, int *frozen_in, int *constrained_in,
    if (ncname != NULL){
       asprintf( &ncfilename, "%s", ncname );
       /* fprintf( stderr, "Creating netcdf trajectory file: %s\n", ncfilename); */
-      fprintf( stderr, "Error: no netcdf in this build\n" );
-      exit(1);
-      // netcdfCreate( &NC, ncfilename, prm->Natom, 0 ); /* hard-wire isBox */
+      netcdfCreate( &NC, ncfilename, prm->Natom, 0 ); /* hard-wire isBox */
    }
 
    constrained = constrained_in;
@@ -1400,6 +1418,7 @@ int mme_init_sff(PARMSTRUCT_T * prm_in, int *frozen_in, int *constrained_in,
          prm->Charges, prm->Masses, prm->Cn1, prm->Cn2,
          prm->Iac, prm->Cno);
      rism_init_(&comm);
+
      /* Set GB to vacuum electrostatics. */
      gb = 0;
      if (ntpr_rism != 0) {
@@ -2577,9 +2596,7 @@ int md(int n, int maxstep, REAL_T * x, REAL_T * f, REAL_T * v,
          }
       }
       if (ntwx > 0 && nstep % ntwx == 0 && ncfilename != NULL)
-         fprintf( stderr, "Error: no netcdf in this build\n" );
-         exit(1);
-         // netcdfWriteNextFrame( &NC, x, NULL );  /* hardwire no box info */
+         netcdfWriteNextFrame( &NC, x, NULL );  /* hardwire no box info */
       t2 = seconds();
       *tmdIO += t2 - t1;
       t1 = seconds();

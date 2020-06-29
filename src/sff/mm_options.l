@@ -15,7 +15,6 @@ void setArrayInt ( char *str, int *a, int n);
 void setArrayDbl ( char *str, double *a, int n);
 
 %}
-
 Float [+-]?((([0-9]+\.?[0-9]*)|([0-9]*\.?[0-9]+))([eE][-+]?[0-9]+)?)
 Int [+-]?[0-9]+
 PosInt [+]?[1-9][0-9]*
@@ -24,7 +23,6 @@ NonNegInt [+]?[0-9]+
 Str [^,\ =]+
 Assign (\ *=\ *|\ +)
 ListSep (\ *,\ *)
-
 %%
 
 cut{Assign}{Float}                 { ECHO; cut = setVarDbl(yytext); }
@@ -180,10 +178,58 @@ saveprogress{Assign}{NonNegInt} { ECHO; rismData.saveprogress=setVarInt(yytext);
 ntwrism{Assign}{Int}            { ECHO; rismData.ntwrism=setVarInt(yytext); }
 verbose{Assign}[012]            { ECHO; rismData.verbose=setVarInt(yytext); }
 progress{Assign}{NonNegInt}     { ECHO; rismData.progress=setVarInt(yytext); }
+molReconstruct{Assign}[01]      { ECHO; rismData.molReconstruct=setVarInt(yytext); }
 ntpr_rism{Assign}{NonNegInt}    { ECHO; ntpr_rism=setVarInt(yytext); }
 uccoeff{Assign}{Float}({ListSep}{Float})* { ECHO; setArrayDbl(yytext,rismData.uccoeff,4); }
 biasPotential{Assign}{Float}    { ECHO; rismData.biasPotential=setVarDbl(yytext); }
 selftest{Assign}[01]            { ECHO; rismData.selftest=setVarInt(yytext); }
+treeDCF{Assign}[01]                  { ECHO; rismData.treeDCF=setVarInt(yytext); }
+treeTCF{Assign}[01]                  { ECHO; rismData.treeTCF=setVarInt(yytext); }
+treeCoulomb{Assign}[01]              { ECHO; rismData.treeCoulomb=setVarInt(yytext); }
+treeDCFMAC{Assign}{Float}           { ECHO; rismData.treeDCFMAC=setVarDbl(yytext); }
+treeTCFMAC{Assign}{Float}           { ECHO; rismData.treeTCFMAC=setVarDbl(yytext); }
+treeCoulombMAC{Assign}{Float}       { ECHO; rismData.treeCoulombMAC=setVarDbl(yytext); }
+treeDCFOrder{Assign}{Int}                { ECHO; rismData.treeDCFOrder=setVarInt(yytext); }
+treeTCFOrder{Assign}{Int}                { ECHO; rismData.treeTCFOrder=setVarInt(yytext); }
+treeCoulombOrder{Assign}{Int}            { ECHO; rismData.treeCoulombOrder=setVarInt(yytext); }
+treeDCFN0{Assign}{Int}                   { ECHO; rismData.treeDCFN0=setVarInt(yytext); }
+treeTCFN0{Assign}{Int}                   { ECHO; rismData.treeTCFN0=setVarInt(yytext); }
+treeCoulombN0{Assign}{Int}               { ECHO; rismData.treeCoulombN0=setVarInt(yytext); }
+asympKSpaceTolerance{Assign}{Float}      { ECHO; rismData.asympKSpaceTolerance=setVarDbl(yytext); }
+ljTolerance{Assign}{Float}               { ECHO; rismData.ljTolerance=setVarDbl(yytext); }
+chargeSmear{Assign}{Float}               { ECHO; rismData.chargeSmear=setVarDbl(yytext); }
+
+ipb{Assign}[012]                { ECHO; pbsa = setVarInt(yytext); }
+inp{Assign}[012]                { ECHO; inp = setVarInt(yytext); }
+epsin{Assign}{Float}            { ECHO; epsin = setVarDbl(yytext); }
+epsout{Assign}{Float}           { ECHO; epsout = setVarDbl(yytext); }
+smoothopt{Assign}[012]          { ECHO; smoothopt = setVarInt(yytext); }
+istrng{Assign}{Float}           { ECHO; istrng = setVarDbl(yytext); }
+ivalence{Assign}{Float}         { ECHO; ivalence = setVarDbl(yytext); }
+radiopt{Assign}[01]             { ECHO; radiopt = setVarInt(yytext); }
+dprob{Assign}{Float}            { ECHO; dprob = setVarDbl(yytext); }
+iprob{Assign}{Float}            { ECHO; iprob = setVarDbl(yytext); }
+npbopt{Assign}[01]              { ECHO; npbopt = setVarInt(yytext); }
+solvopt{Assign}[1-68]           { ECHO; solvopt = setVarInt(yytext); }
+accept{Assign}{Float}           { ECHO; accept = setVarDbl(yytext); }
+maxitn{Assign}{NonNegInt}       { ECHO; maxitn = setVarInt(yytext); }
+fillratio{Assign}{Float}        { ECHO; fillratio = setVarDbl(yytext); }
+space{Assign}{Float}            { ECHO; space = setVarDbl(yytext); }
+nfocus{Assign}[12]              { ECHO; nfocus = setVarInt(yytext); }
+fscale{Assign}[1-9]+            { ECHO; fscale = setVarInt(yytext); }
+bcopt{Assign}([156]|10)         { ECHO; bcopt = setVarInt(yytext); }
+eneopt{Assign}[12]              { ECHO; eneopt = setVarInt(yytext); }
+dbfopt{Assign}[12]              { ECHO; dbfopt = setVarInt(yytext); }
+frcopt{Assign}[0-3]             { ECHO; frcopt = setVarInt(yytext); }
+cutnb{Assign}{Float}            { ECHO; cutnb = setVarDbl(yytext); }
+sprob{Assign}{Float}            { ECHO; sprob = setVarDbl(yytext); }
+npbverb{Assign}[0-1]            { ECHO; npbverb = setVarInt(yytext); }
+arcres{Assign}{Float}           { ECHO; arcres = setVarDbl(yytext); }
+cavity_surften{Assign}{Float}   { ECHO; cavity_surften = setVarDbl(yytext); } 
+cavity_offset{Assign}{Float}    { ECHO; cavity_offset = setVarDbl(yytext); }
+nsnba{Assign}{NonNegInt}        { ECHO; nsnba = setVarInt(yytext); }
+npbgrid{Assign}{NonNegInt}      { ECHO; npbgrid = setVarInt(yytext); }
+maxarcdot{Assign}{NonNegInt}    { ECHO; maxarcdot = setVarInt(yytext); }
 
 diel{Assign}Yammp               { ECHO; dield = -5; }
 diel{Assign}R94                 { ECHO; dield = -4; }
@@ -380,4 +426,3 @@ int mm_options(char *opts)
    yy_delete_buffer(YY_CURRENT_BUFFER);
    return (0);
 }
-

@@ -2508,7 +2508,6 @@ REAL_T mme34(REAL_T * x, REAL_T * f, int *iter)
        egb(lpairs, upairs, pairlist, lpairs, upairs, pairlist,
            x, grad, prm->Fs, prm->Rborn, prm->Charges,
            &kappa, &epsext, &enb, &eel, &esurf, &evdwnp, 1);
-#ifdef PBSA
      } else if (pbsa && mytaskid==0) {
        t2 = seconds();
        *tmmeOther += t2 - t1;
@@ -2518,7 +2517,6 @@ REAL_T mme34(REAL_T * x, REAL_T * f, int *iter)
        t2 = seconds();
        *tmmePB += t2 - t1;
        t1 = t2;
-#endif
      } else {
        nbond(lpairs, upairs, pairlist, 0, x, grad, &enb, &eel, NULL, NULL, 1);
      }
@@ -2536,17 +2534,13 @@ REAL_T mme34(REAL_T * x, REAL_T * f, int *iter)
    /* If the iteration count equals 0, print the header for task 0 only. */
 
    if (*iter == 0 && mytaskid == 0) {
-#ifdef PBSA
       if(pbsa){
          fprintf(nabout, "      iter    Total       bad      vdW     elect"
               "   nonpolar       EPB      frms\n");
       } else { 
-#endif
          fprintf(nabout, "      iter    Total       bad      vdW     elect"
               "   nonpolar   genBorn      frms\n");
-#ifdef PBSA
       }
-#endif
       fflush(nabout);
    }
 
@@ -2746,7 +2740,6 @@ REAL_T mme34(REAL_T * x, REAL_T * f, int *iter)
       t2 = seconds();
       *tmmeBorn += t2 - t1;
       t1 = t2;
-#ifdef PBSA
    } else if (pbsa && mytaskid==0) {
      if ( pbopt == NULL ) {
        pbopt=(PBOPTSTRUCT_T *) malloc(sizeof(PBOPTSTRUCT_T));
@@ -2804,7 +2797,6 @@ REAL_T mme34(REAL_T * x, REAL_T * f, int *iter)
      t2 = seconds();
      *tmmePB += t2 - t1;
      t1 = t2;
-#endif
    } else {
       enbips = eelips = 0.;
       if( prm->IfBox ){

@@ -146,6 +146,7 @@ REAL_T		mme2( REAL_T*, REAL_T*, REAL_T*, REAL_T*,
 REAL_T		mme4( REAL_T*, REAL_T*, INT_T* );
 REAL_T		mme_rattle( REAL_T*, REAL_T*, INT_T* );
 INT_T		mme_init_sff( PARMSTRUCT_T*, INT_T*, INT_T*, REAL_T*, STRING_T* );
+INT_T       mme_timer( );
 INT_T		newton( REAL_T*, INT_T*, REAL_T*,
 			REAL_T ( *func1 )( REAL_T*, REAL_T*, INT_T* ),
 			REAL_T ( *func2 )( REAL_T*, REAL_T*, REAL_T*, REAL_T*,
@@ -163,6 +164,7 @@ INT_T		putxv( STRING_T*, STRING_T*, INT_T, REAL_T, REAL_T*, REAL_T* );
 INT_T           putxyz( STRING_T**, INT_T*, REAL_T* );
 REAL_T		rand2( void );
 INT_T		sasad( REAL_T*, REAL_T*, REAL_T*, INT_T, REAL_T );
+INT_T       setseed( INT_T* );
 INT_T   xmin_opt_init( struct xmin_opt* );
 REAL_T	xmin( REAL_T ( *func )( REAL_T*, REAL_T*, INT_T* ),
              INT_T*, REAL_T*, REAL_T*, REAL_T*, REAL_T*, struct xmin_opt* );
@@ -219,6 +221,12 @@ typedef	struct	bounds_t	{
     REAL_T fcenormsw;
     REAL_T uccoeff[4];
     REAL_T biasPotential;
+    REAL_T treeDCFMAC;
+    REAL_T treeTCFMAC;
+    REAL_T treeCoulombMAC;
+    REAL_T asympKSpaceTolerance;
+    REAL_T ljTolerance;
+    REAL_T chargeSmear;
     INT_T closureOrder;
     INT_T ng3[3];
     INT_T rism;      /* non-zero if RISM is turned on */
@@ -251,10 +259,20 @@ typedef	struct	bounds_t	{
     INT_T verbose;
     INT_T progress;
     INT_T write_thermo; 
+    INT_T treeDCFOrder;
+    INT_T treeTCFOrder;
+    INT_T treeCoulombOrder;
+    INT_T treeDCFN0;
+    INT_T treeTCFN0;
+    INT_T treeCoulombN0;
     INT_T selftest;
+    INT_T treeDCF;
+    INT_T treeTCF;
+    INT_T treeCoulomb;
+    INT_T molReconstruct;
     /*This is an unused variable that aligns
       the type on eight byte boundaries*/
-    INT_T padding;
+    INT_T padding; 
   } RismData;
 
 #ifdef RISMSFF
