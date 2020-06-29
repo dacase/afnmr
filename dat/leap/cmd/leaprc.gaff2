@@ -50,6 +50,8 @@ addAtomTypes {
 	{ "n2"  "N" "sp2" }
 	{ "n3"  "N" "sp3" }
 	{ "n4"  "N" "sp3" }
+	{ "n5"  "N" "sp3" }
+	{ "n6"  "N" "sp3" }
 	{ "n7"  "N" "sp3" }
 	{ "n8"  "N" "sp3" }
 	{ "n9"  "N" "sp3" }
@@ -60,7 +62,15 @@ addAtomTypes {
 	{ "ne"  "N" "sp2" }
 	{ "nf"  "N" "sp2" }
 	{ "nh"  "N" "sp2" }
+	{ "ni"  "N" "sp2" }
+	{ "nj"  "N" "sp2" }
+	{ "nk"  "N" "sp3" }
+	{ "nl"  "N" "sp3" }
+	{ "nm"  "N" "sp2" }
+	{ "nn"  "N" "sp2" }
 	{ "no"  "N" "sp2" }
+	{ "np"  "N" "sp3" }
+	{ "nq"  "N" "sp3" }
 	{ "ns"  "N" "sp2" }
 	{ "nt"  "N" "sp2" }
 	{ "nu"  "N" "sp2" }

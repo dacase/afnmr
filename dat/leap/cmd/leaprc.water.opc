@@ -65,6 +65,9 @@ addAtomTypes {
     { "U4+"  "U"   "sp3" }
     { "Pu4+" "Pu"  "sp3" }
     { "Th4+" "Th"  "sp3" }
+    { "OW"   "O"   "sp3" }
+    { "HW"   "H"   "sp3" }
+    { "EP"   ""    "sp3" }
 }
 loadOff atomic_ions.lib
 loadOff solvents.lib

@@ -7049,10 +7049,10 @@ hc-c3-c3-cl   1    0.00          0.0            -3.         Junmei et al, 1999
 hc-c3-c3-cl   1    0.25          0.0             1.         Junmei et al, 1999
 hc-c3-c3-br   1    0.00          0.0            -3.         Junmei et al, 1999
 hc-c3-c3-br   1    0.55          0.0             1.         Junmei et al, 1999
-c3-c -n -c3   1    0.00          0.0            -2.	    Junmei, 2015
-c3-c -n -c3   1    1.50        180.0             1.	    Junmei, 2015
+c3-c -n -c3   1    0.00          0.0            -2.         Junmei, 2015
+c3-c -n -c3   1    1.50        180.0             1.         Junmei, 2015
 c3-ss-sh-hs   3    5.30          0.0            -3.         Junmei, 2015
-c3-ss-sh-hs   1    2.70          0.0             2.	    Junmei, 2015
+c3-ss-sh-hs   1    2.70          0.0             2.         Junmei, 2015
 c3-n4-c3-ca   9    1.40          0.0            -3.         Junmei, 2015
 c3-n4-c3-ca   1    0.70          0.0             2.         Junmei, 2015
 oh-c3-c3-n4   1    0.144         0.0            -3.         Junmei, 2015

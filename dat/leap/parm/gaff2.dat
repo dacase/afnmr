@@ -71,9 +71,9 @@ n5 14.01         0.530               like n7 in RG3
 n6 14.01         0.530               like n7 in RG4
 o  16.00         0.434               Oxygen with one connected atom
 oh 16.00         0.465               Oxygen in hydroxyl group
-op 16.00         0.465               
-oq 16.00         0.465               
 os 16.00         0.465               Ether and ester oxygen
+op 16.00         0.465               os in 3-memberred rings
+oq 16.00         0.465               os in 4-memberred rings
 ow 16.00         0.465               Oxygen in water 
 p2 30.97         1.538               Phosphate with two connected atoms 
 p3 30.97         1.538               Phosphate with three connected atoms, such as PH3
@@ -91,11 +91,12 @@ s2 32.06         2.900               S with two connected atom, involved at leas
 s4 32.06         2.900               S with three connected atoms 
 s6 32.06         2.900               S with four connected atoms 
 sh 32.06         2.900               Sp3 S connected with hydrogen 
-sp 32.06         2.900               
-sq 32.06         2.900               
 ss 32.06         2.900               Sp3 S in thio-ester and thio-ether
+sp 32.06         2.900               ss in 3-memberred rings
+sq 32.06         2.900               ss in 4-memberred rings
 sx 32.06         2.900               Special s4 in conjugated systems
 sy 32.06         2.900               Special s6 in conjugated systems
+Cu 63.010        0.000               Copper 
 
 hn  ho  hs  n   na  nc  nd  ne  nf  n2  n3  n4  o   oh  os  ow  sh  ss
 ow-hw  553.0    0.9572          TIP3P_Water       1	
@@ -7282,6 +7283,7 @@ cc-na-na-cd   1    0.400         0.000           2          c141 SS AUE=0.5320 R
 cc-na-nh-c2   1    0.700         0.000           2          set3_9 SS AUE=0.7727 RMSE=0.9375 TorType=3
 cc-n -c -c3   1    0.500       180.000           2          set2_9 SS AUE=0.2224 RMSE=0.3240 TorType=3
 cd-cc-c3-c3   1    0.157       180.000           3          p1 SS AUE=0.2727 RMSE=0.3320 TorType=3
+cc-cd-c3-c3   1    0.157       180.000           3          p1 SS AUE=0.2727 RMSE=0.3320 TorType=3
 cd-na-c3-na   1    0.023         0.000           2          t16 SS AUE=0.2606 RMSE=0.3332 TorType=3
 c -n -c2-c3   1    1.510       180.000           1          set1_5 SS AUE=0.6699 RMSE=0.8754 TorType=3
 c -n -c3-n    1    2.080         0.000           2          t17 SS AUE=0.8425 RMSE=1.0798 TorType=3
@@ -7613,6 +7615,7 @@ MOD4      RE
   pd          2.0732  0.2295
   pe          2.0732  0.2295
   pf          2.0732  0.2295
+  Cu          2.2100  0.1729             Esitmated by Junmei
 
 END
 
