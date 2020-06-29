@@ -359,8 +359,8 @@ echo "MS"
 /bin/rm runms.solsurf
 
 echo "RISM"
-$AFNMRHOME/bin/rism3d.snglpnt --pdb $1.pqr --prmtop $1.parm7 \
-   --xvv ${AFNMRHOME}/dat/spc-nacl-3.xvv \
+$AFNMRHOME/bin/rism3d.snglpnt --rst $1.min.x --prmtop $1.parm7 \
+   --xvv ${AFNMRHOME}/dat/rism1d/KCl_0.1M_pse2.xvv \
    --chgdist chgdist --buffer 12. --grdspc 0.5,0.5,0.5 --verbose 1 \
    --volfmt xyzv > rism3d.out
 if [ "$?" -gt 0 ]; then
@@ -380,6 +380,8 @@ fi
 cat gridprune.out >> $1.afnmr.log
 $AFNMRHOME/bin/pair < check.dat >> $1.afnmr.log
 /bin/rm input.xyzv surf.pos gridprune.out check.dat
+
+exit
 
 
 elif [ "$implicit_solvent" = "solinprot" ]; then
