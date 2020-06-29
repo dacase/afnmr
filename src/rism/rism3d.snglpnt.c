@@ -120,8 +120,8 @@ int setDefaults(struct mdOptions *mdOpt, struct rismOptions *rismOpt)
     rismOpt->potUV = NULL;
     rismOpt->electronMap = NULL;
     rismOpt->volfmt = "dx";
-    closure[0] = "kh";
-    rismOpt->closureOrder = 1;
+    closure[0] = "pse";
+    rismOpt->closureOrder = 2;
     rismOpt->asympcorr = 1;
     rismOpt->buffer = 14;
     rismOpt->solvcut = -1;
