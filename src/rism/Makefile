@@ -3,7 +3,7 @@ include ../config.h
 
 # ------- rism3d information: ----------------------------------------------
 
-LIBOBJ = \
+LIBOBJ = amber_rism_interface.o \
 	quaternion.o array_util.o rism_util.o rism_report_c.o \
 	rism3d_grid_c.o rism3d_closure_c.o \
 	rism3d_kh_c.o rism3d_hnc_c.o rism3d_psen_c.o \
@@ -34,7 +34,7 @@ $(SPOBJ): %.o : %.c
 
 $(BINDIR)/rism3d.snglpnt: $(SPOBJ) $(LIBDIR)/librism.a
 	@echo "[RISM]  CC $@"
-	$(VB)$(CC) $(CFLAGS) $^ -L$(LIBDIR) $(FLIBS) $(LM) \
+	$(VB)$(CC) $(CFLAGS) $(SPOBJ) -L$(LIBDIR) $(FLIBS) $(LM) \
        $(LDFLAGS) -o $(BINDIR)/rism3d.snglpnt$(SFX)
 
 install: $(BINDIR)/rism3d.snglpnt

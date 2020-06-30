@@ -364,12 +364,14 @@ $AFNMRHOME/bin/rism3d.snglpnt --rst $1.min.x --prmtop $1.parm7 \
    --chgdist chgdist --buffer 12. --grdspc 0.5,0.5,0.5 --verbose 1 \
    --volfmt xyzv > rism3d.out
 if [ "$?" -gt 0 ]; then
-   echo "Error in 3drism: check 3drism.out"
+   echo "Error in 3drism: check rism3d.out"
    exit 1
 fi
-cat 3drism.out >> $1.afnmr.log
+echo "====== rism3d.out  =================================================" \
+     >> $1.afnmr.log
+cat rism3d.out >> $1.afnmr.log
 /bin/mv chgdist.1.xyzv input.xyzv
-/bin/rm 3drism.out
+/bin/rm rism3d.out
 
 echo "gridprune"
 $AFNMRHOME/bin/gridprune < $1.pqr > gridprune.out
@@ -377,12 +379,11 @@ if [ "$?" -gt 0 ]; then
    echo "Error in gridprune: check gridprune.out"
    exit 1
 fi
+echo "====== gridprune.out  ==============================================" \
+     >> $1.afnmr.log
 cat gridprune.out >> $1.afnmr.log
 $AFNMRHOME/bin/pair < check.dat >> $1.afnmr.log
 /bin/rm input.xyzv surf.pos gridprune.out check.dat
-
-exit
-
 
 elif [ "$implicit_solvent" = "solinprot" ]; then
 

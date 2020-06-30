@@ -1,7 +1,9 @@
 #   top-level Makefile for afnmr
+include config.h
+
 install: 
-	(cd blas && make install )
-	(cd lapack && make install )
+	(cd blas && make $(BLAS) )
+	(cd lapack && make $(LAPACK) )
 	(cd leap && make install )
 	(cd etc && make install )
 	(cd sff && make install )

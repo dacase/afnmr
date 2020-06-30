@@ -21,14 +21,14 @@ OBJS=    dasum.o daxpy.o dcabs1.o dcopy.o ddot.o \
 
 install: $(LIBDIR)/libblas.a
 
+skip:
+	@echo "Skipping BLAS"
+
 $(LIBDIR)/libblas.a: $(OBJS)
 	@echo "[LAPACK]  AR $@"
 	$(VB)/bin/rm -f $@
 	$(VB)$(AR) $@ $(OBJS) > /dev/null
 	$(VB)$(RANLIB) $@
-
-skip:
-	@echo "skipping compilation of BLAS"
 
 clean:
 	-rm -f *.o 

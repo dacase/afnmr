@@ -50,6 +50,9 @@ OBJS= dsyev.o dsygv.o dlansy.o dsytrd.o dorgtr.o dsteqr.o \
 
 install: $(LIBDIR)/liblapack.a
 
+skip:
+	@echo "Skipping LAPACK"
+
 $(LIBDIR)/liblapack.a: $(OBJS)
 	@echo "[LAPACK]  AR $@"
 	@/bin/rm -f $@

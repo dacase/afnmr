@@ -31,11 +31,11 @@ ifeq "$(MKLROOT)" ""
    BLAS=install
    LAPACK=install
 else
-   FLIBS=-lsff -llapack -lblas -lrism -lmpi
+   FLIBS=-lsff -lrism -mkl -lifport -lifcore
    RISM=install
+   RISMSFF=-DRISMSFF
    BLAS=skip
    LAPACK=skip
-   RISMSFF=-DRISMSFF
 endif
 
 CC=icc
@@ -58,4 +58,4 @@ AR=ar rv
 RANLIB=ranlib
 FLEX=flex
 YACC=bison -y
-VB=@
+VB=

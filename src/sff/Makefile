@@ -2,7 +2,7 @@ include ../config.h
 
 .c.o:
 	@echo "[SFF]  CC $<"
-	$(VB)$(CC) -c $(COPTFLAGS) $(CFLAGS) -o $@ $<
+	$(VB)$(CC) -c $(COPTFLAGS) $(CFLAGS) $(RISMSFF) -o $@ $<
 
 OBJS = conjgrad.o lmodC.o memutil.o nblist.o newton.o nmode.o wallclock.o \
 	   prm.o rand2.o sasad.o sff.o xminC.o ptrajmask.o
