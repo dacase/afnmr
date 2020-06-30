@@ -1,4 +1,6 @@
 #  Simple hard-wired config.h file for gnu compilers
+#    If MKLROOT is defined, use MKL; otherwise not.  Note that (for now)
+#    MKL is required for the 3D-RISM option.
 
 #set AFNMRHOME here, or use an environment variable:
 
@@ -30,32 +32,29 @@ ifeq "$(MKLROOT)" ""
    RISMSFF=""
    BLAS=install
    LAPACK=install
+   FFLAGS=-I$(INCDIR)
 else
-   FLIBS=-lsff -lrism -mkl -lifport -lifcore
+   FLIBS=-lsff -lrism $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_sequential.a $(MKLROOT)/lib/libmkl_core.a -lpthread -ldl $(LIBGFORTRAN) -lgfortran
    RISM=install
    RISMSFF=-DRISMSFF
    BLAS=skip
    LAPACK=skip
-endif
-
-CC=icc
-CFLAGS=
-COPTFLAGS=-O3 
-
-CXX=icpc
-CXXFLAGS=
-CXXOPTFLAGS=-O3
-
-FC=ifort
-ifeq "$(MKLROOT)" ""
-   FFLAGS=-I$(INCDIR)
-else
    FFLAGS=-I$(INCDIR) -I$(MKLROOT)/include -I$(MKLROOT)/include/fftw
 endif
+
+CC=gcc
+CFLAGS=
+COPTFLAGS=-O3 -mtune=native
+
+CXX=g++
+CXXFLAGS=
+CXXOPTFLAGS=-O3 -mtune=native
+
+FC=gfortran
 FOPTFLAGS=-O3 -mtune=native
 
 AR=ar rv
 RANLIB=ranlib
 FLEX=flex
 YACC=bison -y
-VB=
+VB=@
