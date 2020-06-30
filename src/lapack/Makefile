@@ -59,9 +59,6 @@ $(LIBDIR)/liblapack.a: $(OBJS)
 	@$(AR) $@ $(OBJS) > /dev/null
 	@$(RANLIB) $@
 
-skip:
-	@echo "skipping compilation of LAPACK"
-
 uninstall:
 	rm -f $(LIBDIR)/liblapack.a
 
