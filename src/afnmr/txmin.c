@@ -26,7 +26,7 @@ int main( int argc, char *argv[] )
 
    xmin_opt_init( &xo );  // sets the default parameters;
 
-   xo.maxiter = 5;                  // non-default minimization options:
+   xo.maxiter = 10;                  // non-default minimization options:
    xo.grms_tol = 0.0005;
    xo.ls_maxatmov = 0.15;
    xo.print_level = 1;
@@ -44,7 +44,7 @@ int main( int argc, char *argv[] )
 
 //   setup the force field parameters, and get an initial energy:
 
-   mm_options( "ntpr=1, gb=1, kappa=0.10395, rgbmax=99., cut=99.0, wcons=2. " );
+   mm_options( "ntpr=1, gb=8, kappa=0.10395, rgbmax=99., cut=99.0, wcons=2. " );
 
    // nothing frozen; constrain non-hydrogens:
    int* frozen = parseMaskString( "@ZZZ", prm, xyz, 2 );
@@ -56,8 +56,8 @@ int main( int argc, char *argv[] )
 
 //   run the minimization:
 
-   char title[] = " non-rattle minimization";
-   energy = xmin( mme,  &natm, xyz, grad,  &energy,  &grms,  &xo );
+   char title[] = " rattle minimization";
+   energy = xmin( mme_rattle,  &natm, xyz, grad,  &energy,  &grms,  &xo );
    putxv( argv[3], title, natm, start_time, xyz, xyz );
    energy = mme_rattle( xyz, grad, &iter );
 
