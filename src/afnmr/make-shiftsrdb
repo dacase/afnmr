@@ -67,5 +67,7 @@ elif [ "$program" = "g09" ]; then
 fi
 
 #  now sort the shifts by residue and atom name:
-sort -k1n -k2 $basename.rdbi >> $basename.rdb
+#    the tr kludge seems needed since (some) Linux sorts do not treat "'"
+#    in a consistent way.  Assumes that "z" will not appear in an atomname
+tr "'" "z" < $basename.rdbi | sort -k1n -k2 | tr "z" "'" >> $basename.rdb
 /bin/rm $basename.rdbi
