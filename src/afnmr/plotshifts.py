@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-from __future__ import division
+#!/usr/bin/env python
+
 
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -240,7 +240,7 @@ for ii, input_file in enumerate(opt.input_file):
       if opt.details:
          nucdata[key] = (xdata, ydata)
    
-      if opt.legend and len(datapoints.keys()) > 1:
+      if opt.legend and len(list(datapoints.keys())) > 1:
          marker, color = symbols[i%LS], colors[i%LC]
       else:
          marker, color = symbols[0], colors[3]
@@ -288,28 +288,28 @@ for ii, input_file in enumerate(opt.input_file):
          ax.text(opt.rlab[2*ii], opt.rlab[2*ii+1], lab,
                  fontsize=fontsizes['label'], transform=ax.transAxes)
 
-      print 'Plot %d' % ii
-      print '--------------------------------'
-      print 'Linear regression:'
-      print '     Slope = %.2f' % m
-      print ' Intercept = %.2f' % b
-      print ' Corr.Coef = %.3f' % r
-      print '        2'
-      print '       R   = %.3f' % (r * r)
-      print '         p = %.4f' % p
-      print ' Std. Err. = %.4f' % stderr
-      print '      RMSE = %.4f' % rmse
+      print('Plot %d' % ii)
+      print('--------------------------------')
+      print('Linear regression:')
+      print('     Slope = %.2f' % m)
+      print(' Intercept = %.2f' % b)
+      print(' Corr.Coef = %.3f' % r)
+      print('        2')
+      print('       R   = %.3f' % (r * r))
+      print('         p = %.4f' % p)
+      print(' Std. Err. = %.4f' % stderr)
+      print('      RMSE = %.4f' % rmse)
       if opt.details:
          # Now print out the R^2 and RMSE for each type of nucleus
-         print ''
-         print 'Nucleus |  R^2   |  RMSE'
-         print '--------+--------+-------'
+         print('')
+         print('Nucleus |  R^2   |  RMSE')
+         print('--------+--------+-------')
          for key in nucdata:
             xdata, ydata = nucdata[key]
             m, b, r, p, stderr = linregress(xdata, ydata)
-            print '   %-4s | %.4f | %.4f' % (key, r*r, calc_rmse(xdata, ydata))
-         print ''
-      print '--------------------------------'
+            print('   %-4s | %.4f | %.4f' % (key, r*r, calc_rmse(xdata, ydata)))
+         print('')
+      print('--------------------------------')
 
    if len(pls) > 1 and opt.legend:
       if opt.printstats:
