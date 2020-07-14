@@ -13,22 +13,20 @@ $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
 $fulltensor=1;
 
-if( $reference eq "seg0" ){
-   $reference_set = "OLYP seg0 ";
-   $ref{"H"} = 33.3;   # A2 H shifts (no H1/H3)
-   $ref{"C"} = 182.5;  # A2 C shifts
-   $ref{"N"} = 245.9;  # 1d3z1 N shifts"
-   $ref{"P"} = 300.0;
-   $ref{"S"} = 0.0;
-   $ref{"F"} = 131.33;
-} elsif( $reference eq "mseg2" ){
-   $reference_set = "OLYP mseg2 ";
-   $ref{"H"} = 31.3;   # A2 H shifts (no H1/H3)
-   $ref{"C"} = 178.1;  # A2 C shifts
-   $ref{"N"} = 233.8;  # 1d3z1 N shifts 
-   $ref{"P"} = 300.0;
-   $ref{"S"} = 0.0;
-   $ref{"F"} = 131.33;
+if( $reference eq "ref_seg0" ){
+   $reference_set = "OLYP ref_seg0 ";
+   $ref{"H"} = 33.3;   # TMS
+   $ref{"C"} = 191.8;  # TMS
+   $ref{"N"} = 240.8;  # CH3NO2 + 380.5
+   $ref{"P"} = 300.0;  # guess
+   $ref{"F"} = 130.3; #CFCl3
+} elsif( $reference eq "ref_seg1" ){
+   $reference_set = "OLYP ref_seg1 ";
+   $ref{"H"} = 31.6;   # TMS
+   $ref{"C"} = 181.3;  # TMS
+   $ref{"N"} = 253.6;  # CH3NO2 + 380.5
+   $ref{"P"} = 325.0;  # guess
+   $ref{"F"} = 137.4; #CFCl3
 }
 
 if( $basename eq "header" ){

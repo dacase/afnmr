@@ -62,8 +62,8 @@ group.add_argument('--no-grid', dest='grid', default=True, action='store_false',
 group.add_argument('--r-label', dest='rlab', default=None, nargs='*',
                    metavar='<FLOAT>', help='''Location to put a label of the
                    correlation coefficient for the best-fit line''', type=float)
-group.add_argument('--rrmse', dest='rlabrmse', default=False,
-                   action='store_true', help='''Include the RMSE in the label
+group.add_argument('--slope', dest='rlabslope', default=False,
+                   action='store_true', help='''Include the slope in the label
                    printing the correlation coefficient. Default is not to''')
 group = parser.add_argument_group('Other Options:')
 group.add_argument('-d', '--detailed-stats', dest='details', default=False,
@@ -281,8 +281,8 @@ for ii, input_file in enumerate(opt.input_file):
          ax.text(xt, yt, FITLINE_LABEL % (m, abs(b), r**2, rmse),
                 transform=ax.transAxes, fontsize=14)
       if opt.rlab is not None:
-         if opt.rlabrmse:
-            lab = '$R = %.3f$\n$RMSE = %.3f ppm$' % (r, rmse)
+         if opt.rlabslope:
+            lab = '$R = %.3f$\n$slope = %.3f$' % (r, m)
          else:
             lab = '$R = %.3f$' % r
          ax.text(opt.rlab[2*ii], opt.rlab[2*ii+1], lab,

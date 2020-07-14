@@ -7,14 +7,26 @@
 
 sub numerically { $a <=> $b; }
 $resi = 0;
+@ARGV == 2 or die " usage: getshifts-demon reference basename \n";
+$reference = "$ARGV[0]";
+$basename = "$ARGV[1]";
 
 #  reference shieldings; (these are basis/functional dependent!)
-$ref{"H"} = 32.02;  # ernst3, vdzp, HA, 0-63
-$ref{"C"} = 244.0;  # ernst3, vdzp, CB, 0-63
-$ref{"N"} = 321.4;  # enrst3, vdzp, 0-63
-$ref{"O"} = 0.0;
-$ref{"P"} = 0.0;
-$ref{"S"} = 0.0;
+if( $reference eq "ref_seg0" ){
+   $reference_set = "OLYP ref_seg0 ";
+   $ref{"H"} = 33.3;   # TMS
+   $ref{"C"} = 191.8;  # TMS
+   $ref{"N"} = 240.8;  # CH3NO2 + 380.5
+   $ref{"P"} = 300.0;  # guess
+   $ref{"F"} = 130.3; #CFCl3
+} elsif( $reference eq "ref_seg1" ){
+   $reference_set = "OLYP ref_seg1 ";
+   $ref{"H"} = 31.6;   # TMS
+   $ref{"C"} = 181.3;  # TMS
+   $ref{"N"} = 253.6;  # CH3NO2 + 380.5
+   $ref{"P"} = 325.0;  # guess
+   $ref{"F"} = 137.4; #CFCl3
+}
 
 if( @ARGV ==2 && $ARGV[0] eq "header" ){
    # document the reference shieldings being used:
@@ -26,8 +38,6 @@ if( @ARGV ==2 && $ARGV[0] eq "header" ){
    printf( "4N\t8\t8\t10N\t10N\t10N\n" );
    exit(0);
 }
-
-@ARGV == 1 or die " usage basename \n";
 
 $basename = "$ARGV[0]";
 $_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
