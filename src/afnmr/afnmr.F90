@@ -872,18 +872,14 @@ program afnmr_x
             end do
             write(30,'(a)') 'AUXIS  (A2)'
             do i=1,nhighatom
-              if( dlabel(i)(1:1) .eq. 'H' ) then
-                write(30,'(a,a)') dlabel(i),' (GEN-A2)'
-              else
-                write(30,'(a,a)') dlabel(i),' (GEN-A2*)'
-              endif
+              write(30,'(a,a)') dlabel(i),' (GEN-A2*)'
             end do
           else if (basis .eq. 'T' ) then
             write(30,'(a)') 'BASIS  (pcSseg-1)'
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'D' ) then
             write(30,'(a)') 'BASIS  (pcSseg-0)'
-            write(30,'(a)') 'AUXIS  (GEN-A2)'
+            write(30,'(a)') 'AUXIS  (GEN-A2*)'
           endif
 
           if( demon5 ) then
