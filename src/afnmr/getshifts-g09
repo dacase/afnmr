@@ -15,18 +15,18 @@ $fulltensor=1;
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";
-   $ref{"H"} = 33.3;   # TMS
-   $ref{"C"} = 191.8;  # TMS
-   $ref{"N"} = 240.8;  # CH3NO2 + 380.5
+   $ref{"H"} = 33.2;   # TMS
+   $ref{"C"} = 189.9;  # TMS
+   $ref{"N"} = 241.2;  # CH3NO2 + 380.5
    $ref{"P"} = 300.0;  # guess
-   $ref{"F"} = 130.3; #CFCl3
+   $ref{"F"} = 130.2;  # CFCl3
 } elsif( $reference eq "ref_seg1" ){
    $reference_set = "OLYP ref_seg1 ";
    $ref{"H"} = 31.6;   # TMS
-   $ref{"C"} = 181.3;  # TMS
-   $ref{"N"} = 253.6;  # CH3NO2 + 380.5
+   $ref{"C"} = 183.1;  # TMS
+   $ref{"N"} = 254.9;  # CH3NO2 + 380.5
    $ref{"P"} = 325.0;  # guess
-   $ref{"F"} = 137.4; #CFCl3
+   $ref{"F"} = 139.6;  # CFCl3
 }
 
 if( $basename eq "header" ){
