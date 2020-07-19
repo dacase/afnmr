@@ -155,7 +155,7 @@ program afnmr_x
       solinprot = .false.
       qopt = .false.
       listsize = 0
-      version = '1.2'
+      version = '1.3'
 
       print*
       print*,'**********************************************'
@@ -730,12 +730,8 @@ program afnmr_x
 
         if( solinprot ) then
           close(33)
-#if 0
-          ier = system('./runsolinprot ' // filek(1:lengthb+3))
-#else  /* use this for GCC version 4.6 and above, esp. if above fails */
           call execute_command_line('./runsolinprot ' // filek(1:lengthb+3), &
                exitstat = ier)
-#endif
           if( ier .ne. 0 )then
              write(0,*) "error in solinprot: check solinprot.out"
              write(0,*) "error code was ", ier
