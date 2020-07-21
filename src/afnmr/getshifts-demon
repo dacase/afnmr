@@ -20,13 +20,15 @@ if( $reference eq "ref_seg0" ){
    $ref{"N"} = 241.8;  # CH3NO2 + 380.5
    $ref{"P"} = 300.0;  # guess
    $ref{"F"} = 136.0;  # CFCl3
-} elsif( $reference eq "ref_seg1 GEN-A2*" ){
-   $reference_set = "OLYP ref_seg1 ";
+} elsif( $reference eq "ref_seg1" ){
+   $reference_set = "OLYP ref_seg1 GEN-A2*";
    $ref{"H"} = 31.6;   # TMS
    $ref{"C"} = 181.5;  # TMS
    $ref{"N"} = 253.6;  # CH3NO2 + 380.5
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 137.4;  # CFCl3
+} else {
+   die "unrecognized reference set: $reference\n";
 }
 
 if( $basename eq "header" ){

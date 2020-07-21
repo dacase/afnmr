@@ -27,7 +27,10 @@ if( $reference eq "ref_seg0" ){
    $ref{"N"} = 254.9;  # CH3NO2 + 380.5
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 139.6;  # CFCl3
+} else {
+   die "unrecognized reference set: $reference\n";
 }
+
 
 if( $basename eq "header" ){
    # document the reference shieldings being used:
