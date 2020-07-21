@@ -875,7 +875,7 @@ program afnmr_x
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'D' ) then
             write(30,'(a)') 'BASIS  (pcSseg-0)'
-            write(30,'(a)') 'AUXIS  (GEN-A2*)'
+            write(30,'(a)') 'AUXIS  (GEN-A2)'
           endif
 
           if( demon5 ) then

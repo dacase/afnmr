@@ -26,7 +26,7 @@ int main( int argc, char *argv[] )
 
    xmin_opt_init( &xo );  // sets the default parameters;
 
-   xo.maxiter = 10;                  // non-default minimization options:
+   xo.maxiter = 5;                  // non-default minimization options:
    xo.grms_tol = 0.0005;
    xo.ls_maxatmov = 0.15;
    xo.print_level = 1;
@@ -52,13 +52,13 @@ int main( int argc, char *argv[] )
 
    mme_init_sff( prm, frozen, constrained, xyz_ref, NULL );
    iter = -1;   // historical flag to give more verbose output
-   energy = mme_rattle( xyz, grad, &iter );
+   energy = mme( xyz, grad, &iter );
 
 //   run the minimization:
 
-   char title[] = " rattle minimization";
-   energy = xmin( mme_rattle,  &natm, xyz, grad,  &energy,  &grms,  &xo );
+   char title[] = "minimization";
+   energy = xmin( mme,  &natm, xyz, grad,  &energy,  &grms,  &xo );
    putxv( argv[3], title, natm, start_time, xyz, xyz );
-   energy = mme_rattle( xyz, grad, &iter );
+   energy = mme( xyz, grad, &iter );
 
 }
