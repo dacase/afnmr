@@ -386,7 +386,7 @@ if [ "\$?" -gt 0 ]; then
    exit 1
 fi
 $AFNMRHOME/bin/pair < check.dat
-/bin/rm input.xyzv surf.pos check.dat
+/bin/rm input.xyzv surf.pos check.dat \$1.prot.pqr
 exit 0
 
 EOF3
@@ -411,7 +411,7 @@ cat afnmr.out >> $1.afnmr.log
 #  Some fine file clean-ups  (optional)
 #============================================================================
 /bin/rm -f $1.min.x \
-       srfchg.pos runms.solsurf runsolinprot leap.log
+       srfchg.pos runms.solsurf runsolinprot leap.log 
 
 if [ "$build" = "yes" ]; then
 	/bin/rm -f $1.x $1.parm7
