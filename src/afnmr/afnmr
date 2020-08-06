@@ -22,10 +22,11 @@ Optional flags:
                    If this flag is not present, fragments will be created
                    for residues 1 up to the last protein or nucleic acid
                    residue
-   -mixedb         use a mixed basis with the primary residue at TZP,
+   -mixedb         use a mixed basis with the primary residue at pcSseg01
                    others at DZP
-   -tzp            all quantum residues are treated at the TZP level
-   -dzp            all quantum residues are treated at the DZP level (default)
+   -tzp            all quantum residues are treated at the pcSseg-1 level
+   -dzp            all quantum residues are treated at the pcSseg-0 level 
+                      (default)
    -solinprot      use the solinprot program to get surface charges (default)
    -demon, -deMon  Set up quantum input files to use with deMon
    -demon5         Set up quantum input files to use with deMon, v5 (default)
