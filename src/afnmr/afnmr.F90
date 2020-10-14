@@ -35,7 +35,7 @@ program afnmr_x
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), T (TeraChem), S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
-!                  or M (primary res. T, rest D)
+!                  or M (primary res. T, rest D) or A (aug-tzp)
 !            solinprot is T or F
 !            qopt is T or F, to turn on or off quantum geometry optimization,
 !                  or X (for internal optimization with xtb)
@@ -76,7 +76,7 @@ program afnmr_x
       integer system
 #endif
 
-      integer, parameter ::MAXNRES=32,MAXPRES=31
+      integer, parameter ::MAXNRES=33,MAXPRES=31
       character(len=3) :: nresn(MAXNRES), presn(MAXPRES)
 
       nresn(1) = '  G'
@@ -111,6 +111,7 @@ program afnmr_x
       nresn(30) = 'gtp'
       nresn(31) = 'DMA'
       nresn(32) = 'M6A'
+      nresn(33) = 'CYH'
 
       presn(1) = 'ALA'
       presn(2) = 'ARG'
@@ -847,6 +848,17 @@ program afnmr_x
             end do
             close(11)
 64          continue
+
+          else if( basis .eq. 'A' ) then
+            open( UNIT=11, FILE=trim(afnmrhome) // &
+                '/basis/aug-pcsseg-1.1.gbs')
+            rewind(11)
+            do kbas=1,9999
+               read(11,'(a80)',end = 65) line
+               write(30,'(a)') trim(line)
+            end do
+            close(11)
+65          continue
 
           endif
 
