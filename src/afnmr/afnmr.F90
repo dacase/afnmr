@@ -35,7 +35,7 @@ program afnmr_x
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), T (TeraChem), S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
-!                  or M (primary res. T, rest D) or A (aug-tzp)
+!                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
 !            qopt is T or F, to turn on or off quantum geometry optimization,
 !                  or X (for internal optimization with xtb)
@@ -464,17 +464,15 @@ program afnmr_x
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
           write(30,'(a)') '%nprocshared=4'
-#if 0   /* for getting Gaussian atomic charges  */
-          write(30,'(a)') '# HF/6-31G(d) charge nosymm Pop=MK'
-#else
           write(30,'(a,a,a)', advance='no')  '# ', trim(functional), &
               '/Gen charge nosymm '
           if (qopt) then
             write(30,'(a)') 'Opt ReadOptimize '
+          else if (basis .eq. 'S' ) then
+            write(30,'(a)') 'Pop=HLY '
           else
             write(30,'(a)') 'nmr(printeigenvectors) integral(grid=ultrafine)'
           endif
-#endif
           write(30,*)
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -859,6 +857,17 @@ program afnmr_x
             end do
             close(11)
 65          continue
+
+          else if( basis .eq. 'S' ) then
+            open( UNIT=11, FILE=trim(afnmrhome) // &
+                '/basis/pcseg-0.1.gbs')
+            rewind(11)
+            do kbas=1,9999
+               read(11,'(a80)',end = 66) line
+               write(30,'(a)') trim(line)
+            end do
+            close(11)
+66          continue
 
           endif
 

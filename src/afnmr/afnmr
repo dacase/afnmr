@@ -27,6 +27,7 @@ Optional flags:
    -tzp            all residues are treated at the pcSseg-1 level
    -aug-tzp        all residues are treated at the aug-pcSseg-1 level
    -dzp            all residues are treated at the pcSseg-0 level (default)
+   -shape          all residues are treated at the pcseg-0 level
    -solinprot      use the solinprot program to get surface charges (default)
    -demon, -deMon  Set up quantum input files to use with deMon
    -demon5         Set up quantum input files to use with deMon, v5 (default)
@@ -98,6 +99,7 @@ while [ $# -gt 0 ]; do
         -tzp)         basis="T";;
         -aug-tzp)     basis="A";;
         -dzp)         basis="D";;
+        -shape)       basis="S";;
         -demon)       program="D";;
         -deMon)       program="D";;
         -demon5)      program="E";;
