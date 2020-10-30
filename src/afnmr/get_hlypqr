@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# set basename: assumes that <basename>.pqr and <basename>.log are
+# present;  output goes to <basename>.hly.pqr
+basename=$1
+
+# first, construct the pqr files with HLY charges:
+log_to_hlypqr $basename
+
+# next: sort the file on atom number:
+sort -k2n $basename.hly.pqr > look
+/bin/mv look $basename.hly.pqr

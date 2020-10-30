@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+$logfile = @ARGV[0] . ".log";
+$pqrfile = @ARGV[0] . ".pqr";
+$hlypqrfile = @ARGV[0] . ".hly.pqr";
+
+open( LOG, "<", $logfile ) || die "can't open $logfile";
+
+while (<LOG>) {
+   last if $_ =~ "ESP charges:"
+}
+$_ = <LOG>;  # skip next line
+
+#
+#   first, read in a pdb file line and unpack
+#
+
+open( PQR, "<", $pqrfile) || die "can't open $pqrfile";
+open( HLYPQR, ">", $hlypqrfile) || die "can't open $hlypqrfile";
+
+while (<PQR>) {
+if( $_ =~ /^ATOM|^HETATM/){
+
+$pqrat++;
+
+#  expand to 80+ characters (really hokey version):
+chop($_);
+$_ .= "                                                                    ";
+
+( $label, $atno, $atname, $alt, $resname, $chainId, $resno, $iCode,
+      $x, $y, $z, $chg, $radius, $element, $charge ) =
+    unpack("a6 a5 x a4 a a3 x a a4 a x3 a8 a8 a8 a8 a8 x6 a2 a2",$_);
+
+#
+#  do modifications necessary here:
+#
+$line = <LOG>;
+($qno,$qelement,$chg) = split(' ',$line);
+
+if( $qno != $pqrat ){
+   print "mismatch:";
+   print $line;
+   print $_;
+   exit 1;
+}
+
+#
+#  write back out
+#
+printf HLYPQR 
+"%6s%5s %-4s%1s%3s %1s%4s%1s   %8.3f%8.3f%8.3f%8.4f%8.3f      %2s%2s\n",
+      $label, $atno,$atname,$alt, $resname,$chainId, $resno, $iCode,
+        $x,$y,$z, $chg, $radius, $element, $charge;
+
+}
+}
