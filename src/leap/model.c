@@ -1016,22 +1016,22 @@ this = 0;
  *      Return an ideal bond length for the bond between the two
  *      atoms.
  */
-double
-dModelBondLength( ATOM aAtom1, ATOM aAtom2 )
+double dModelBondLength( ATOM aAtom1, ATOM aAtom2 )
 {
-double		dValue, dK;
-STRING		s1, s2, sDesc;
-PARMSET		psTemp;
-int		iTag;
+  double dValue, dK, dKpull, dRpull0, dKpress, dRpress0;
+  STRING s1, s2, sDesc;
+  PARMSET psTemp;
+  int iTag;
 
-    if ( bParmLibDefaultExists() ) {
-    	PARMLIB_DEFAULT_LOOP( psTemp,
+  if (bParmLibDefaultExists()) {
+    PARMLIB_DEFAULT_LOOP( psTemp,
 		( iTag = iParmSetFindBond( psTemp, 
 						sAtomType(aAtom1),
 						sAtomType(aAtom2) ) ) );
 	if ( iTag != PARM_NOT_FOUND ) {
-	    ParmSetBond( psTemp, iTag, s1, s2, &dK, &dValue, sDesc );
-	    return(dValue);
+	  ParmSetBond(psTemp, iTag, s1, s2, &dK, &dValue, &dKpull, &dRpull0, &dKpress,
+		      &dRpress0, sDesc);
+          return(dValue);
 	}
     }
 

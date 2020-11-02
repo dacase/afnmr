@@ -146,14 +146,14 @@
 
 #ifdef BOOL_IN_X11_XMD
 # include <X11/Xmd.h>
-#endif
-
-#if HAVE_BOOL || defined(BOOL)
-// do nothing
-#elif defined(HAVE__BOOL)
-typedef _Bool BOOL;
 #else
+# if HAVE_BOOL || defined(BOOL)
+// do nothing
+# elif defined(HAVE__BOOL)
+typedef _Bool BOOL;
+# else
 typedef unsigned char   BOOL;
+# endif
 #endif
 
 #if defined(WIN32) && !defined(MAXPATHLEN)

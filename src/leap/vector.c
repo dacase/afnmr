@@ -197,7 +197,7 @@ VECTOR  V;
 double
 dVectorDot( VECTOR *vPX, VECTOR *vPY )
 {
-    return(( vPX->dX*vPY->dX + vPX->dY*vPY->dY + vPX->dZ*vPY->dZ ));
+    return( vPX->dX*vPY->dX + vPX->dY*vPY->dY + vPX->dZ*vPY->dZ );
 }
 
 
@@ -313,7 +313,7 @@ double          dChi;
                         /* The chirality calculated will be correct */
 
         if ( !bB ) {
-            if ( !bA || !bC || !bD ) goto DONE;
+            if ( !bC || !bD ) goto DONE; /* Here bA is not 0 */
             dChi = dVectorAtomChirality( vPCenter, vPA, vPC, vPD );
             goto DONE;
         }
@@ -322,12 +322,11 @@ double          dChi;
                         /* The chirality calculated will be negative wrt the */
                         /* correct chirality */
         if ( !bC ) {
-            if ( !bA || !bB || !bD ) goto DONE;
+            if ( !bD ) goto DONE; /* Here both bA and bC are not 0 */
             dChi = -dVectorAtomChirality( vPCenter, vPA, vPB, vPD );
             goto DONE;
         }
 
-        if ( !bA || !bB || !bC ) goto DONE;
         dChi = dVectorAtomChirality( vPCenter, vPA, vPB, vPC );
     }
     

@@ -855,8 +855,8 @@ char            cInsertionCode;
         VPWARN(( "Atom names in each residue should be unique.\n" ));
         VP0(( "     (Same-name atoms are handled by using the first\n" ));
         VP0(( "      occurrence and by ignoring the rest.\n" ));
-        VP0(( "      Frequently duplicate atom names stem from alternate\n" ));
-        VP0(( "      conformations in the PDB file.)\n\n" ));
+        VP0(( "      Many instances of duplicate atom names usually come\n" ));
+        VP0(( "      from alternate conformations in the PDB file.)\n\n" ));
     }
 
     destroy_index( &atomindex );

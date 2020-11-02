@@ -1576,15 +1576,15 @@ STRING		s1, s2, s3, s4;
 void
 BuildRelaxInFramework( UNIT uUnit, MINIMIZER mStrain )
 {
-LOOP            lAtoms, lTemp;
-ATOM            aAtom, aAtom1, aAtom2, aAtom3, aAtom4;
-BOOL            bM1, bM2, bM3, bM4, bOneMinimizedAtom;
-double          dKb, dR0, dKt, dT0, dTkub, dRkub, dKp, dP0;
-double          dScEE, dScNB;
-STRING		sAtom1, sAtom2, sAtom3, sAtom4, sDesc;
-PARMSET		psTemp;
-TORSION		tTorsion;
-int		iTag, i, iIndex, iN, iDefaults;
+  LOOP lAtoms, lTemp;
+  ATOM aAtom, aAtom1, aAtom2, aAtom3, aAtom4;
+  BOOL bM1, bM2, bM3, bM4, bOneMinimizedAtom;
+  double dKb, dR0, dKpull, dRpull0, dKpress, dRpress0,dKt, dT0, dTkub, dRkub, dKp, dP0;
+  double dScEE, dScNB;
+  STRING sAtom1, sAtom2, sAtom3, sAtom4, sDesc;
+  PARMSET psTemp;
+  TORSION tTorsion;
+  int iTag, i, iIndex, iN, iDefaults;
 
                 /* Now do the minimization */
                 /* Add all atoms that */
@@ -1647,7 +1647,8 @@ int		iTag, i, iIndex, iN, iDefaults;
 					      sAtomType(aAtom1),
 					      sAtomType(aAtom2) ) ) );
 	if ( iTag != PARM_NOT_FOUND ) {
-	    ParmSetBond( psTemp, iTag, sAtom1, sAtom2, &dKb, &dR0, sDesc );
+	  ParmSetBond(psTemp, iTag, sAtom1, sAtom2, &dKb, &dR0, &dKpull, &dRpull0, &dKpress,
+		      &dRpress0, sDesc);
 	} else {
 
 		/* Get a parameter from the model builder */

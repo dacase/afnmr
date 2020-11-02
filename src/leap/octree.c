@@ -733,7 +733,7 @@ double		dTx, dTy, dTz, dTmax, dTmp;
 					i++;
 				}
 				if ( i > 3  &&  nowarning ) {
-					VPWARN(( "Non-water solvent may ",
+					VPWARN(( "Non-water solvent may "
 						"lead to steric problems\n" ));
 					nowarning = 0;
 				}

@@ -3005,7 +3005,7 @@ char            *sCmd = "set";
                         sOString(oAssocObject(aaArgs[1])),
                         oAssocObject(aaArgs[2]) );
             } else {
-                VPFATALEXIT(( "%s: Cannot set attribute for %s - not a 'container'\n",
+                VPFATALEXIT(( "%s: Cannot set attribute for %s - not a 'container'\n"
                         "\ttype %s\n", sCmd, sAssocName(aAssoc),
                          sObjectType(oAssocObject(aAssoc)) ));
             }
@@ -6721,7 +6721,7 @@ char    *sCmd = "alias";
                     }
                 }
                 if ( bOK == FALSE ) {
-                    VPFATALEXIT(( "%s: '%s' is already one of the commands.\n", 
+                    VPFATALEXIT(( "%s: '%s' is already one of the commands.\n"
                         "Please try something different.\n", sCmd, sAlias ));
                     return( NULL );
                 }       

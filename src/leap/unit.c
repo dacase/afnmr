@@ -1729,7 +1729,7 @@ LIST    lAtoms;
  *
  *      Author: Christian Schafmeister (1991)
  *
- *      Run checks on the UNIT and its contents to see if the are
+ *      Check the UNIT and its contents to see if they are
  *      ready to have calculations run on them.
  *
  *TODO: Figure out what you want to do with RESTRAINTs
@@ -1753,8 +1753,8 @@ double          dCharge, dPertCharge, dFrac, dAbs;
 BOOL            bPert;
 
 
-        /* Check to make sure that all bond lengths are 2.0 angstroms */
-        /* or less, flag those that are as warnings */
+    /* Check to make sure that all bond lengths are between MAXBONDLEN and */
+    /* MINBONDLEN angstroms and flag those that are not as warnings. */
 
     lBonds = lLoop( (OBJEKT)uUnit, BONDS );
     while ( oNext(&lBonds) ) {
@@ -1768,8 +1768,9 @@ BOOL            bPert;
 		 strcmp( sAtomName( aAtom2 ), "EPW" ) == 0 ) {
 	      /* Lone pair, ignore it  */
 	    } else {
-            VPWARN(( "There is a bond of %lf angstroms between: \n",
-                    "-------  %s and %s\n", dLen,
+            VPWARN(( "There is a bond of %.3lf angstroms between %s and %s atoms:"
+                    "\n-------  %s and %s\n",
+                    dLen, sAtomName( aAtom1 ), sAtomName( aAtom2 ),
                     sContainerFullDescriptor( (CONTAINER)aAtom1, sTemp1 ),
                     sContainerFullDescriptor( (CONTAINER)aAtom2, sTemp2 ) ));
 	    }
