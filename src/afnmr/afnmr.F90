@@ -76,7 +76,7 @@ program afnmr_x
       integer system
 #endif
 
-      integer, parameter ::MAXNRES=33,MAXPRES=31
+      integer, parameter ::MAXNRES=33,MAXPRES=41
       character(len=3) :: nresn(MAXNRES), presn(MAXPRES)
 
       nresn(1) = '  G'
