@@ -85,6 +85,7 @@ args=$@
 
 cat > leap.in << EOF
 source leaprc.protein.ff14SB
+source leaprc.phosaa14SB
 source leaprc.RNA.OL3
 source leaprc.DNA.OL15
 source leaprc.water.tip3p

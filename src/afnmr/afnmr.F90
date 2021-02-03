@@ -144,6 +144,16 @@ program afnmr_x
       presn(29) = 'NHE'
       presn(30) = 'NME'
       presn(31) = 'CYB'
+      presn(32) = 'PTR'
+      presn(33) = 'SEP'
+      presn(34) = 'TPO'
+      presn(35) = 'Y1P'
+      presn(36) = 'S1P'
+      presn(37) = 'T1P'
+      presn(38) = 'H1D'
+      presn(39) = 'H2D'
+      presn(40) = 'H1E'
+      presn(41) = 'H2E'
 
       gaussian = .false.
       orca = .false.
