@@ -71,6 +71,7 @@ while ($_ = <OUT>) {
 
        @f = split( ' ', $_ ); $iat = $f[4]; $elem = substr($f[6],0,1);
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       next if $elem eq "S";
        <OUT>; <OUT>; <OUT>; <OUT>; 
 
        #  get full shielding tensor:
@@ -107,8 +108,8 @@ while ($_ = <OUT>) {
        } else {
           $delta  = -$diso + $eigval[2];  $eta = ($eigval[1]-$eigval[0])/$delta;
        }
-       # use solution-state definition of delta:
-       $delta *= -1.5;
+       # uncomment next line to use solution-state definition of delta:
+       # $delta *= -1.5;
 
        if( $fulltensor ){
           printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 

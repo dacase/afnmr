@@ -65,6 +65,7 @@ while (<OUT>) {
        @f = split( ' ', $_ ); $_ = $f[1]; s/(\d+)(\w)/x/; 
        $iat = $1 + 1;   $elem = $2;
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       next if $elem eq "S";
        # skip 23 lines:
        <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>;
        <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>;

@@ -1,0 +1,23 @@
+#!/bin/zsh
+
+foreach i ({1..10}) do
+	make-shiftsrdb -demon ref_seg1 ct$i
+	column < ct$i.rdb res atomname shift > foo
+	mv foo ct$i.rdb
+	perl -p -i -e"s/shift/ct$i/" ct$i.rdb
+	column < ct$i.rdb ct$i > ct$i.rdbs
+done
+
+paste \
+ct1.rdb \
+ct2.rdbs \
+ct3.rdbs \
+ct4.rdbs \
+ct5.rdbs \
+ct6.rdbs \
+ct7.rdbs \
+ct8.rdbs \
+ct9.rdbs \
+ct10.rdbs > ct.rdball
+
+/bin/rm ct*.rdb ct*.rdbs

@@ -73,6 +73,7 @@ while (<LOG>) {
    if (m/ Isotropic = /) {
        @f = split( ' ', $_ ); $iat = $f[0]; $elem = $f[1];
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
        next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
                    ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
