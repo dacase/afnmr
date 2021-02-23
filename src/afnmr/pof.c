@@ -2,7 +2,8 @@
 /*LINTLIBRARY*/
 
 #include <math.h>
-double pof (double F, int m, int n)
+double
+pof (F, m, n) double F;
 	{
 	int	i, j;
 	int	a, b;

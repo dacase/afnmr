@@ -15,10 +15,10 @@ $(BINDIR)/ms: ms.f
 	@echo "[AFNMR]  FC $@"
 	$(VB)$(FC) $(FFLAGS) $(LDFLAGS) -o $@ $<
 
-$(BINDIR)/pair: pair.o number.o pof.o strings.o checkio.o 
+$(BINDIR)/pair: pair.o pof.o strings.o
 	@echo "[AFNMR]  CC $@"
-	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ pair.o number.o pof.o strings.o \
-            checkio.o $(LM)
+	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ pair.o pof.o strings.o \
+            $(LM)
 
 $(BINDIR)/afnmr.x: afnmr.F90
 	@echo "[AFNMR]  FC $@"

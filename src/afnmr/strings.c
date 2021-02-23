@@ -11,7 +11,10 @@
 #ifndef ESCAPE
 #define	ESCAPE '\\'
 #endif
-int sstrings (char *line, char *abase, int maxstrings, int maxchars)
+
+int sstrings (line, abase, maxstrings, maxchars)
+	char	*line;
+	char	*abase;
 	{
 	int	nstrings = 0;
 	int	nchars;
@@ -23,7 +26,7 @@ int sstrings (char *line, char *abase, int maxstrings, int maxchars)
 		while (*line && !isspace (*line) && nchars<maxchars-1)
 			if ((abase[nchars++] = *line++) == ESCAPE)
 				abase[nchars-1] = *line++;
-		abase[nchars] = '\0';
+		abase[nchars] = NULL;
 		abase += maxchars;
 		while (*line && !isspace (*line)) line++;
 		while (isspace (*line)) line++;
@@ -33,11 +36,12 @@ int sstrings (char *line, char *abase, int maxstrings, int maxchars)
 	return (nstrings);
 	}
 
-int fstrings (FILE *ioptr, char *abase, int maxstrings, int maxchars)
+int fstrings (ioptr, abase, maxstrings, maxchars)
+	FILE	*ioptr;
+	char	*abase;
 	{
 	char	line[BUFSIZ];
 
 	if (fgets (line, BUFSIZ, ioptr) == NULL) return (EOF);
 	return (sstrings (line, abase, maxstrings, maxchars));
 	}
-
