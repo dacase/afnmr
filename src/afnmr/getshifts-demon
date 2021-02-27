@@ -2,16 +2,16 @@
 
 #******************************************************************************
 # collect shifts from demon outputs
-#   usage:  getshifts-demon reference basename; rdb file stdout
+#   usage:  getshifts-demon reference basename fulltensor; rdb file stdout
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
 sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 
-@ARGV == 2 or die " usage: getshifts-demon reference basename \n";
+@ARGV == 3 or die " usage: getshifts-demon reference basename fulltensor\n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor=0;
+$fulltensor= "$ARGV[2]";
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 GEN-A2";
@@ -37,9 +37,12 @@ if( $basename eq "header" ){
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   if( $fulltensor ){
+   if( $fulltensor == 2 ){
       printf("res\tatomname\tresname\tshift\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n");
       printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+   } elsif( $fulltensor == 1 ){
+      printf("res\tatomname\tresname\tshift\td11\td22\td33\n");
+      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\n" );
    } else {
       printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
       printf( "8N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
@@ -84,11 +87,11 @@ while ($_ = <OUT>) {
        $_ = <OUT>; @f = split( ' ', $_ ); 
        $szx=$f[1]; $szy=$f[2]; $szz=$f[3];
 
-       #  grab and print the isotropic shift:
+       #  get the isotropic shift:
        <OUT>; <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
        $diso = $ref{$elem} - $f[3];
 
-       #  get the principal shifts:
+       #  get the principal components of the shift tensor:
        <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
        $d11=$ref{$elem} - $f[0]; 
        $d22=$ref{$elem} - $f[1]; 
@@ -102,6 +105,7 @@ while ($_ = <OUT>) {
        $_ = <OUT>; @f = split( ' ', $_ ); 
        $v13 = $f[0]; $v23 = $f[1]; $v33 = $f[2];
 
+       # get delta and eta using the Haberlin convention:
        @eigval = sort numerically $d11,$d22,$d33;
        if( abs($diso - $eigval[0]) > abs($diso - $eigval[2]) ){
           $delta  = -$diso + $eigval[0];  $eta = ($eigval[1]-$eigval[2])/$delta;
@@ -111,10 +115,13 @@ while ($_ = <OUT>) {
        # uncomment next line to use solution-state definition of delta:
        # $delta *= -1.5;
 
-       if( $fulltensor ){
+       if( $fulltensor == 2 ){
           printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
             $res[$iat],$aname[$iat],$rname[$iat],$diso,$sxx,$sxy,$sxz,
             $syx,$syy,$syz,$szx,$szy,$szz;
+       } elsif( $fulltensor == 1 ){
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
+            $res[$iat],$aname[$iat],$rname[$iat],$diso,$d11,$d22,$d33,
        } else {
            if( $aname[$iat] eq "N" ){
               # N-H vector:
