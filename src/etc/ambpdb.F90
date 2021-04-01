@@ -18,7 +18,7 @@ program ambpdb
    logical :: ext_pdb_data
    
    double precision, dimension(:), allocatable :: coords, fhbene, chg
-   real, dimension(:), allocatable :: radius
+   real, dimension(:), allocatable :: radius, atom_occupancy, atom_bfactor
    double precision :: hbene
 
    integer, dimension(:), allocatable :: ix, residue_number
@@ -134,8 +134,8 @@ program ambpdb
             residue_number(nreslen), &
             residue_chainid(nreslen), atom_altloc(natomlen), &
             atomic_number(natomlen), residue_icode(nreslen), &
-            isymbl(natomlen), &
-            stat = ier)
+            isymbl(natomlen), atom_occupancy(natomlen), &
+            atom_bfactor(natomlen), stat = ier)
   
    if (ier /= 0) then
       write(0,*) 'memory allocation failure'
@@ -145,7 +145,8 @@ program ambpdb
    call getnam(natom,nres,igraph,ipres,lbres,ititl,10, &
                coords,ix,ib,jb,nbond,chg,radius,lastat,ter,hasradii, &
                residue_number, residue_chainid, atom_altloc, &
-               atomic_number, residue_icode, ext_pdb_data,isymbl)
+               atomic_number, residue_icode, ext_pdb_data, isymbl, &
+               atom_occupancy, atom_bfactor)
    close(unit=10)
 
    ! ----- READ THE COORDINATE FILE -----
@@ -184,7 +185,8 @@ program ambpdb
                   alttit,title,center,chg,aatm,bres,ioffset,lastat, &
                   ftype,radius,hasradii,remediate, &
                   residue_number, residue_chainid, atom_altloc, &
-                  atomic_number, residue_icode, ext_pdb_data)
+                  atomic_number, residue_icode, ext_pdb_data, &
+                  atom_occupancy, atom_bfactor)
       if (arg1 .eq. '-first') then
           call writebond(6,nbond,ib,jb)
           call writetf(6,ntf,itf,jtf)
@@ -263,7 +265,8 @@ end subroutine getnam0
 subroutine getnam(natom,nres,igraph,ipres,lbres,ititl,nf, &
                   coords,ix,ib,jb,nbond,chg,radius,lastat,ter,hasradii, &
                   residue_number,residue_chainid,atom_altloc, &
-                  atomic_number,residue_icode,ext_pdb_data,isymbl)
+                  atomic_number,residue_icode,ext_pdb_data,isymbl, &
+                  atom_occupancy, atom_bfactor)
 
    implicit none
 
@@ -283,6 +286,7 @@ subroutine getnam(natom,nres,igraph,ipres,lbres,ititl,nf, &
                                     residue_icode(nres), &
                                     atom_altloc(natom), isymbl(*)
    integer, intent(out) :: atomic_number(natom)
+   real, intent(out) :: atom_occupancy(natom), atom_bfactor(natom)
    
    ! Local variables
    character(len=80) :: fmt,fmtin,ifmt,afmt,rfmt,type,ititl
@@ -421,31 +425,42 @@ subroutine getnam(natom,nres,igraph,ipres,lbres,ititl,nf, &
         read(nf,fmt) (atomic_number(i), i=1,natom)
       endif
 
+      !  defaults, if not using extended pdb data:
+      residue_chainid = ' '
+      residue_icode = ' '
+      atom_altloc = ' '
+      atom_occupancy = 1.0
+      atom_bfactor = 0.0
+      
       if (ext_pdb_data) then
+
          call nxtsec(nf,6,1,'*','RESIDUE_NUMBER',fmt,iok)
          if (iok == 0) then
             read(nf,fmt) residue_number
-            call nxtsec(nf,6,0,'*','RESIDUE_CHAINID',fmt,iok)
-            read(nf,fmt) residue_chainid
-            call nxtsec(nf,6,1,'*','RESIDUE_ICODE',fmt,iok)
-            if (iok == 0) then
-               read(nf,fmt) residue_icode
-            else
-               residue_icode=' '
-            end if
-            call nxtsec(nf,6,1,'*','ATOM_ALTLOC',fmt,iok)
-            if (iok == 0) then
-               read(nf,fmt) atom_altloc
-            else
-               atom_altloc=' '
-            end if
          else
             write(*,'(A)') &
                   'PRMTOP file did not have extended PDB data.'
             ext_pdb_data = .false.
+            go to 10
          end if
+
+         call nxtsec(nf,6,0,'*','RESIDUE_CHAINID',fmt,iok)
+         if (iok == 0 ) read(nf,fmt) residue_chainid
+
+         call nxtsec(nf,6,1,'*','RESIDUE_ICODE',fmt,iok)
+         if (iok == 0) read(nf,fmt) residue_icode
+         call nxtsec(nf,6,1,'*','ATOM_ALTLOC',fmt,iok)
+         if (iok == 0) read(nf,fmt) atom_altloc
+
+         call nxtsec(nf,6,1,'*','ATOM_OCCUPANCY',fmt,iok)
+         if (iok == 0) read(nf,fmt) atom_occupancy
+
+         call nxtsec(nf,6,1,'*','ATOM_BFACTOR',fmt,iok)
+         if (iok == 0) read(nf,fmt) atom_bfactor
+
       end if
    end if
+  10  continue
 
 #if 0
    if (ifbox .gt. 0) then
@@ -533,7 +548,8 @@ subroutine genpdb(natom,nres,coords,igraph,ipres,lbres,ititl,nf,arg1, &
                   alttit,title,center,chg,aatm,bres,ioffset,lastat, &
                   ftype,radius,hasradii,remediate, &
                   residue_number, residue_chainid, atom_altloc, &
-                  atomic_number, residue_icode, ext_pdb_data)
+                  atomic_number, residue_icode, ext_pdb_data, &
+                  atom_occupancy, atom_bfactor)
    
    implicit none
 
@@ -555,6 +571,7 @@ subroutine genpdb(natom,nres,coords,igraph,ipres,lbres,ititl,nf,arg1, &
    character(len=40),intent(in) :: title
    character(len=80),intent(in) :: ititl
    integer, intent(in) :: atomic_number(natom)
+   real, intent(in) :: atom_occupancy(natom), atom_bfactor(natom)
 
    ! Local variables   
    integer :: i, iat, imol, isrn, itype, &
@@ -895,7 +912,8 @@ subroutine genpdb(natom,nres,coords,igraph,ipres,lbres,ititl,nf,arg1, &
                   '(A4,I7,1X,A4,A1,A3,1X,A1,I4,A1,3X,3F8.3,2F6.2,10X,A2)')  &
                   'ATOM',k_print,atnam,atom_altloc(j)(1:1),lbres(j), &
                   residue_chainid(j)(1:1),residue_number(j), &
-                  residue_icode(j)(1:1),coords(kc+1:kc+3),1.0,0.0, &
+                  residue_icode(j)(1:1),coords(kc+1:kc+3), &
+                  atom_occupancy(k), atom_bfactor(k), &
                   element(atomic_number(k))
             else
                write(nf, &
