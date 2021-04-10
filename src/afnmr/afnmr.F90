@@ -538,16 +538,16 @@ program afnmr_x
         else if ( demon ) then
           write(30,'(a,i4,a,a,a,f5.2)') 'TITLE AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
-          write(30,'(a)') 'SCFTYPE  RKS Tol=3.0e-6 MAX=150'
+          write(30,'(a)') 'SCFTYPE  RKS Tol=1.0e-6 MAX=100'
           write(30,'(a)') 'GUESS TB'
           write(30,'(a)') 'ORBITALS CARTESIAN'
           write(30,'(a)') 'ERIS MULTIPOLE'
           write(30,'(a,a)') 'VxcType Auxis ', trim(functional)
           write(30,'(a)') 'GRID FINE'
           write(30,'(a)') 'QUADRATURE RANDOM'
-          write(30,'(a)') 'MIXING -0.2'
-          write(30,'(a)') 'SHIFT -0.2'
-          write(30,'(a)') 'DIIS ON TOL=0.002'
+          write(30,'(a)') 'MIXING -0.1'
+          write(30,'(a)') 'SHIFT 0.0'
+          write(30,'(a)') 'DIIS ON'
 
         else if ( terachem ) then
           write(30,'(a)') 'basis 6-31gs'
