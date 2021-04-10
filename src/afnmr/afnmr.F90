@@ -593,7 +593,7 @@ program afnmr_x
         write(6,'(2i5)') kuser, cfrag
 
         if ( gaussian .or. qchem ) then
-          write(30,50)cfrag,1
+          write(30,'(1x,I3,2x,I2)') cfrag,1
         else if ( orca ) then
           write(30,'(a,i3,1x,i3)')'* xyz ',cfrag,1
         else if ( demon ) then
@@ -957,12 +957,30 @@ program afnmr_x
           write(30,'(a)') '   '
           write(30,'(a)') '$rem'
           write(30,'(a)') 'JOBTYPE       NMR'
+          write(30,'(a)') 'SCF_ALGORITHM  RCA_DIIS'
           write(30,'(a)') 'EXCHANGE      OPTX'
           write(30,'(a)') 'CORRELATION   LYP'
-          write(30,'(a)') 'BASIS         def2-SVP'
+          write(30,'(a)') 'BASIS         GEN'
+          write(30,'(a)') 'PURECART      111'
           write(30,'(a)') 'SYMMETRY      FALSE'
           write(30,'(a)') 'WAVEFUNCTION_ANALYSIS  FALSE'
           write(30,'(a)') '$end'
+          write(30,'(a)') ''
+
+          if( basis .eq. 'D' ) then
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
+          else if( basis .eq. 'T' ) then
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
+          else
+              write(0,*) 'Qchem currently only supports dzp or tzp basis sets'
+              stop
+          end if
+          rewind(11)
+          do kbas=1,9999
+             read(11,'(a80)',end = 67) line
+             write(30,'(a)') trim(line)
+          end do
+      67  close(11)
 
         else if ( terachem ) then  !  terachem is only for qopt calcs.
           write(30,'(a)') '$constraints'
@@ -1079,7 +1097,6 @@ program afnmr_x
 
 1315    format(3f10.4,2x,f12.8)
 1317    format(f12.8,2x,3f10.4)
-50      format(1x,I3,2x,I2)
 1316    format(3f15.6,2x,f12.8)
 1318    format(f12.8,2x,3f15.6)
 1319    format(a,3f15.6,2x,f12.8)
