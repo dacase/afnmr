@@ -26,7 +26,7 @@ int sstrings (line, abase, maxstrings, maxchars)
 		while (*line && !isspace (*line) && nchars<maxchars-1)
 			if ((abase[nchars++] = *line++) == ESCAPE)
 				abase[nchars-1] = *line++;
-		abase[nchars] = NULL;
+		abase[nchars] = '\0';
 		abase += maxchars;
 		while (*line && !isspace (*line)) line++;
 		while (isspace (*line)) line++;
