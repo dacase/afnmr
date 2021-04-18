@@ -295,6 +295,7 @@ program afnmr_x
            do m=1,MAXPRES
              if( rn.eq.presn(m) ) restype(nptemp) = 'P'
            end do
+           if( rn.eq.'HOH' .or. rn.eq.'WAT' ) restype(nptemp) = 'W'
 
         else if( line(1:3) .eq. 'TER' ) then
 !          mark residue nptemp as a terminal residue:
@@ -306,7 +307,7 @@ program afnmr_x
       !  figure out the last protein residue:
       lastprotres = nres
       do i=1,nres
-        if( restype(i) .eq. 'G' ) then
+        if( restype(i) .eq. 'G' .or. restype(i) .eq. 'W' ) then
            lastprotres = i-1
            exit
         endif
@@ -346,7 +347,7 @@ program afnmr_x
           residuename(lastprotres).eq.'NME' ) then
         selectC(lastprotres) = natom-2  !! will make kfinal=natom
       endif
-      if( restype(1).eq.'G' ) selectC(1) = 1
+      if( restype(1).eq.'G' .or. restype(1) .eq. 'W' ) selectC(1) = 1
       selectC(0) = 1
       selectC(nres+1) = natom+1
 !
@@ -389,11 +390,13 @@ program afnmr_x
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
 !
-                if( i.ge.selectC(resno(i)) .and. restype(resno(i)).ne.'G') then
+                if( i.ge.selectC(resno(i)) .and. &
+                restype(resno(i)).ne.'G' .and. restype(resno(i)).ne.'W') then
                    connect(resno(i)+1,resno(j))=.true.
                    connect(resno(j),resno(i)+1)=.true.
                 endif
-                if( j.ge.selectC(resno(j)) .and. restype(resno(j)).ne.'G') then
+                if( j.ge.selectC(resno(j)) .and. &
+                restype(resno(i)).ne.'G' .and. restype(resno(i)).ne.'W') then
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
@@ -727,7 +730,7 @@ program afnmr_x
         do kk=1,natom
           if( .not. atomsign(kk) ) then
             if( solinprot ) then
-               if ( restype(resno(kk)).ne.'G' ) &
+               if ( restype(resno(kk)).ne.'W' ) &
                write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
                   'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
                   (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
@@ -1173,7 +1176,7 @@ subroutine get_atom_range( kstart, kfinal, ktemp,  &
           if( ter(ktemp-1) ) then
             kstart=selectC(ktemp-1)+2
           endif
-        else    !  general (G) residue type: should be ligand or water
+        else    !  general (G/W) residue type: should be ligand or water
           kstart=selectC(ktemp)
           kfinal=selectC(ktemp+1)-1
         endif
