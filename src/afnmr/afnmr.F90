@@ -168,14 +168,14 @@ program afnmr_x
       listsize = 0
       version = '1.3.1'
 
-      print*
-      print*,'**********************************************'
-      print*,'AF-NMR'
-      print*
-      print*,'Authors : Xiao He, Kenneth Merz,'
-      print*,'          Sishi Tang and David A. Case'
-      print*,'Version: ', trim(version)
-      print*,'**********************************************'
+      write(6,*)
+      write(6,*)'**********************************************'
+      write(6,*)'AF-NMR'
+      write(6,*)
+      write(6,*)'Authors : Xiao He, Kenneth Merz,'
+      write(6,*)'          Sishi Tang and David A. Case'
+      write(6,*)' Version: ', trim(version)
+      write(6,*)'**********************************************'
 
       call get_environment_variable('AFNMRHOME', afnmrhome )
 
