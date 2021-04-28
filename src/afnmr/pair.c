@@ -68,7 +68,7 @@ char	*target, *argv0;
 	return (!strcmp (target, argv0+offset));
 	}
 
-void initial (argc, argv) char **argv;
+void initial (argc, argv) int argc; char **argv;
     {
     int	argnum;
     char	*optr;
