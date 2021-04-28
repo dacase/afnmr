@@ -50,7 +50,7 @@ m6ab_test1::
 	@echo "Running test quantum fragmentation on RNA with demon"
 	@echo
 	../../bin/afnmr -nobuild -list 6 m6ab.1
-	@../dacdif -r 1.e-6 m6ab.1006.inp.save m6ab.1006.inp
+	@../dacdif -a 1.e-5 m6ab.1006.inp.save m6ab.1006.inp
 	@../dacdif m6ab.1006.pqr.save m6ab.1006.pqr
 	@/bin/rm -f m6ab.1.afnmr.log 
 
