@@ -394,7 +394,7 @@ program afnmr_x
                    connect(resno(j),resno(i)+1)=.true.
                 endif
                 if( j.ge.selectC(resno(j)) .and. &
-                restype(resno(i)).ne.'G' .and. restype(resno(i)).ne.'W') then
+                restype(resno(j)).ne.'G' .and. restype(resno(j)).ne.'W') then
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
