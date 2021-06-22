@@ -7,11 +7,11 @@ program gridprune
       double precision x(MAXGRID), y(MAXGRID), z(MAXGRID), c(MAXGRID), &
           mx(MAXATOM), my(MAXATOM), mz(MAXATOM), b(MAXSURF), dis(MAXATOM), &
           a(MAXATOM,MAXSURF), closest, s(MAXATOM), bcopy(MAXATOM), &
-          acopy(MAXATOM,MAXSURF),pbc(MAXSURF)
+          acopy(MAXATOM,MAXSURF)
+!     double precision pbc(MAXSURF)
 
       double precision closec, mmx, mmy, mmz, mmc, molcharge, bsum,svdprec
-      integer i,j,ngrid,natom,jclos,nsurf,info,rank,nclose,lengthb
-      character*6 label
+      integer i,j,ngrid,natom,nsurf,info,rank,nclose,lengthb
       character*80 arg, line
       logical solinprot
 
@@ -59,7 +59,7 @@ program gridprune
       do i=1,MAXATOM
          read(5,'(a80)',end=199) line
          if( line(1:4) .eq. 'ATOM') then
-            read(line,'(a4,26x,4f8.3)') label, mmx, mmy, mmz, mmc
+            read(line,'(30x,4f8.3)') mmx, mmy, mmz, mmc
             j = j + 1
             mx(j) = mmx
             my(j) = mmy
@@ -100,7 +100,6 @@ program gridprune
                dis(j)=sqrt((x(i)-mx(j))**2 + (y(i)-my(j))**2 + (z(i)-mz(j))**2)
                if( dis(j) < closest ) then
                   closest = dis(j)
-                  jclos = j
                end if
             end do
             if (closest .gt. 0.5  .and. abs(c(i)) .gt. 0.00000008 )  then
