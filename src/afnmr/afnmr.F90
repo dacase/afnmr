@@ -960,7 +960,7 @@ program afnmr_x
           write(30,'(a)') '   '
           write(30,'(a)') '$rem'
           write(30,'(a)') 'JOBTYPE       NMR'
-          write(30,'(a)') 'SCF_ALGORITHM  RCA_DIIS'
+          write(30,'(a)') 'SCF_ALGORITHM  DIIS'
           write(30,'(a)') 'EXCHANGE      OPTX'
           write(30,'(a)') 'CORRELATION   LYP'
           write(30,'(a)') 'BASIS         GEN'
@@ -973,7 +973,7 @@ program afnmr_x
           if( basis .eq. 'D' ) then
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
           else if( basis .eq. 'T' ) then
-              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-1.in')
           else
               write(0,*) 'Qchem currently only supports dzp or tzp basis sets'
               stop
