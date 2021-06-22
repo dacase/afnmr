@@ -4,8 +4,8 @@ module comafnmr
 
    implicit none
    integer,parameter::MAXAT=60000,MAXRES=20000,MAXIQM=600
-   real(kind=8)::coord(3,MAXAT), fxyz(3,MAXIQM)
-   real(kind=8):: qmcharge(MAXAT),rad(MAXAT)
+   double precision::coord(3,MAXAT), fxyz(3,MAXIQM)
+   double precision:: qmcharge(MAXAT),rad(MAXAT)
    logical::connect(MAXRES,MAXRES)
    logical::atomsign(MAXAT)
    logical::ter(0:MAXRES)
@@ -50,17 +50,15 @@ program afnmr_x
       use comafnmr
       implicit none
 
-      double precision :: a,b,c,d,e,x,y,z,tempdis
-      integer :: ttnumber,strandno(MAXAT)
+      double precision :: a,b,c,d,x,y,z,tempdis
       character(len=8) :: lpchar
       character(len=1) :: program,basis,solinprotb,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: firstprotres, lastprotres
-      integer :: i,j,k,ki,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
-      integer :: kfinal,ktemp,kkatom,kstart,kcount,kbas
+      integer :: i,j,k,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
+      integer :: kfinal,ktemp,kstart,kcount,kbas
       integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
-      character(len=6) :: sn(MAXAT)
       character(len=3) :: rn
       character(len=1):: restype(MAXRES)
       character(len=30) :: pqrstart
@@ -68,7 +66,7 @@ program afnmr_x
       character(len=5) :: functional
       character(len=6) :: nbcutb
 
-      double precision total,pe,ee,ex,ec,dis,cuspfree,kinetic,nbcut
+      double precision dis,nbcut
       double precision chargef(MAXRES)
       character(len=80) line,basename,pdbfile,filek,afnmrhome,version
       integer lengthb,lengthc,natom
@@ -261,9 +259,9 @@ program afnmr_x
         read(10,'(a80)',end = 101) line
         if( line(1:5) .eq. 'ATOM ' .or. line(1:5) .eq. 'HETAT') then
            i = i + 1
-           read(line,100)sn(i),ttnumber,atomname(i),residue(i),  &
+           read(line,100)atomname(i),residue(i),  &
              resno_user(i),(coord(j,i),j=1,3),qmcharge(i),rad(i),element(i)
-100        format(a6,1x,I4,1x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
+100        format(12x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
            if( element(i) .eq. ' E' ) then  ! skip extra points
 !              .or. element(i).eq.'NA' .or. element(i).eq.'CL' &
 !              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
@@ -1240,14 +1238,14 @@ subroutine addH( iqm, x, y, z)
       use comafnmr
       implicit none
       integer, intent(in) :: iqm
-      real(kind=8), intent(in) ::  x,y,z
+      double precision, intent(in) ::  x,y,z
       character(len=3) i_char
 
       if( demon ) then
         write( i_char, '(i3)' ) iqm
         dlabel(iqm) = 'H' // adjustl(i_char)
         dlabel(iqm)(5:5) = ' ' 
-        write(30,'(1x,a,x,3f12.5)') dlabel(iqm),x,y,z
+        write(30,'(1x,a,1x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,1000)'H ',x,y,z
       else if ( gaussian ) then
