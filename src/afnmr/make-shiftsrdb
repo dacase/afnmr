@@ -8,9 +8,9 @@ cat<<EOD
 
 Usage: make-shiftsrdb qpgm reference <basename> fulltensor
 
-   where qpgm must be one of "-demon", "-g09" or "-orca"
+   where qpgm must be one of "-demon", "-g09", "-qchem" or "-orca"
    reference is the name of a reference shielding set
-   Input are <basename>xxx.{out,log} files
+   Input are <basename>xxx.{out,log,qcout} files
    Set fulltensor to 1 to get expanded CSA printouts
 
    Output goes to <basename>.rdb
@@ -38,6 +38,7 @@ case "$1" in
         -demon)       program="demon";;
         -orca)        program="orca";;
         -g09)         program="g09";;
+        -qchem)       program="qchem";;
         -help)        usage; exit 0;;
         --help)       usage; exit 0;;
         -h)           usage; exit 0;;
@@ -67,6 +68,11 @@ then
     done
 elif [ "$program" = "g09" ]; then
     for i in ${basename}???.log
+    do
+        $AFNMRHOME/bin/getshifts-$program $reference ${i%.*} $fulltensor >> $basename.rdbi
+    done
+elif [ "$program" = "qchem" ]; then
+    for i in ${basename}???.qcout
     do
         $AFNMRHOME/bin/getshifts-$program $reference ${i%.*} $fulltensor >> $basename.rdbi
     done
