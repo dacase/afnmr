@@ -924,10 +924,12 @@ program afnmr_x
 
           if( qopt ) then
             write(30,'(a)') 'OPTIMIZE CARTESIAN MAX=5'
-            write(30,'(a)') 'CONSTANTS'
-            do i=nhighatom+1,iqmprot
-               write(30,'(a,a)') dlabel(i), '  XYZ'
-            end do
+            if( nhighatom .lt. iqmprot ) then
+               write(30,'(a)') 'CONSTANTS'
+               do i=nhighatom+1,iqmprot
+                  write(30,'(a,a)') dlabel(i), '  XYZ'
+               end do
+            endif
           endif
 
         else if( orca ) then
