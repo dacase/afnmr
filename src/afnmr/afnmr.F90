@@ -56,7 +56,7 @@ program afnmr_x
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: firstprotres, lastprotres
-      integer :: i,j,k,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot
+      integer :: i,j,k,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas
       integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
       character(len=3) :: rn
@@ -883,8 +883,12 @@ program afnmr_x
           endif
 
           if (qopt) then
-            write(30,'(a,i4,a,i4,a,i4)') 'noatoms  atoms=1-', nhighatom, &
-                 ', ', iqmprot+1, '-', natom
+            if( nhighatom .lt. iqmprot ) then
+               write(30,'(a,i4,a,i4,a,i4)') 'noatoms  atoms=1-', nhighatom, &
+                    ', ', iqmprot+1, '-', natom
+            else
+               write(30,'(a,i4)') 'noatoms  atoms=1-', nhighatom
+            end if
             write(30,*)
           endif
 
@@ -936,12 +940,14 @@ program afnmr_x
           write(30,'(a)') '*'
           if( qopt ) then
             write(30,'(a)') '%geom MaxIter=5'
-            write(30,'(a)') '      Constraints'
-            do i=nhighatom+1,iqmprot
-               write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
-            end do
-             write(30,'(a)') '      end'
-             write(30,'(a)') '    end'
+            if( nhighatom .lt. iqmprot ) then
+               write(30,'(a)') '      Constraints'
+               do i=nhighatom+1,iqmprot
+                  write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
+               end do
+                write(30,'(a)') '      end'
+                write(30,'(a)') '    end'
+            endif
           endif
           !  next two lines are for versions of Orca up to 3.0.1
           ! write(30,'(a)') '%eprnmr  ori IGLO'
@@ -986,11 +992,13 @@ program afnmr_x
       67  close(11)
 
         else if ( terachem ) then  !  terachem is only for qopt calcs.
-          write(30,'(a)') '$constraints'
-          do i=nhighatom+1,iqmprot
-             write(30,'(a,i4)') '  atom ', i
-          end do
-          write(30,'(a)') '$end'
+          if( nhighatom .lt. iqmprot ) then
+             write(30,'(a)') '$constraints'
+             do i=nhighatom+1,iqmprot
+                write(30,'(a,i4)') '  atom ', i
+             end do
+             write(30,'(a)') '$end'
+          end if
 
         end if
 
@@ -998,8 +1006,10 @@ program afnmr_x
           write(44,'(a)') '$set'
           write(44,'(a,i3)') 'chrg ', cfrag
           write(44,'(a)') 'uhf   0'
-          write(44,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
-          write(44,'(a)') 'fixfc 0'
+          if( nhighatom .lt. iqmprot ) then
+             write(44,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
+             write(44,'(a)') 'fixfc 0'
+          end if
           write(44,'(a)') 'maxopt 30'
           write(44,'(a)') '$end'
           close(44)
