@@ -541,7 +541,7 @@ program afnmr_x
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
           write(30,'(a)') 'SCFTYPE  RKS Tol=1.0e-6 MAX=100'
           write(30,'(a)') 'GUESS TB'
-          write(30,'(a)') 'ORBITALS CARTESIAN'
+          write(30,'(a)') 'ORBITALS SPHERICAL'
           write(30,'(a)') 'ERIS MULTIPOLE'
           write(30,'(a,a)') 'VxcType Auxis ', trim(functional)
           write(30,'(a)') 'GRID FINE'
@@ -970,7 +970,7 @@ program afnmr_x
           write(30,'(a)') 'EXCHANGE      OPTX'
           write(30,'(a)') 'CORRELATION   LYP'
           write(30,'(a)') 'BASIS         GEN'
-          write(30,'(a)') 'PURECART      111'
+          write(30,'(a)') 'PURECART      1111'
           write(30,'(a)') 'SYMMETRY      FALSE'
           write(30,'(a)') 'WAVEFUNCTION_ANALYSIS  FALSE'
           write(30,'(a)') '$end'
