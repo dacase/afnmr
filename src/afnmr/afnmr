@@ -166,6 +166,8 @@ echo "Running AFNMR on $1.pdb"
 #============================================================================
 echo "Running tleap"
 cat <<EOF >> leap.in
+set default nocenter on
+set default reorder_residues off
 x = loadpdb $1.pdb
 $afterloadpdb
 saveamberparm x $1.parm7 $1.x
