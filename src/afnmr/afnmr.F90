@@ -374,16 +374,27 @@ program afnmr_x
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
+#if 0
             if( (dis.le.nbcut .and. element(i).ne.' H' .and.  &
                                     element(j).ne.' H') )then
+#else
+            ! test: don't use protein side-chain atoms to determine contacts
+            if( dis.le.nbcut .and. element(i).ne.' H' .and.  &
+                                   element(j).ne.' H' .and.  &
+                ( atomname(i).eq.' C  ' .or. atomname(i).eq.' CA ' .or. &
+                  atomname(i).eq.' N  ' .or. atomname(i).eq.' O  ' .or. &
+                  atomname(j).eq.' C  ' .or. atomname(j).eq.' CA ' .or. &
+                  atomname(j).eq.' N  ' .or. atomname(j).eq.' O  ' ) )then
+#endif
 
-#if 0
+#if 1
                 write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
                            atomname(i), resno_user(i), &
                            atomname(j),  resno_user(j), dis
 #endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
+#if 0
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -392,12 +403,19 @@ program afnmr_x
                 restype(resno(i)).ne.'G' .and. restype(resno(i)).ne.'W') then
                    connect(resno(i)+1,resno(j))=.true.
                    connect(resno(j),resno(i)+1)=.true.
+                write(6,'(a4,i4,5x,a4,i4,5x,f8.3,2i5)') &
+                           atomname(i), resno_user(i), &
+                           atomname(j),  resno_user(j), dis, resno(i)+1,resno(j)
                 endif
                 if( j.ge.selectC(resno(j)) .and. &
                 restype(resno(j)).ne.'G' .and. restype(resno(j)).ne.'W') then
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
+                write(6,'(a4,i4,5x,a4,i4,5x,f8.3,2i5)') &
+                           atomname(i), resno_user(i), &
+                           atomname(j),  resno_user(j), dis,resno(i),resno(j)+1
                 endif
+#endif
             endif
 
         enddo  !  j=i+1,natom
@@ -406,11 +424,10 @@ program afnmr_x
 #if 0
       ! debug connectivity table:
       write(6,*) 'connectivities:'
-      do i=1,30
+      i=5
         do j=1,nres
           if( connect(i,j) ) write(6,*)  i,j, connect(i,j)
         end do
-      end do
       !write(6,*) (restype(i),i=1,nres), lastprotres
       !write(6,*) 'select C values:'
       !write(6,'(2i5)') (i,selectC(i), i=0,nres)
