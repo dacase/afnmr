@@ -365,17 +365,29 @@ program afnmr_x
 !----------------------------------------------------------------------------
 
       do i=1,natom
+        if( element(i).eq.' H' ) cycle
+
         do j=i+1,natom
 
             if( resno(i).eq.resno(j) ) cycle
+            if( element(j).eq.' H' ) cycle
 
             dis=dsqrt((coord(1,i)-coord(1,j))**2   &
              +(coord(2,i)-coord(2,j))**2+(coord(3,i)-coord(3,j))**2)
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
-            if( (dis.le.nbcut .and. element(i).ne.' H' .and.  &
-                                    element(j).ne.' H') )then
+#if 1
+            if( dis.le.nbcut ) then
+#else
+            ! test: don't use protein side-chain atoms to determine contacts
+            if( dis.le.nbcut .and. element(i).ne.' H' .and.  &
+                                   element(j).ne.' H' .and.  &
+                ( atomname(i).eq.' C  ' .or. atomname(i).eq.' CA ' .or. &
+                  atomname(i).eq.' N  ' .or. atomname(i).eq.' O  ' .or. &
+                  atomname(j).eq.' C  ' .or. atomname(j).eq.' CA ' .or. &
+                  atomname(j).eq.' N  ' .or. atomname(j).eq.' O  ' ) )then
+#endif
 
 #if 0
                 write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
@@ -384,6 +396,7 @@ program afnmr_x
 #endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
+#if 1
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -398,29 +411,14 @@ program afnmr_x
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
+#endif
             endif
 
         enddo  !  j=i+1,natom
       enddo    !  i=1,natom
-
-#if 0
-      ! debug connectivity table:
-      write(6,*) 'connectivities:'
-      do i=1,30
-        do j=1,nres
-          if( connect(i,j) ) write(6,*)  i,j, connect(i,j)
-        end do
-      end do
-      !write(6,*) (restype(i),i=1,nres), lastprotres
-      !write(6,*) 'select C values:'
-      !write(6,'(2i5)') (i,selectC(i), i=0,nres)
-      stop 1
-#endif
-
 !
 !     Big loop over residues to create fragments:
 !
-
       do kcount=1,nres
 
         if( listsize > 0 ) then
@@ -1199,10 +1197,10 @@ subroutine addatom( kk, iqm, basis )
       use comafnmr
       implicit none
       integer, intent(in) ::  kk,iqm
-      character*1, intent(in) ::  basis
-      integer j, atno
-      character*3  i_char
-      character*1  elem
+      character(len=1), intent(in) ::  basis
+      integer :: j, atno
+      character(len=3) ::  i_char
+      character(len=1) ::  elem
 
       if ( demon ) then
         write( i_char, '(i3)' ) iqm
