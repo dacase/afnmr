@@ -950,7 +950,7 @@ program afnmr_x
           !  next two lines are for versions of Orca up to 3.0.1
           ! write(30,'(a)') '%eprnmr  ori IGLO'
           ! write(30,'(a)') '   LocMet PM'
-          !  following line is for Orca 4:
+          !  following line is for Orca 4 or 5:
           write(30,'(a)') '%eprnmr  ori GIAO'
           write(30,'(a)', advance='no') '   nuclei = 1'
           do i=2,nhighatom
@@ -963,8 +963,8 @@ program afnmr_x
           write(30,'(a)') '$end'
           write(30,'(a)') '   '
           write(30,'(a)') '$rem'
-          write(30,'(a)') 'JOBTYPE       NMR'
-          write(30,'(a)') 'SCF_ALGORITHM  DIIS'
+          write(30,'(a)') 'MOPROP        1'
+          write(30,'(a)') 'SCF_ALGORITHM DIIS'
           write(30,'(a)') 'EXCHANGE      OPTX'
           write(30,'(a)') 'CORRELATION   LYP'
           write(30,'(a)') 'BASIS         GEN'
