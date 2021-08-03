@@ -450,7 +450,7 @@ program afnmr_x
           open(30,file=filek(1:lengthb+3)//'.sqmin')
           ! open(35,file=filek(1:lengthb+3)//'.surf.pqr')
         else if ( orca ) then
-          open(30,file=filek(1:lengthb+3)//'.inp')
+          open(30,file=filek(1:lengthb+3)//'.orcainp')
           open(32,file=filek(1:lengthb+3)//'.pos')
         else if ( demon ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
@@ -967,6 +967,8 @@ program afnmr_x
           write(30,'(a)') 'SCF_ALGORITHM DIIS'
           write(30,'(a)') 'EXCHANGE      OPTX'
           write(30,'(a)') 'CORRELATION   LYP'
+          write(30,'(a)') 'SCF_CONVERGENCE  7'
+          write(30,'(a)') 'THRESH          10'
           write(30,'(a)') 'BASIS         GEN'
           write(30,'(a)') 'PURECART      1111'
           write(30,'(a)') 'SYMMETRY      FALSE'
