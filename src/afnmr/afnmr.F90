@@ -537,7 +537,7 @@ program afnmr_x
         else if ( demon ) then
           write(30,'(a,i4,a,a,a,f5.2)') 'TITLE AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
-          write(30,'(a)') 'SCFTYPE  RKS Tol=1.0e-6 MAX=100'
+          write(30,'(a)') 'SCFTYPE  RKS Tol=1.0e-7 MAX=100'
           write(30,'(a)') 'GUESS TB'
           write(30,'(a)') 'ORBITALS SPHERICAL'
           write(30,'(a)') 'ERIS MULTIPOLE'
@@ -909,7 +909,7 @@ program afnmr_x
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'D' ) then
             write(30,'(a)') 'BASIS  (pcSseg-0)'
-            write(30,'(a)') 'AUXIS  (GEN-A2)'
+            write(30,'(a)') 'AUXIS  (GEN-A2*)'
           endif
 
           if( demon5 ) then
