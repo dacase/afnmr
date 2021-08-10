@@ -1,8 +1,9 @@
 #!/usr/bin/perl -w
 
 #******************************************************************************
-# collect shifts from g09 outputs
-#   usage:  getshifts-g09 reference basename; rdb file fragments to stdout
+# collect shifts from Gaussian outputs
+#   usage:  getshifts-gau reference basename fulltensor 
+#           rdb file to stdout
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
@@ -11,7 +12,7 @@ $resi = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor=1;
+$fulltensor = "$ARGV[2]";
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";
@@ -34,7 +35,7 @@ if( $reference eq "ref_seg0" ){
 
 if( $basename eq "header" ){
    # document the reference shieldings being used:
-   printf( "# results from afnmr-g09:\n" );
+   printf( "# results from afnmr-gau:\n" );
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
@@ -42,8 +43,8 @@ if( $basename eq "header" ){
       printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
       printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\teta\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\n" );
+      printf( "res\tatomname\tresname\tshift\tdelta\teta\tspan\n" );
+      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\n" );
    }
 
    exit(0);
@@ -103,6 +104,7 @@ while (<LOG>) {
            } else {
               $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
            }
+           $span = $eigv[2] - $eigv[0];
 
            #  eigenvectors:  (NB: fails if eigenvectors are not present!)
            $_ = <LOG>;
@@ -149,9 +151,9 @@ while (<LOG>) {
                 $delta, $eta, $alpha1, $alpha2, $alpha3;
 
           } else {
-             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
+             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-                $delta, $eta;
+                $delta, $eta, $span;
 
           }
       }
