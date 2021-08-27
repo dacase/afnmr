@@ -36,7 +36,8 @@ Optional flags:
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
    -xtb            Set up quantum input files to use with xtb for optimization
    -orca           Set up quantum input files to use with Orca
-   -gau            Set up quantum input files to use with Gaussian
+   -gaussian       Set up quantum input files to use with Gaussian
+   -jaguar         Set up quantum input files to use with Jaguar
    -qchem          Set up quantum input files to use with Q-Chem
    -tc             Set up quantum input files to use with TeraChem
    -sqm            Set up quantum input files to use with sqm
@@ -109,7 +110,9 @@ while [ $# -gt 0 ]; do
         -nbcut)       shift; nbcut="$1";;
         -xtb)         qopt="X";;
         -orca)        program="O";;
-        -gau)         program="G";;
+        -jaguar)      program="J";;
+        -gaussian)    program="G";;
+        -gau)         program="G";;    # for backwards compatibility
         -qchem)       program="Q";;
         -tc)          program="T";;
         -sqm)         program="S";;

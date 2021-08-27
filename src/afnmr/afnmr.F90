@@ -19,7 +19,7 @@ module comafnmr
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize
-   logical :: gaussian, orca, demon, demon5, qchem, terachem, &
+   logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, solinprot, xtb, sqm
    logical :: first=.true.
 
@@ -33,7 +33,7 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
-!                     Q (Qchem), T (TeraChem), S (sqm)
+!                     Q (Qchem), J (Jaguar), T (TeraChem), S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
@@ -159,6 +159,7 @@ program afnmr_x
       demon = .false.
       demon5 = .false.
       terachem = .false.
+      jaguar = .false.
       xtb = .false.
       sqm = .false.
       solinprot = .false.
@@ -195,6 +196,8 @@ program afnmr_x
          orca = .true.
       else if( program .eq. 'Q' ) then
          qchem = .true.
+      else if( program .eq. 'J' ) then
+         jaguar = .true.
       else if( program .eq. 'T' ) then
          terachem = .true.
       else if( program .eq. 'S' ) then
@@ -454,7 +457,7 @@ program afnmr_x
           open(32,file=filek(1:lengthb+3)//'.pos')
         else if ( demon ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
-        else if ( qchem ) then
+        else if ( qchem .or. jaguar ) then
           open(30,file=filek(1:lengthb+3)//'.in')
         else if ( terachem ) then
           open(30,file=filek(1:lengthb+3)//'.opt')
@@ -534,6 +537,15 @@ program afnmr_x
           write(30,'(a)') ''
           write(30,'(a)') '$molecule'
 
+        else if ( jaguar ) then
+          write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
+               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
+          write(30,'(a)') '&gen'
+          write(30,'(a)') 'basis=6-31g'
+          write(30,'(a)') 'idft=22111'
+          write(30,'(a)') 'igeopt=0'
+          write(30,'(a)') 'nmr=1'
+
         else if ( demon ) then
           write(30,'(a,i4,a,a,a,f5.2)') 'TITLE AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -595,6 +607,10 @@ program afnmr_x
           write(30,'(1x,I3,2x,I2)') cfrag,1
         else if ( orca ) then
           write(30,'(a,i3,1x,i3)')'* xyz ',cfrag,1
+        else if ( jaguar ) then
+          write(30,'(a,i3)')'molchg=',cfrag
+          write(30,'(a)') '&'
+          write(30,'(a)') '&zmat'
         else if ( demon ) then
           write(30,'(a,i3)')'CHARGE  ',cfrag
           write(30,'(a,i3)')'MULTIPLCITY  ',1
@@ -714,6 +730,9 @@ program afnmr_x
           write(30,'(a)') '$end'
           write(30,'(a)') ''
           write(30,'(a)') '$external_charges'
+        else if ( jaguar ) then
+          write(30,'(a)') '&'
+          write(30,'(a)') '&pointchg'
         else if ( demon ) then
           write(30,'(a)') 'END'
           write(30,'(a)') 'EMBED READ'
@@ -732,6 +751,8 @@ program afnmr_x
                   (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
             else if( gaussian .or. qchem .or. demon ) then
               write(30,1315)(coord(j,kk),j=1,3),qmcharge(kk)
+            else if( jaguar ) then
+              write(30,1317) qmcharge(kk), (coord(j,kk),j=1,3)
             endif
           endif
         enddo
@@ -778,7 +799,9 @@ program afnmr_x
           read(23,*,end=60)a,b,c,d
           if( gaussian .or. qchem .or. demon ) then
             write(30,1316)a,b,c,d
-          else if( orca .or. terachem) then
+          else if( jaguar ) then
+            write(30,1317)d,a,b,c
+          else if( orca .or. terachem ) then
             write(32,1318)d,a,b,c
           else if ( sqm ) then
             !  write out surface charge distributions, for visualization
@@ -892,6 +915,8 @@ program afnmr_x
 
         else if ( sqm ) then
           write(30,'(a)') '#END'
+        else if ( jaguar ) then
+          write(30,'(a)') '&'
         else if ( demon ) then
           write(30,'(a)') 'END'
           if( nhighatom == 0 ) nhighatom = 4
@@ -958,6 +983,9 @@ program afnmr_x
           end do
           write(30,'(a)') ' {shift}'
           write(30,'(a)') 'end'
+
+        else if ( jaguar ) then
+          write(30,'(a)') '&'
 
         else if ( qchem ) then
           write(30,'(a)') '$end'
@@ -1204,7 +1232,7 @@ subroutine addatom( kk, iqm, basis )
       character(len=3) ::  i_char
       character(len=1) ::  elem
 
-      if ( demon ) then
+      if ( demon .or. jaguar ) then
         write( i_char, '(i3)' ) iqm
         dlabel(iqm) = trim(element(kk)) // adjustl(i_char)
         if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
@@ -1253,7 +1281,7 @@ subroutine addH( iqm, x, y, z)
       double precision, intent(in) ::  x,y,z
       character(len=3) i_char
 
-      if( demon ) then
+      if( demon .or. jaguar ) then
         write( i_char, '(i3)' ) iqm
         dlabel(iqm) = 'H' // adjustl(i_char)
         dlabel(iqm)(5:5) = ' ' 
@@ -1266,10 +1294,10 @@ subroutine addH( iqm, x, y, z)
       else if ( sqm ) then
         write(30,1000)' 1  H ',x,y,z
       else
-        write(30,1000)'H ',x,y,z
+        write(30,1000)' H ',x,y,z
       endif
       if( xtb ) then
-        write(44,1000)'H ',x,y,z
+        write(44,1000)' H ',x,y,z
       end if
 
       modnum = modnum + 1

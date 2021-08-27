@@ -46,6 +46,13 @@ test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 m6ab_test1 clean
 	@../dacdif 1d3z1006.pqr.save 1d3z1006.pqr
 #	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr 1d3z1006.xtb.log
 
+1d3z_test7::
+	@echo "Running test quantum fragmentation on ubiquitin: jaguar"
+	@echo
+	../../bin/afnmr -jaguar -nomin -list 7 1d3z1
+	@../dacdif -a 1.e-5 1d3z1007.in.save 1d3z1007.in
+	@/bin/rm -f 1d3z1.afnmr.log 1d3z1007.pqr 1d3z1.min.pqr 1d3z1.pqr
+
 m6ab_test1::
 	@echo "Running test quantum fragmentation on RNA with demon"
 	@echo
