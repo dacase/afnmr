@@ -541,8 +541,9 @@ program afnmr_x
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
           write(30,'(a)') '&gen'
-          write(30,'(a)') 'basis=6-31g'
-          write(30,'(a)') 'idft=22111'
+          if ( basis .eq. 'D' ) write(30,'(a)') 'basis=6-31g'
+          if ( basis .eq. 'T' ) write(30,'(a)') 'basis=6-311g**'
+          write(30,'(a)') 'dftname=olyp'
           write(30,'(a)') 'igeopt=0'
           write(30,'(a)') 'nmr=1'
 
