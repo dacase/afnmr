@@ -282,14 +282,13 @@ void printstats ()
 	printf ("%*.*f %*.*f %*.*f\n", W, D, a, W, D, b, W, D, rms);
 	}
 
-double
-standev (sum, ss, count) double sum, ss;
+double standev (double sum, double ss, int count)
 	{
 	if (count <= 1) return (0.0);
 	return (sqrt ((ss-sum*sum/count)/(count-1)));
 	}
 
-int main (argc, argv) char **argv;
+int main (int argc, char** argv)
 	{
 	Argv0 = argv[0];
 	initial (argc, argv);

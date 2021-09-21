@@ -3,7 +3,7 @@
 
 #include <math.h>
 double
-pof (F, m, n) double F;
+pof (double F, int m, int n)
 	{
 	int	i, j;
 	int	a, b;
