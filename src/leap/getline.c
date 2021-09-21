@@ -34,17 +34,9 @@ static int      gl_tab(char *buf, int offset, int *loc);
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
-
-#ifdef WIN32
-#include <Windows.h>
-#include <stdio.h>
-#include <io.h>
-#endif
-
+#include <stdlib.h>
 
 extern int      isatty();	
-extern void    *malloc();
-extern void     free();
 extern int      kill();	
 
 /********************* exported interface ********************************/
