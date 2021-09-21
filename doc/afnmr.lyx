@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-06 August 2020
+21 September 2021
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.3)
+(Version 1.4)
 \end_layout
 
 \begin_layout Author
@@ -148,7 +148,7 @@ height "1pt"
 This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
  Software Foundation; either version 2, or (at your option) any later version.
- The GNU General Public License should be in a file called COPYING; if not,
+ The GNU General Public License should be in a file called LICENSE; if not,
  write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  Boston, MA 02111-1307 USA This program is distributed in the hope that
  it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -432,6 +432,46 @@ Phys.
  9543-9553 (2018)
 \end_layout
 
+\begin_layout Enumerate
+H.
+ Shi, A.
+ Rangadurai, H.A.
+ Assi, R.
+ Roy, D.A.
+ Case, D.
+ Herschlag, J.D.
+ Yesselman, and H.M.
+ Al-Hashimi.
+ Rapid and accurate determination of atomistic RNA dynamic ensemble models
+ using NMR and structure prediction.
+ 
+\emph on
+Nature Commun.
+ 
+\series bold
+\emph default
+11,
+\series default
+ 5531 (2020).
+\end_layout
+
+\begin_layout Enumerate
+D.A.
+ Case.
+ Using quantum chemistry to estimate chemical shifts in biomolecules.
+ 
+\emph on
+Biophys.
+ Chem.
+
+\emph default
+ 
+\series bold
+267,
+\series default
+ 106476 (2020).
+\end_layout
+
 \begin_layout Standard
 Ab initio chemical shifts can be computed using the automated fragment approach
  implemented in the AFNMR program and described in references [1], [2] and
@@ -440,7 +480,8 @@ Ab initio chemical shifts can be computed using the automated fragment approach
  future versions, but is not included in the present version; however, the
  current code works well for snapshots taken from MD simulations that include
  explicit water molecules.
- Papers [7-10] are recent examples of applications of the afnmr method.
+ Papers [7-12] are recent examples of applications of the afnmr method.
+ Reference [13] is a review.
 \end_layout
 
 \begin_layout Section
@@ -969,6 +1010,10 @@ default
 \end_layout
 
 \begin_layout Description
+-jaguar Set up QM input files to run with the jaguar program from Schrodinger.
+\end_layout
+
+\begin_layout Description
 -qchem Set up QM input files to run with the Q-Chem program
 \end_layout
 
@@ -1281,7 +1326,11 @@ make-shiftsrdb
 \family typewriter
 -orca
 \family default
-, or 
+, 
+\family typewriter
+-qchem, -jaguar
+\family default
+ or 
 \family typewriter
 -g09
 \family default

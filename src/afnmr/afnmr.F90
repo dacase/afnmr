@@ -165,7 +165,7 @@ program afnmr_x
       solinprot = .false.
       qopt = .false.
       listsize = 0
-      version = '1.3.1'
+      version = '1.4'
 
       write(6,*)
       write(6,*)'**********************************************'
