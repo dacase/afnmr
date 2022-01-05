@@ -106,11 +106,11 @@ while [ $# -gt 0 ]; do
         -demon)       program="D";;
         -deMon)       program="D";;
         -demon5)      program="E";;
-        -quick)       program="R";;
         -o3lyp)       functional="O3LYP";;
         -qopt)        qopt="T";;
         -nbcut)       shift; nbcut="$1";;
         -xtb)         qopt="X";;
+        -quick)       qopt="Q";;
         -orca)        program="O";;
         -jaguar)      program="J";;
         -gaussian)    program="G";;

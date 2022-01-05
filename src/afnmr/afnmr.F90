@@ -203,8 +203,6 @@ program afnmr_x
          terachem = .true.
       else if( program .eq. 'S' ) then
          sqm = .true.
-      else if( program .eq. 'R' ) then
-         quick = .true.
       else
          write(0,*) 'Bad input for program: ', program
          stop 1
@@ -462,7 +460,7 @@ program afnmr_x
           open(32,file=filek(1:lengthb+3)//'.pos')
         else if ( demon ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
-        else if ( qchem .or. jaguar .or. quick ) then
+        else if ( qchem .or. jaguar ) then
           open(30,file=filek(1:lengthb+3)//'.in')
         else if ( terachem ) then
           open(30,file=filek(1:lengthb+3)//'.opt')
@@ -472,6 +470,8 @@ program afnmr_x
 
         if ( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
+        else if( quick ) then
+          open(44,file=filek(1:lengthb+3)//'.in')
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
@@ -582,20 +582,7 @@ program afnmr_x
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
 
-        else if ( quick ) then  !  quick is only for qopt calcs.
-          write(30,'(a,i2,a)') 'DFT OYLP BASIS=def2-svp CHARGE=', cfrag, &
-                          'OPTIMIZE=10 EXTCHARGES'
-          write(30,*)
-
-        else if ( xtb ) then
-          write(44,'(a)') 'put number of atoms here!'
-          write(44,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
-               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
-        endif
-
-        do i=1,natom
-          atomsign(i)=.false.
-        enddo
+        end if
 
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
@@ -635,6 +622,18 @@ program afnmr_x
                 ', maxcyc=0, qmmm_int=1,'
           write(30, '(a)' ) ' /'
         end if
+
+        !  Now a section for qopt-only options
+        if ( quick ) then
+          write(44,'(a,i3,a)') 'DFT OLYP BASIS=def2-svp CHARGE=', cfrag, &
+                          ' OPTIMIZE=10 EXTCHARGES'
+          write(44,*)
+
+        else if ( xtb ) then
+          write(44,'(a)') 'put number of atoms here!'
+          write(44,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
+               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
+        endif
 
         nhighatom=0
         nlowatom=0
@@ -734,7 +733,7 @@ program afnmr_x
 
 !       Deal with the charges representing the protein and solvent polarization:
 
-        if( gaussian .or. quick ) then
+        if( gaussian ) then
           write(30,*)
         else if ( qchem ) then
           write(30,'(a)') '$end'
@@ -750,6 +749,8 @@ program afnmr_x
           write(30,'(a)') '#EXCHARGES'
         endif
 
+        if( quick ) write(44,*)
+
 !       write out the protein positions and charges:
 
         do kk=1,natom
@@ -759,7 +760,7 @@ program afnmr_x
                write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
                   'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
                   (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
-            else if( gaussian .or. qchem .or. demon .or. quick ) then
+            else if( gaussian .or. qchem .or. demon ) then
               write(30,1315)(coord(j,kk),j=1,3),qmcharge(kk)
             else if( jaguar ) then
               write(30,1317) qmcharge(kk), (coord(j,kk),j=1,3)
@@ -807,7 +808,7 @@ program afnmr_x
         open(23,file='srfchg.pos')
         do iitemp=1,999999
           read(23,*,end=60)a,b,c,d
-          if( gaussian .or. qchem .or. demon .or. quick) then
+          if( gaussian .or. qchem .or. demon ) then
             write(30,1316)a,b,c,d
           else if( jaguar ) then
             write(30,1317)d,a,b,c
@@ -819,6 +820,7 @@ program afnmr_x
             !  'ATOM  ', iitemp,' H  ','SRF',1, a,b,c,d, 1.0, ' H'
             write(30, 1319) ' 1  H ', a,b,c,d
           endif
+          if( quick ) write(44,1316)a,b,c,d
         enddo
 60      continue
         close(23)
@@ -923,8 +925,6 @@ program afnmr_x
             write(30,*)
           endif
 
-        else if ( quick ) then
-          write(30,*) 
         else if ( sqm ) then
           write(30,'(a)') '#END'
         else if ( jaguar ) then
@@ -1042,7 +1042,8 @@ program afnmr_x
 
         end if
 
-        if ( xtb ) then  !  xtb is only for qopt calcs.
+        ! Again, qopt-only options:
+        if ( xtb ) then
           write(44,'(a)') '$set'
           write(44,'(a,i3)') 'chrg ', cfrag
           write(44,'(a)') 'uhf   0'
@@ -1052,6 +1053,9 @@ program afnmr_x
           end if
           write(44,'(a)') 'maxopt 30'
           write(44,'(a)') '$end'
+          close(44)
+        else if ( quick ) then
+          write(44,*)
           close(44)
         end if
 
@@ -1074,6 +1078,13 @@ program afnmr_x
                 // '.xyz1' )
         endif
 
+        ! What follows is done last (for each residue): it does a 
+        !  quantum minimization of the fragment (using input files
+        !  created above), extracts the minimized coordinates, and 
+        !  places them into the fragment .pqr and .inp files.
+
+        !  TODO: consider adding a parallel section for quick -- but
+        !    note that quick is much slower than xtb
         if( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
           open(45,file=filek(1:lengthb+3)//'.xyz2')
@@ -1252,7 +1263,7 @@ subroutine addatom( kk, iqm, basis )
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
       else if ( terachem ) then
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
-      else if ( gaussian .or. quick ) then
+      else if ( gaussian ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = element(kk)(2:2)
       else if ( sqm ) then
@@ -1273,7 +1284,7 @@ subroutine addatom( kk, iqm, basis )
           write(30,'(a)') 'end;'
         endif
       endif
-      if( xtb ) then
+      if( xtb .or. quick ) then
         write(44,1000)element(kk),(coord(j,kk),j=1,3)
       endif
 
@@ -1301,7 +1312,7 @@ subroutine addH( iqm, x, y, z)
         write(30,'(1x,a,1x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,1000)'H ',x,y,z
-      else if ( gaussian .or. quick) then
+      else if ( gaussian ) then
         write(30,1000)' H',x,y,z
         dlabel(iqm) = 'H'
       else if ( sqm ) then
@@ -1309,7 +1320,7 @@ subroutine addH( iqm, x, y, z)
       else
         write(30,1000)' H ',x,y,z
       endif
-      if( xtb ) then
+      if( xtb .or. quick ) then
         write(44,1000)' H ',x,y,z
       end if
 
