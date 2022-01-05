@@ -35,6 +35,7 @@ Optional flags:
    -qopt           Do quantum optimization with same program as for shifts
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
    -xtb            Set up quantum input files to use with xtb for optimization
+   -quick          Set up quantum input files to use with quick for optimization
    -orca           Set up quantum input files to use with Orca
    -gaussian       Set up quantum input files to use with Gaussian
    -jaguar         Set up quantum input files to use with Jaguar
@@ -105,6 +106,7 @@ while [ $# -gt 0 ]; do
         -demon)       program="D";;
         -deMon)       program="D";;
         -demon5)      program="E";;
+        -quick)       program="R";;
         -o3lyp)       functional="O3LYP";;
         -qopt)        qopt="T";;
         -nbcut)       shift; nbcut="$1";;

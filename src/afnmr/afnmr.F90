@@ -20,7 +20,7 @@ module comafnmr
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
-              qopt, solinprot, xtb, sqm
+              qopt, solinprot, xtb, sqm, quick
    logical :: first=.true.
 
 end module
@@ -33,12 +33,12 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
-!                     Q (Qchem), J (Jaguar), T (TeraChem), S (sqm)
+!                     Q (Qchem), J (Jaguar), T (TeraChem), S (sqm), R (Quick)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
 !            qopt is T or F, to turn on or off quantum geometry optimization,
-!                  or X (for internal optimization with xtb)
+!                  or X/Q (for internal optimization with xtb or quick)
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
 !            <basename>.pqr gives the input structure; put all "general"
@@ -162,10 +162,11 @@ program afnmr_x
       jaguar = .false.
       xtb = .false.
       sqm = .false.
+      quick = .false.
       solinprot = .false.
       qopt = .false.
       listsize = 0
-      version = '1.3.1'
+      version = '1.5'
 
       write(6,*)
       write(6,*)'**********************************************'
@@ -202,6 +203,8 @@ program afnmr_x
          terachem = .true.
       else if( program .eq. 'S' ) then
          sqm = .true.
+      else if( program .eq. 'R' ) then
+         quick = .true.
       else
          write(0,*) 'Bad input for program: ', program
          stop 1
@@ -217,6 +220,8 @@ program afnmr_x
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
          xtb = .true.
+      else if (qoptb .eq. 'Q' ) then
+         quick = .true.
       else if (qoptb .ne. 'F' ) then
          write(0,*) 'Bad input for qopt: ', qoptb
          stop 1
@@ -457,13 +462,14 @@ program afnmr_x
           open(32,file=filek(1:lengthb+3)//'.pos')
         else if ( demon ) then
           open(30,file=filek(1:lengthb+3)//'.inp')
-        else if ( qchem .or. jaguar ) then
+        else if ( qchem .or. jaguar .or. quick ) then
           open(30,file=filek(1:lengthb+3)//'.in')
         else if ( terachem ) then
           open(30,file=filek(1:lengthb+3)//'.opt')
           open(32,file=filek(1:lengthb+3)//'.pos')
           open(34,file=filek(1:lengthb+3)//'.xyz1')
         end if
+
         if ( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
         end if
@@ -576,9 +582,12 @@ program afnmr_x
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
 
-        end if
+        else if ( quick ) then  !  quick is only for qopt calcs.
+          write(30,'(a,i2,a)') 'DFT OYLP BASIS=def2-svp CHARGE=', cfrag, &
+                          'OPTIMIZE=10 EXTCHARGES'
+          write(30,*)
 
-        if ( xtb ) then
+        else if ( xtb ) then
           write(44,'(a)') 'put number of atoms here!'
           write(44,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -725,7 +734,7 @@ program afnmr_x
 
 !       Deal with the charges representing the protein and solvent polarization:
 
-        if( gaussian) then
+        if( gaussian .or. quick ) then
           write(30,*)
         else if ( qchem ) then
           write(30,'(a)') '$end'
@@ -750,7 +759,7 @@ program afnmr_x
                write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
                   'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
                   (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
-            else if( gaussian .or. qchem .or. demon ) then
+            else if( gaussian .or. qchem .or. demon .or. quick ) then
               write(30,1315)(coord(j,kk),j=1,3),qmcharge(kk)
             else if( jaguar ) then
               write(30,1317) qmcharge(kk), (coord(j,kk),j=1,3)
@@ -798,7 +807,7 @@ program afnmr_x
         open(23,file='srfchg.pos')
         do iitemp=1,999999
           read(23,*,end=60)a,b,c,d
-          if( gaussian .or. qchem .or. demon ) then
+          if( gaussian .or. qchem .or. demon .or. quick) then
             write(30,1316)a,b,c,d
           else if( jaguar ) then
             write(30,1317)d,a,b,c
@@ -914,6 +923,8 @@ program afnmr_x
             write(30,*)
           endif
 
+        else if ( quick ) then
+          write(30,*) 
         else if ( sqm ) then
           write(30,'(a)') '#END'
         else if ( jaguar ) then
@@ -1062,6 +1073,7 @@ program afnmr_x
           call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
                 // '.xyz1' )
         endif
+
         if( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
           open(45,file=filek(1:lengthb+3)//'.xyz2')
@@ -1240,7 +1252,7 @@ subroutine addatom( kk, iqm, basis )
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
       else if ( terachem ) then
         write(34,1000)element(kk),(coord(j,kk),j=1,3)
-      else if ( gaussian ) then
+      else if ( gaussian .or. quick ) then
         write(30,1000)element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = element(kk)(2:2)
       else if ( sqm ) then
@@ -1289,7 +1301,7 @@ subroutine addH( iqm, x, y, z)
         write(30,'(1x,a,1x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,1000)'H ',x,y,z
-      else if ( gaussian ) then
+      else if ( gaussian .or. quick) then
         write(30,1000)' H',x,y,z
         dlabel(iqm) = 'H'
       else if ( sqm ) then
