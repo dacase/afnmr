@@ -13,6 +13,8 @@ module comafnmr
    character(len=3):: residue(MAXAT), residuename(MAXRES)
    character(len=4):: atomname(MAXAT)
    character(len=5):: dlabel(MAXAT)
+   character(len=2):: cfragtxt
+   character(len=80):: commandline
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
 !          (note: does not recognize chainID's, so all resno_user() values
@@ -33,7 +35,7 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
-!                     Q (Qchem), J (Jaguar), T (TeraChem), S (sqm), R (Quick)
+!                     Q (Qchem), J (Jaguar), T (TeraChem), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
@@ -69,7 +71,7 @@ program afnmr_x
       double precision dis,nbcut
       double precision chargef(MAXRES)
       character(len=80) line,basename,pdbfile,filek,afnmrhome,version
-      integer lengthb,lengthc,natom
+      integer lengthb,lengthc,natom,iline
 #ifdef __INTEL_COMPILER
       integer system
 #endif
@@ -469,9 +471,10 @@ program afnmr_x
         end if
 
         if ( xtb ) then
-          open(44,file=filek(1:lengthb+3)//'.xyz1')
+          open(44,file=filek(1:lengthb+3)//'.xyz')
+          open(47,file=filek(1:lengthb+3)//'_xtb.inp')
         else if( quick ) then
-          open(44,file=filek(1:lengthb+3)//'.in')
+          open(44,file=filek(1:lengthb+3)//'_quick.in')
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
@@ -625,14 +628,14 @@ program afnmr_x
 
         !  Now a section for qopt-only options
         if ( quick ) then
-          write(44,'(a,i3,a)') 'DFT OLYP BASIS=def2-svp CHARGE=', cfrag, &
+          if( cfrag .ge. 0 ) then
+             write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
                           ' OPTIMIZE=10 EXTCHARGES'
+          else
+             write(44,'(a,i2,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
+                          ' OPTIMIZE=10 EXTCHARGES'
+          endif
           write(44,*)
-
-        else if ( xtb ) then
-          write(44,'(a)') 'put number of atoms here!'
-          write(44,'(a,i4,a,a,a,f5.2)') 'AF-NMR fragment for residue ', &
-               kuser, '; version = ',trim(version), '; nbcut = ', nbcut
         endif
 
         nhighatom=0
@@ -761,9 +764,9 @@ program afnmr_x
                   'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
                   (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
             else if( gaussian .or. qchem .or. demon ) then
-              write(30,1315)(coord(j,kk),j=1,3),qmcharge(kk)
+              write(30,'(3f10.4,2x,f12.8)') (coord(j,kk),j=1,3),qmcharge(kk)
             else if( jaguar ) then
-              write(30,1317) qmcharge(kk), (coord(j,kk),j=1,3)
+              write(30,'(f12.8,2x,3f10.4)') qmcharge(kk), (coord(j,kk),j=1,3)
             endif
           endif
         enddo
@@ -800,7 +803,7 @@ program afnmr_x
           write(32,'(i7)') nprotc+nsf
           do kk=1,natom
              if(.not. atomsign(kk) )then
-                write(32,1317)qmcharge(kk), (coord(j,kk),j=1,3)
+                write(32,'(f12.8,2x,3f10.4)')qmcharge(kk), (coord(j,kk),j=1,3)
              endif
           end do
         endif
@@ -809,18 +812,18 @@ program afnmr_x
         do iitemp=1,999999
           read(23,*,end=60)a,b,c,d
           if( gaussian .or. qchem .or. demon ) then
-            write(30,1316)a,b,c,d
+            write(30,'(3f15.6,2x,f12.8)')a,b,c,d
           else if( jaguar ) then
-            write(30,1317)d,a,b,c
+            write(30,'(f12.8,2x,3f10.4)')d,a,b,c
           else if( orca .or. terachem ) then
-            write(32,1318)d,a,b,c
+            write(32,'(f12.8,2x,3f15.6)')d,a,b,c
           else if ( sqm ) then
             !  write out surface charge distributions, for visualization
             ! write(35,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.2,6x,a2)') &
             !  'ATOM  ', iitemp,' H  ','SRF',1, a,b,c,d, 1.0, ' H'
-            write(30, 1319) ' 1  H ', a,b,c,d
+            write(30, '(a,3f15.6,2x,f12.8)') ' 1  H ', a,b,c,d
           endif
-          if( quick ) write(44,1316)a,b,c,d
+          if( quick ) write(44,'(3f15.6,2x,f12.8)')a,b,c,d
         enddo
 60      continue
         close(23)
@@ -1044,15 +1047,12 @@ program afnmr_x
 
         ! Again, qopt-only options:
         if ( xtb ) then
-          write(44,'(a)') '$set'
-          write(44,'(a,i3)') 'chrg ', cfrag
-          write(44,'(a)') 'uhf   0'
           if( nhighatom .lt. iqmprot ) then
-             write(44,'(a,i4,a,i4)') 'fix ',nhighatom+1,'-',iqmprot
-             write(44,'(a)') 'fixfc 0'
+             write(47,*) '$fix'
+             write(47,*) '   atoms: ', nhighatom+1,'-',iqmprot
+             write(47,*) '$end'
           end if
-          write(44,'(a)') 'maxopt 30'
-          write(44,'(a)') '$end'
+          close(47)
           close(44)
         else if ( quick ) then
           write(44,*)
@@ -1081,33 +1081,24 @@ program afnmr_x
         ! What follows is done last (for each residue): it does a 
         !  quantum minimization of the fragment (using input files
         !  created above), extracts the minimized coordinates, and 
-        !  places them into the fragment .pqr and .inp files.
+        !  places them into the fragment .min.pqr and .min.inp files.
 
-        !  TODO: consider adding a parallel section for quick -- but
-        !    note that quick is much slower than xtb
         if( xtb ) then
-          open(44,file=filek(1:lengthb+3)//'.xyz1')
-          open(45,file=filek(1:lengthb+3)//'.xyz2')
-          read(44,*)  ! skip dummy first line
-          write(45,'(i4)') iqm   ! number of atoms goes on first line
-          do i=1,9999
-            read(44,'(a)', end=205) line
-            write(45,'(a)') trim(line)
-          end do
-  205     close(44)
-          close(45)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
-                // '.xyz1' )
-
           !  do the xtb minimization here:
           write(6,*)
-          write(6,*) 'Doing geometry optimization with xtb'
-          call execute_command_line( 'xtb ' // filek(1:lengthb+3) &
-                // '.xyz2 -opt > ' // filek(1:lengthb+3) // '.xtb.log' )
-          ! call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
-          !       // '.xyz2' )
-          call execute_command_line( &
-            '/bin/rm -f energy charges wbo xtbrestart xtbopt.log' )
+          write(6,*) 'Optimize geometry using xtb'
+          write(0,*) 'Optimize geometry using xtb for residue', kuser
+          read(cfragtxt,'(i2)') cfrag
+          write(0,*) 'cfrag as integer, text: ', cfrag, cfragtxt
+          commandline = 'xtb ' // filek(1:lengthb+3) &
+                // '.xyz --opt --cycles 10 --chrg ' // cfragtxt  &
+                // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
+                // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
+          write(0,*) trim(commandline)
+          call execute_command_line( trim(commandline) )
+          stop
+          ! call execute_command_line( &
+          !   '/bin/rm -f energy charges wbo xtbrestart xtbopt.log' )
 
           !  extract the coordinates from the xtb output file:
           open(46,file='xtbopt.xyz')
@@ -1138,7 +1129,7 @@ program afnmr_x
              open(47,file=filek(1:lengthb+3)//'.inp')
              open(48,file=filek(1:lengthb+3)//'.inp1')
              do i=1,9999
-                read(47,'(a)', end=210) line
+                read(47,'(a)') line
                 write(48,'(a)') trim(line)
                 if( line(1:9) == 'GEOMETRY ' ) then
                    do j=1,iqm
@@ -1148,7 +1139,7 @@ program afnmr_x
                    end do
                 end if
              end do
-  210        close(47)
+             close(47)
              close(48)
              call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
                 // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
@@ -1157,14 +1148,65 @@ program afnmr_x
              write(6,*) "xtb only works with demon for now"
              call exit(1)
           end if
+ 
+        else if( quick ) then
 
+          !  do the quick minimization here:
+          write(6,*)
+          write(6,*) 'Optimize geometry using quick'
+          write(0,*) 'Optimize geometry using quick for residue', kuser
+          call execute_command_line( &
+             'quick.cuda ' // filek(1:lengthb+3) // '_quick.in' )
+
+          !  extract the coordinates from the quick output file:
+          open(46,file=filek(1:lengthb+3) // '_quick.out')
+          do iline=1,100000
+             read(46,'(a)') line
+             if( line(1:32) .ne. ' OPTIMIZED GEOMETRY IN CARTESIAN' ) cycle
+             read(46,*)  ! skip ELEMENT X Y Z line
+             do i=1,iqm
+                read(46,*) dummyl, fxyz(1,i), fxyz(2,i), fxyz(3,i)
+             end do
+             exit
+          end do
+          close(46)
+
+          !  transfer the minimized coordinates to the .pqr file
+          open(47,file=filek(1:lengthb+3)//'.pqr')
+          open(48,file=filek(1:lengthb+3)//'.min.pqr')
+          do i=1,iqm
+             read(47,'(a30,24x,a16)') pqrstart,pqrend
+             write(48,'(a30,3f8.3,a16)') pqrstart, &
+                 fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
+          end do
+          close(47)
+          close(48)
+
+          if( demon ) then
+
+             !  transfer the minimized coordinates to the .inp file
+             open(47,file=filek(1:lengthb+3)//'.inp')
+             open(48,file=filek(1:lengthb+3)//'.min.inp')
+             do i=1,9999
+                read(47,'(a)',end=10) line
+                write(48,'(a)') trim(line)
+                if( line(1:9) == 'GEOMETRY ' ) then
+                   do j=1,iqm
+                      read (47,*) 
+                      write(48,'(a,2x,3f12.5)') dlabel(j), &
+                             fxyz(1,j), fxyz(2,j), fxyz(3,j)
+                   end do
+                end if
+             end do
+   10        close(47)
+             close(48)
+
+          else
+             write(6,*) "quick only works with demon for now"
+             call exit(1)
+          end if
+ 
         end if
-
-1315    format(3f10.4,2x,f12.8)
-1317    format(f12.8,2x,3f10.4)
-1316    format(3f15.6,2x,f12.8)
-1318    format(f12.8,2x,3f15.6)
-1319    format(a,3f15.6,2x,f12.8)
 
         if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
 
@@ -1262,9 +1304,9 @@ subroutine addatom( kk, iqm, basis )
         if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
       else if ( terachem ) then
-        write(34,1000)element(kk),(coord(j,kk),j=1,3)
+        write(34,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian ) then
-        write(30,1000)element(kk),(coord(j,kk),j=1,3)
+        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = element(kk)(2:2)
       else if ( sqm ) then
         elem = element(kk)(2:2)
@@ -1275,9 +1317,9 @@ subroutine addatom( kk, iqm, basis )
         if ( elem == 'F' ) atno = 9
         if ( elem == 'P' ) atno = 15
         if ( elem == 'S' ) atno = 16
-        write(30,1001) atno, element(kk),(coord(j,kk),j=1,3)
+        write(30,'(i2,2x,a2,4x,3f10.4)') atno, element(kk),(coord(j,kk),j=1,3)
       else
-        write(30,1000)element(kk),(coord(j,kk),j=1,3)
+        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
         if( orca .and. basis .eq. 'M' ) then
           write(30,'(a)') 'NewGTO'
           write(30,'(a)') '"def2-TZVP"'
@@ -1285,7 +1327,7 @@ subroutine addatom( kk, iqm, basis )
         endif
       endif
       if( xtb .or. quick ) then
-        write(44,1000)element(kk),(coord(j,kk),j=1,3)
+        write(44,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
       endif
 
       write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
@@ -1293,8 +1335,6 @@ subroutine addatom( kk, iqm, basis )
         qmcharge(kk),rad(kk),element(kk)
 
       return
-1000  format(a2,4x,3f10.4)
-1001  format(i2,2x,a2,4x,3f10.4)
 end subroutine addatom
 
 subroutine addH( iqm, x, y, z)
@@ -1311,17 +1351,17 @@ subroutine addH( iqm, x, y, z)
         dlabel(iqm)(5:5) = ' ' 
         write(30,'(1x,a,1x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
-        write(34,1000)'H ',x,y,z
+        write(34,'(a2,4x,3f10.4)')'H ',x,y,z
       else if ( gaussian ) then
-        write(30,1000)' H',x,y,z
+        write(30,'(a2,4x,3f10.4)')' H',x,y,z
         dlabel(iqm) = 'H'
       else if ( sqm ) then
-        write(30,1000)' 1  H ',x,y,z
+        write(30,'(a2,4x,3f10.4)')' 1  H ',x,y,z
       else
-        write(30,1000)' H ',x,y,z
+        write(30,'(a2,4x,3f10.4)')' H ',x,y,z
       endif
       if( xtb .or. quick ) then
-        write(44,1000)' H ',x,y,z
+        write(44,'(a2,4x,3f10.4)')' H ',x,y,z
       end if
 
       modnum = modnum + 1
@@ -1334,7 +1374,5 @@ subroutine addH( iqm, x, y, z)
       endif
 
       return
-1000    format(a2,4x,3f10.4)
-1001    format(a6,4x,3f10.4)
 end subroutine addH
 
