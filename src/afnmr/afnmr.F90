@@ -42,8 +42,9 @@ program afnmr_x
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
-!            qopt is T or F, to turn on or off quantum geometry optimization,
-!                  or X/Q/U (for optimization with xtb, quick or terachem)
+!            qopt controls off quantum geometry optimization: set to
+!                  D/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
+!                  quick or terachem), or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
 !            <basename>.pqr gives the input structure; put all "general"
@@ -215,13 +216,13 @@ program afnmr_x
       if( solinprotb .eq. 'T' .or. solinprotb .eq. 'S' ) solinprot = .true.
 
       call get_command_argument( 4, qoptb, lengthb )
-      if( qoptb .eq. 'T' ) then
+      if( qoptb .eq. 'D' .or. qoptb .eq. 'G' ) then
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
          xtb = .true.
       else if (qoptb .eq. 'Q' ) then
          quick = .true.
-      else if (qoptb .eq. 'U' ) then
+      else if (qoptb .eq. 'T' ) then
          terachem = .true.
       else if (qoptb .ne. 'F' ) then
          write(0,*) 'Bad input for qopt: ', qoptb
