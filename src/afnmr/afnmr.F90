@@ -594,6 +594,10 @@ program afnmr_x
           write(34,'(a)') filek(1:lengthb+3)
         end if
 
+        do i=1,natom
+          atomsign(i)=.false.
+        enddo
+
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
 
