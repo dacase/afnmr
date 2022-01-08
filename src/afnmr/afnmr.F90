@@ -15,12 +15,15 @@ module comafnmr
    character(len=5):: dlabel(MAXAT)
    character(len=2):: cfragtxt
    character(len=160):: commandline
+   character(len=30) :: pqrstart
+   character(len=16) :: pqrend
+   character(len=80) :: filek, line
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
 !          (note: does not recognize chainID's, so all resno_user() values
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
-   integer :: modnum, ier, listsize
+   integer :: modnum, ier, listsize, lengthb
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, solinprot, xtb, sqm, quick
    logical :: first=.true.
@@ -35,12 +38,12 @@ program afnmr_x
 !   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
-!                     Q (Qchem), J (Jaguar), T (TeraChem), or S (sqm)
+!                     Q (Qchem), J (Jaguar), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
 !            qopt is T or F, to turn on or off quantum geometry optimization,
-!                  or X/Q (for internal optimization with xtb or quick)
+!                  or X/Q/U (for optimization with xtb, quick or terachem)
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
 !            <basename>.pqr gives the input structure; put all "general"
@@ -63,15 +66,13 @@ program afnmr_x
       integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
       character(len=3) :: rn
       character(len=1):: restype(MAXRES)
-      character(len=30) :: pqrstart
-      character(len=16) :: pqrend
       character(len=5) :: functional
       character(len=6) :: nbcutb
 
       double precision dis,nbcut
       double precision chargef(MAXRES)
-      character(len=80) line,basename,pdbfile,filek,afnmrhome,version
-      integer lengthb,lengthc,natom,iline
+      character(len=80) basename,pdbfile,afnmrhome,version
+      integer lengthc,natom,iline
 #ifdef __INTEL_COMPILER
       integer system
 #endif
@@ -201,8 +202,6 @@ program afnmr_x
          qchem = .true.
       else if( program .eq. 'J' ) then
          jaguar = .true.
-      else if( program .eq. 'T' ) then
-         terachem = .true.
       else if( program .eq. 'S' ) then
          sqm = .true.
       else
@@ -222,6 +221,8 @@ program afnmr_x
          xtb = .true.
       else if (qoptb .eq. 'Q' ) then
          quick = .true.
+      else if (qoptb .eq. 'U' ) then
+         terachem = .true.
       else if (qoptb .ne. 'F' ) then
          write(0,*) 'Bad input for qopt: ', qoptb
          stop 1
@@ -452,6 +453,7 @@ program afnmr_x
 !
 !       write header info:
 !
+        ! regular file opens here:
         if( gaussian ) then
           open(30,file=filek(1:lengthb+3)//'.com')
         else if ( sqm ) then
@@ -464,17 +466,18 @@ program afnmr_x
           open(30,file=filek(1:lengthb+3)//'.inp')
         else if ( qchem .or. jaguar ) then
           open(30,file=filek(1:lengthb+3)//'.in')
-        else if ( terachem ) then
-          open(30,file=filek(1:lengthb+3)//'.opt')
-          open(32,file=filek(1:lengthb+3)//'.pos')
-          open(34,file=filek(1:lengthb+3)//'.xyz1')
         end if
 
+        ! qopt file opens here:
         if ( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
           open(47,file=filek(1:lengthb+3)//'_xtb.inp')
         else if( quick ) then
           open(44,file=filek(1:lengthb+3)//'_quick.in')
+        else if ( terachem ) then
+          open(30,file=filek(1:lengthb+3)//'.opt')
+          open(32,file=filek(1:lengthb+3)//'.pos')
+          open(34,file=filek(1:lengthb+3)//'.xyz1')
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
@@ -482,6 +485,7 @@ program afnmr_x
            open(33,file=filek(1:lengthb+3)//'.prot.pqr')
         end if
 
+        ! regular header info here:
         if( gaussian ) then
           write(30,'(a)') '%mem=800mw'
           write(30,'(a)') '%nprocshared=4'
@@ -570,7 +574,10 @@ program afnmr_x
           write(30,'(a)') 'SHIFT 0.0'
           write(30,'(a)') 'DIIS ON'
 
-        else if ( terachem ) then
+        end if
+
+        ! qopt headers here:
+        if ( terachem ) then
           write(30,'(a)') 'basis 6-31gs'
           write(30,'(a,a)') 'coordinates ',filek(1:lengthb+3)//'.xyz'
           write(30,'(a,a)') 'pointcharges ',filek(1:lengthb+3)//'.pos'
@@ -584,7 +591,6 @@ program afnmr_x
           write(30,'(a)') 'nstep 10'
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
-
         end if
 
 !       cycle through all "connected" fragments to get the charge on the
@@ -615,9 +621,6 @@ program afnmr_x
           write(30,'(a,i3)')'CHARGE  ',cfrag
           write(30,'(a,i3)')'MULTIPLCITY  ',1
           write(30,'(a)') 'GEOMETRY CARTESIAN ANGSTROM'
-        else if ( terachem ) then
-          write(30,'(a,i3)')'charge  ',cfrag
-          write(30,'(a)') 'end'
         else if ( sqm ) then
           write(30, '(a)' ) filek(1:lengthb+3)
           write(30, '(a)' ) ' &qmmm'
@@ -636,6 +639,9 @@ program afnmr_x
                           ' OPTIMIZE=10 EXTCHARGES'
           endif
           write(44,*)
+        else if ( terachem ) then
+          write(30,'(a,i3)')'charge  ',cfrag
+          write(30,'(a)') 'end'
         endif
 
         nhighatom=0
@@ -1034,15 +1040,6 @@ program afnmr_x
           end do
       67  close(11)
 
-        else if ( terachem ) then  !  terachem is only for qopt calcs.
-          if( nhighatom .lt. iqmprot ) then
-             write(30,'(a)') '$constraints'
-             do i=nhighatom+1,iqmprot
-                write(30,'(a,i4)') '  atom ', i
-             end do
-             write(30,'(a)') '$end'
-          end if
-
         end if
 
         ! Again, qopt-only options:
@@ -1057,26 +1054,19 @@ program afnmr_x
         else if ( quick ) then
           write(44,*)
           close(44)
+        else if ( terachem ) then 
+          if( nhighatom .lt. iqmprot ) then
+             write(30,'(a)') '$constraints'
+             do i=nhighatom+1,iqmprot
+                write(30,'(a,i4)') '  atom ', i
+             end do
+             write(30,'(a)') '$end'
+          end if
+
         end if
 
         close(30)
         if( orca ) close(32)
-        if( terachem ) then
-          close(32)
-          close(34)
-          open(34,file=filek(1:lengthb+3)//'.xyz1')
-          open(35,file=filek(1:lengthb+3)//'.xyz')
-          read(34,*)  ! skip dummy first line
-          write(35,'(i4)') iqm   ! number of atoms goes on first line
-          do i=1,9999
-            read(34,'(a)', end=105) line
-            write(35,'(a)') trim(line)
-          end do
-  105     close(34)
-          close(35)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
-                // '.xyz1' )
-        endif
 
         ! What follows is done last (for each residue): it does a 
         !  quantum minimization of the fragment (using input files
@@ -1125,45 +1115,7 @@ program afnmr_x
           end do
           close(46)
           call execute_command_line( '/bin/rm -f xtbopt.xyz' )
-
-          !  transfer the minimized coordinates to the .pqr file
-          open(47,file=filek(1:lengthb+3)//'.pqr')
-          open(48,file=filek(1:lengthb+3)//'.pqr1')
-          do i=1,iqm
-             read(47,'(a30,24x,a16)') pqrstart,pqrend
-             write(48,'(a30,3f8.3,a16)') pqrstart, &
-                 fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
-          end do
-          close(47)
-          close(48)
-          call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-             // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
-
-          if( demon ) then
-
-             !  transfer the minimized coordinates to the .inp file
-             open(47,file=filek(1:lengthb+3)//'.inp')
-             open(48,file=filek(1:lengthb+3)//'.inp1')
-             do i=1,9999
-                read(47,'(a)',end=106) line
-                write(48,'(a)') trim(line)
-                if( line(1:9) == 'GEOMETRY ' ) then
-                   do j=1,iqm
-                      read (47,*) 
-                      write(48,'(a,2x,3f12.5)') dlabel(j), &
-                             fxyz(1,j), fxyz(2,j), fxyz(3,j)
-                   end do
-                end if
-             end do
-  106        close(47)
-             close(48)
-             call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-                // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
-
-          else
-             write(6,*) "xtb only works with demon for now"
-             call exit(1)
-          end if
+          call transfer_minimized_coords( iqm )
  
         else if( quick ) then
 
@@ -1186,42 +1138,24 @@ program afnmr_x
              exit
           end do
           close(46)
-
-          !  transfer the minimized coordinates to the .pqr file
-          open(47,file=filek(1:lengthb+3)//'.pqr')
-          open(48,file=filek(1:lengthb+3)//'.min.pqr')
-          do i=1,iqm
-             read(47,'(a30,24x,a16)') pqrstart,pqrend
-             write(48,'(a30,3f8.3,a16)') pqrstart, &
-                 fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
-          end do
-          close(47)
-          close(48)
-
-          if( demon ) then
-
-             !  transfer the minimized coordinates to the .inp file
-             open(47,file=filek(1:lengthb+3)//'.inp')
-             open(48,file=filek(1:lengthb+3)//'.min.inp')
-             do i=1,9999
-                read(47,'(a)',end=10) line
-                write(48,'(a)') trim(line)
-                if( line(1:9) == 'GEOMETRY ' ) then
-                   do j=1,iqm
-                      read (47,*) 
-                      write(48,'(a,2x,3f12.5)') dlabel(j), &
-                             fxyz(1,j), fxyz(2,j), fxyz(3,j)
-                   end do
-                end if
-             end do
-   10        close(47)
-             close(48)
-
-          else
-             write(6,*) "quick only works with demon for now"
-             call exit(1)
-          end if
+          call transfer_minimized_coords( iqm )
  
+        else if( terachem ) then
+          close(32)
+          close(34)
+          open(34,file=filek(1:lengthb+3)//'.xyz1')
+          open(35,file=filek(1:lengthb+3)//'.xyz')
+          read(34,*)  ! skip dummy first line
+          write(35,'(i4)') iqm   ! number of atoms goes on first line
+          do i=1,9999
+            read(34,'(a)', end=105) line
+            write(35,'(a)') trim(line)
+          end do
+  105     close(34)
+          close(35)
+          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+                // '.xyz1' )
+          ! TODO: need to call terachem, then transfer the info into demon
         end if
 
         if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
@@ -1391,3 +1325,49 @@ subroutine addH( iqm, x, y, z)
       return
 end subroutine addH
 
+subroutine transfer_minimized_coords(iqm)
+
+      use comafnmr
+      implicit none
+      integer, intent(in) :: iqm
+      integer :: i,j
+
+      !  transfer the minimized coordinates to the .pqr file
+      open(47,file=filek(1:lengthb+3)//'.pqr')
+      open(48,file=filek(1:lengthb+3)//'.pqr1')
+      do i=1,iqm
+         read(47,'(a30,24x,a16)') pqrstart,pqrend
+         write(48,'(a30,3f8.3,a16)') pqrstart, &
+             fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
+      end do
+      close(47)
+      close(48)
+      call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+         // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+
+      if( demon ) then
+
+         !  transfer the minimized coordinates to the .inp file
+         open(47,file=filek(1:lengthb+3)//'.inp')
+         open(48,file=filek(1:lengthb+3)//'.inp1')
+         do i=1,9999
+            read(47,'(a)',end=106) line
+            write(48,'(a)') trim(line)
+            if( line(1:9) == 'GEOMETRY ' ) then
+               do j=1,iqm
+                  read (47,*) 
+                  write(48,'(a,2x,3f12.5)') dlabel(j), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+               end do
+            end if
+         end do
+  106    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+            // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
+
+      else
+         write(6,*) "xtb only works with demon for now"
+         call exit(1)
+      end if
+end subroutine transfer_minimized_coords
