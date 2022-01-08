@@ -1363,9 +1363,8 @@ subroutine addH( iqm, x, y, z)
 
       if( demon .or. jaguar ) then
         write( i_char, '(i3)' ) iqm
-        dlabel(iqm) = 'H' // adjustl(i_char)
-        dlabel(iqm)(5:5) = ' ' 
-        write(30,'(1x,a,1x,3f12.5)') dlabel(iqm),x,y,z
+        dlabel(iqm) = ' H' // adjustl(i_char)
+        write(30,'(a,1x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,'(a2,4x,3f10.4)')'H ',x,y,z
       else if ( gaussian ) then
