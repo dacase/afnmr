@@ -14,7 +14,7 @@ module comafnmr
    character(len=4):: atomname(MAXAT)
    character(len=5):: dlabel(MAXAT)
    character(len=2):: cfragtxt
-   character(len=80):: commandline
+   character(len=160):: commandline
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
 !          (note: does not recognize chainID's, so all resno_user() values
@@ -471,7 +471,7 @@ program afnmr_x
         end if
 
         if ( xtb ) then
-          open(44,file=filek(1:lengthb+3)//'.xyz')
+          open(44,file=filek(1:lengthb+3)//'.xyz1')
           open(47,file=filek(1:lengthb+3)//'_xtb.inp')
         else if( quick ) then
           open(44,file=filek(1:lengthb+3)//'_quick.in')
@@ -1084,21 +1084,37 @@ program afnmr_x
         !  places them into the fragment .min.pqr and .min.inp files.
 
         if( xtb ) then
+          !  first, fix the xyz file, since we finally know iqm:
+          open(44,file=filek(1:lengthb+3)//'.xyz1')
+          open(35,file=filek(1:lengthb+3)//'.xyz')
+          write(35,*) iqm
+          write(35,*)
+          do i=1,iqm
+            read(44,'(a)') line
+            write(35,'(a)') trim(line)
+          end do
+          close(44)
+          close(35)
+          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+                // '.xyz1' )
+          
           !  do the xtb minimization here:
           write(6,*)
           write(6,*) 'Optimize geometry using xtb'
           write(0,*) 'Optimize geometry using xtb for residue', kuser
-          read(cfragtxt,'(i2)') cfrag
-          write(0,*) 'cfrag as integer, text: ', cfrag, cfragtxt
+          write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
                 // '.xyz --opt --cycles 10 --chrg ' // cfragtxt  &
                 // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
                 // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
-          write(0,*) trim(commandline)
+          write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
-          stop
-          ! call execute_command_line( &
-          !   '/bin/rm -f energy charges wbo xtbrestart xtbopt.log' )
+          call execute_command_line( &
+            '/bin/rm -f charges wbo xtbrestart xtbopt.log xtbtopo.mol' )
+          call execute_command_line( &
+            '/bin/rm -f ' // filek(1:lengthb+3) // '_xtb.inp' )
+          call execute_command_line( &
+            '/bin/rm -f ' // filek(1:lengthb+3) // '.xyz' )
 
           !  extract the coordinates from the xtb output file:
           open(46,file='xtbopt.xyz')
@@ -1108,7 +1124,7 @@ program afnmr_x
              read(46,*) dummyl, fxyz(1,i), fxyz(2,i), fxyz(3,i)
           end do
           close(46)
-          ! call execute_command_line( '/bin/rm -f xtbopt.xyz' )
+          call execute_command_line( '/bin/rm -f xtbopt.xyz' )
 
           !  transfer the minimized coordinates to the .pqr file
           open(47,file=filek(1:lengthb+3)//'.pqr')
@@ -1120,8 +1136,8 @@ program afnmr_x
           end do
           close(47)
           close(48)
-          ! call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-          !    // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+          call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+             // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
 
           if( demon ) then
 
@@ -1129,7 +1145,7 @@ program afnmr_x
              open(47,file=filek(1:lengthb+3)//'.inp')
              open(48,file=filek(1:lengthb+3)//'.inp1')
              do i=1,9999
-                read(47,'(a)') line
+                read(47,'(a)',end=106) line
                 write(48,'(a)') trim(line)
                 if( line(1:9) == 'GEOMETRY ' ) then
                    do j=1,iqm
@@ -1139,7 +1155,7 @@ program afnmr_x
                    end do
                 end if
              end do
-             close(47)
+  106        close(47)
              close(48)
              call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
                 // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
