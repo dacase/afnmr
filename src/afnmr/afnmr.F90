@@ -9,6 +9,7 @@ module comafnmr
    logical::connect(MAXRES,MAXRES)
    logical::atomsign(MAXAT)
    logical::ter(0:MAXRES)
+   character(len=1):: restype(MAXRES)
    character(len=2):: element(MAXAT),dummyl
    character(len=3):: residue(MAXAT), residuename(MAXRES)
    character(len=4):: atomname(MAXAT)
@@ -17,16 +18,20 @@ module comafnmr
    character(len=160):: commandline
    character(len=30) :: pqrstart
    character(len=16) :: pqrend
-   character(len=80) :: filek, line
+   character(len=80) :: filek, line, afnmrhome
+   character(len=5) :: functional
+   character(len=5) :: version
+   character(len=1) :: basis
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
 !          (note: does not recognize chainID's, so all resno_user() values
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
-   integer :: modnum, ier, listsize, lengthb
+   integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, solinprot, xtb, sqm, quick
    logical :: first=.true.
+   double precision :: nbcut
 
 end module
 
@@ -56,24 +61,22 @@ program afnmr_x
       use comafnmr
       implicit none
 
-      double precision :: a,b,c,d,x,y,z,tempdis
+      double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
-      character(len=1) :: program,basis,solinprotb,qoptb
+      character(len=1) :: program,solinprotb,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: firstprotres, lastprotres
-      integer :: i,j,k,kk,kuser,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
-      integer :: kfinal,ktemp,kstart,kcount,kbas
-      integer :: n1,n2,nprotc,nres,nsf,nptemp,nhighatom,nlowatom
+      integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
+      integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
+      integer :: n1,n2,nprotc,nres,nsf,nptemp
       character(len=3) :: rn
-      character(len=1):: restype(MAXRES)
-      character(len=5) :: functional
       character(len=6) :: nbcutb
 
-      double precision dis,nbcut
+      double precision dis
       double precision chargef(MAXRES)
-      character(len=80) basename,pdbfile,afnmrhome,version
-      integer lengthc,natom,iline
+      character(len=80) basename,pdbfile
+      integer lengthc,iline
 #ifdef __INTEL_COMPILER
       integer system
 #endif
@@ -252,11 +255,8 @@ program afnmr_x
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
 
-      do i=1,MAXRES
-        ter(i) = .false.
-        chargef(i) = 0.d0
-      end do
-      ter(0) = .false.
+      ter(0:MAXRES) = .false.
+      chargef(1:MAXRES) = 0.d0
 !
 !     Read the input pqr file:
 !
@@ -361,16 +361,12 @@ program afnmr_x
 !
 !     Set up the connectivity arrays:
 !
-      do i=1,nres
-        do j=1,nres
-          connect(i,j)=.false.
-        enddo
-      enddo
-
+      connect(1:nres,1:nres)=.false.
       do i=1,nres
         connect(i,i)=.true.
-        charge(i) = nint( chargef(i) )
       enddo
+
+      charge(1:nres) = nint( chargef(1:nres) )
 
 !----------------------------------------------------------------------------
 
@@ -451,6 +447,345 @@ program afnmr_x
         filek = basename(1:lengthb) // char(48+kuser/100)  &
             // char(48+(kuser-kuser/100*100)/10)  &
             // char(48+(kuser-kuser/10*10))
+
+        call write_header_info( kuser )
+
+        atomsign(1:natom)=.false.
+
+!       cycle through all "connected" fragments to get the charge on the
+!       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
+
+        cfrag = 0
+        do ktemp=1,nres
+          if(connect(k,ktemp))then
+            call get_atom_range( kstart, kfinal, ktemp, &
+                   selectC, restype(ktemp), ter)
+            atomsign(kstart:kfinal) = .true.
+            cfrag = cfrag + charge(ktemp)
+            write(6,'(20x,i5,a4,5i6)') kuser,residuename(ktemp), &
+                 resno_user(kfinal),kstart,kfinal,charge(ktemp),cfrag
+          endif
+        enddo
+        write(6,'(2i5)') kuser, cfrag
+        call write_cfrag_header_info(cfrag)
+
+        nhighatom=0
+        nlowatom=0
+!
+!       get starting, ending atoms for residue "k":
+!
+        call get_atom_range( iatstart, iatfinal, k, &
+            selectC, restype(k), ter )
+!
+!       write out atoms in principal residue:
+!
+        do kk=iatstart,iatfinal
+          iqm = iqm + 1
+          nhighatom = nhighatom + 1
+          call addatom( kk, iqm )
+        enddo
+
+        do ktemp=1,nres
+          if( ktemp.ne.k .and. connect(k,ktemp) )then
+
+              call get_atom_range( kstart, kfinal, ktemp, &
+                   selectC, restype(ktemp), ter)
+!
+!             write out coordinates in a "connected" residue
+!
+              do kk=kstart,kfinal
+                nlowatom = nlowatom + 1
+                iqm = iqm + 1
+                call addatom( kk, iqm )
+              enddo
+!
+!             add hydrogens to dangling residues:
+!
+              if(ktemp.ne.1 .and. ktemp.le.lastprotres  &
+                  .and. .not. ter(ktemp-1) )then
+!
+!               ---look for "backwards" links to previous residue:
+!
+                if(.not. atomsign(kstart-1) )then
+                  n1=kstart
+                  n2=selectCA(ktemp-1)
+                  if(atomname(n1).eq.' C  ') then
+                    call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
+                      coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
+                  else
+                    call xyzchangeO(coord(1,n2),coord(2,n2),coord(3,n2), &
+                      coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
+                  endif
+                  nlowatom = nlowatom + 1
+                  iqm = iqm + 1
+                  call addH( iqm, x, y, z)
+                endif
+              endif
+
+              if(ktemp.lt.lastprotres .and. .not. ter(ktemp)) then
+!
+!             ---look for "forwards" links to the next residue:
+!
+                if(.not. atomsign(kfinal+3) )then
+                  n1=selectCA(ktemp)
+                  n2=selectC(ktemp)
+                  call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
+                    coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
+                  nlowatom = nlowatom + 1
+                  iqm = iqm + 1
+                  call addH( iqm, x, y, z)
+                endif
+              endif
+
+          endif
+          if( ktemp == lastprotres ) iqmprot = iqm  ! only freeze protein
+        enddo  ! ktemp
+
+        !  check for dangling S--S bonds:
+
+        do kk=1,natom
+          if( atomname(kk)(2:3) == 'SG' .and. atomsign(kk) ) then
+!           write(0,*) 'found SG: ', resno(kk), atomsign(kk)
+            do i=1,natom
+              if( i.eq.kk) cycle
+              if( atomname(i)(2:3) .ne. 'SG') cycle
+              tempdis=dsqrt((coord(1,i)-coord(1,kk))**2.0d0  &
+                 +(coord(2,i)-coord(2,kk))**2.0d0            &
+                 +(coord(3,i)-coord(3,kk))**2.0d0)
+              if(tempdis.le.2.5d0 .and. kk.ne.i   &
+                   .and.  .not. atomsign(i) )then
+                !we have found a "dangling" S--S bond; saturate:
+                call xyzchangeS(coord(1,i),coord(2,i),coord(3,i),  &
+                    coord(1,kk),coord(2,kk),coord(3,kk),x,y,z)
+                iqm = iqm + 1
+                call addH( iqm, x, y, z)
+              endif
+            enddo
+          endif
+        enddo
+        close(31)
+
+        call handle_external_charges()
+        call finish_program_files( iqmprot )
+        call external_minimizer( cfrag, iqm, kuser )
+
+        if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
+
+      enddo  ! big loop over residues
+
+end program afnmr_x
+
+subroutine xyzchange(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
+
+        implicit none
+        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
+
+         grad=dsqrt(1.09d0**2/((xold-xzero)**2+(yold-yzero)**2   &
+           +(zold-zzero)**2))
+         xnew=xzero+grad*(xold-xzero)
+         ynew=yzero+grad*(yold-yzero)
+         znew=zzero+grad*(zold-zzero)
+         return
+end subroutine xyzchange
+
+subroutine xyzchangeS(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
+
+        implicit none
+        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
+
+         grad=dsqrt(1.33d0**2/((xold-xzero)**2+(yold-yzero)**2   &
+           +(zold-zzero)**2))
+         xnew=xzero+grad*(xold-xzero)
+         ynew=yzero+grad*(yold-yzero)
+         znew=zzero+grad*(zold-zzero)
+         return
+end subroutine xyzchangeS
+
+subroutine xyzchangeO(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
+
+        implicit none
+        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
+
+         grad=dsqrt(0.96d0**2/((xold-xzero)**2+(yold-yzero)**2  &
+           +(zold-zzero)**2))
+         xnew=xzero+grad*(xold-xzero)
+         ynew=yzero+grad*(yold-yzero)
+         znew=zzero+grad*(zold-zzero)
+         return
+end subroutine xyzchangeO
+
+subroutine get_atom_range( kstart, kfinal, ktemp,  &
+           selectC, restype, ter )
+        implicit none
+
+        integer, intent(in)   :: ktemp, selectC(0:*)
+        integer, intent(out)  :: kstart, kfinal
+        logical, intent(in)   :: ter(0:*)
+        character(len=1), intent(in) ::  restype
+
+        if( restype.eq.'P' ) then
+          kstart=selectC(ktemp-1)
+          kfinal=selectC(ktemp)-1
+          if( ter(ktemp) )then
+            kfinal=selectC(ktemp)+2
+          endif
+          if( ter(ktemp-1) ) then
+            kstart=selectC(ktemp-1)+3
+          endif
+        else if( restype.eq.'N' ) then
+          kstart=selectC(ktemp-1)
+          kfinal=selectC(ktemp)-1
+          if( ter(ktemp) )then
+            kfinal=selectC(ktemp)+1
+          endif
+          if( ter(ktemp-1) ) then
+            kstart=selectC(ktemp-1)+2
+          endif
+        else    !  general (G/W) residue type: should be ligand or water
+          kstart=selectC(ktemp)
+          kfinal=selectC(ktemp+1)-1
+        endif
+
+        return
+end subroutine get_atom_range
+
+subroutine addatom( kk, iqm )
+
+      use comafnmr
+      implicit none
+      integer, intent(in) ::  kk,iqm
+      integer :: j, atno
+      character(len=3) ::  i_char
+      character(len=1) ::  elem
+
+      if ( demon .or. jaguar ) then
+        write( i_char, '(i3)' ) iqm
+        dlabel(iqm) = trim(element(kk)) // adjustl(i_char)
+        if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
+        write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
+      else if ( terachem ) then
+        write(34,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
+      else if ( gaussian ) then
+        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
+        dlabel(iqm) = element(kk)(2:2)
+      else if ( sqm ) then
+        elem = element(kk)(2:2)
+        if ( elem == 'H' ) atno = 1
+        if ( elem == 'C' ) atno = 6
+        if ( elem == 'N' ) atno = 7
+        if ( elem == 'O' ) atno = 8
+        if ( elem == 'F' ) atno = 9
+        if ( elem == 'P' ) atno = 15
+        if ( elem == 'S' ) atno = 16
+        write(30,'(i2,2x,a2,4x,3f10.4)') atno, element(kk),(coord(j,kk),j=1,3)
+      else
+        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
+        if( orca .and. basis .eq. 'M' ) then
+          write(30,'(a)') 'NewGTO'
+          write(30,'(a)') '"def2-TZVP"'
+          write(30,'(a)') 'end;'
+        endif
+      endif
+      if( xtb .or. quick ) then
+        write(44,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
+      endif
+
+      write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
+        kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
+        qmcharge(kk),rad(kk),element(kk)
+
+      return
+end subroutine addatom
+
+subroutine addH( iqm, x, y, z)
+
+      use comafnmr
+      implicit none
+      integer, intent(in) :: iqm
+      double precision, intent(in) ::  x,y,z
+      character(len=3) i_char
+
+      if( demon .or. jaguar ) then
+        write( i_char, '(i3)' ) iqm
+        dlabel(iqm) = ' H' // adjustl(i_char)
+        write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
+      else if ( terachem ) then
+        write(34,'(a2,4x,3f10.4)')'H ',x,y,z
+      else if ( gaussian ) then
+        write(30,'(a2,4x,3f10.4)')' H',x,y,z
+        dlabel(iqm) = 'H'
+      else if ( sqm ) then
+        write(30,'(a2,4x,3f10.4)')' 1  H ',x,y,z
+      else
+        write(30,'(a2,4x,3f10.4)')' H ',x,y,z
+      endif
+      if( xtb .or. quick ) then
+        write(44,'(a2,4x,3f10.4)')' H ',x,y,z
+      end if
+
+      modnum = modnum + 1
+      if( modnum < 10 ) then
+         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
+      else
+         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
+      endif
+
+      return
+end subroutine addH
+
+subroutine transfer_minimized_coords(iqm)
+
+      use comafnmr
+      implicit none
+      integer, intent(in) :: iqm
+      integer :: i,j
+
+      !  transfer the minimized coordinates to the .pqr file
+      open(47,file=filek(1:lengthb+3)//'.pqr')
+      open(48,file=filek(1:lengthb+3)//'.pqr1')
+      do i=1,iqm
+         read(47,'(a30,24x,a16)') pqrstart,pqrend
+         write(48,'(a30,3f8.3,a16)') pqrstart, &
+             fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
+      end do
+      close(47)
+      close(48)
+      call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+         // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+
+      if( demon ) then
+
+         !  transfer the minimized coordinates to the .inp file
+         open(47,file=filek(1:lengthb+3)//'.inp')
+         open(48,file=filek(1:lengthb+3)//'.inp1')
+         do i=1,9999
+            read(47,'(a)',end=106) line
+            write(48,'(a)') trim(line)
+            if( line(1:9) == 'GEOMETRY ' ) then
+               do j=1,iqm
+                  read (47,*) 
+                  write(48,'(a,2x,3f12.5)') dlabel(j), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+               end do
+            end if
+         end do
+  106    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+            // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
+
+      else
+         write(6,*) "external qopt only works with demon for now"
+         call exit(1)
+      end if
+end subroutine transfer_minimized_coords
+
+subroutine write_header_info(kuser)
+      use comafnmr
+      implicit none
+      integer, intent(in) :: kuser
 !
 !       write header info:
 !
@@ -593,27 +928,15 @@ program afnmr_x
           write(34,'(a)') 'put number of atoms here!'
           write(34,'(a)') filek(1:lengthb+3)
         end if
+        return
+end subroutine write_header_info
 
-        do i=1,natom
-          atomsign(i)=.false.
-        enddo
+subroutine write_cfrag_header_info(cfrag)
+      use comafnmr
+      implicit none
+      integer, intent(in) :: cfrag
 
-!       cycle through all "connected" fragments to get the charge on the
-!       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
-
-        cfrag = 0
-        do ktemp=1,nres
-          if(connect(k,ktemp))then
-            call get_atom_range( kstart, kfinal, ktemp, &
-                   selectC, restype(ktemp), ter)
-            atomsign(kstart:kfinal) = .true.
-            cfrag = cfrag + charge(ktemp)
-            write(6,'(20x,i5,a4,5i6)') kuser,residuename(ktemp), &
-                 resno_user(kfinal),kstart,kfinal,charge(ktemp),cfrag
-          endif
-        enddo
-        write(6,'(2i5)') kuser, cfrag
-
+        !  write quantum chemistry files that depend on known cfrag:
         if ( gaussian .or. qchem ) then
           write(30,'(1x,I3,2x,I2)') cfrag,1
         else if ( orca ) then
@@ -648,102 +971,15 @@ program afnmr_x
           write(30,'(a,i3)')'charge  ',cfrag
           write(30,'(a)') 'end'
         endif
+        return
 
-        nhighatom=0
-        nlowatom=0
-!
-!       get starting, ending atoms for residue "k":
-!
-        call get_atom_range( iatstart, iatfinal, k, &
-            selectC, restype(k), ter )
-!
-!       write out atoms in principal residue:
-!
-        do kk=iatstart,iatfinal
-          iqm = iqm + 1
-          nhighatom = nhighatom + 1
-          call addatom( kk, iqm, basis)
-        enddo
+end subroutine write_cfrag_header_info
 
-        do ktemp=1,nres
-          if( ktemp.ne.k .and. connect(k,ktemp) )then
-
-              call get_atom_range( kstart, kfinal, ktemp, &
-                   selectC, restype(ktemp), ter)
-!
-!             write out coordinates in a "connected" residue
-!
-              do kk=kstart,kfinal
-                nlowatom = nlowatom + 1
-                iqm = iqm + 1
-                call addatom( kk, iqm, ' ')
-              enddo
-!
-!             add hydrogens to dangling residues:
-!
-              if(ktemp.ne.1 .and. ktemp.le.lastprotres  &
-                  .and. .not. ter(ktemp-1) )then
-!
-!               ---look for "backwards" links to previous residue:
-!
-                if(.not. atomsign(kstart-1) )then
-                  n1=kstart
-                  n2=selectCA(ktemp-1)
-                  if(atomname(n1).eq.' C  ') then
-                    call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
-                      coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
-                  else
-                    call xyzchangeO(coord(1,n2),coord(2,n2),coord(3,n2), &
-                      coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
-                  endif
-                  nlowatom = nlowatom + 1
-                  iqm = iqm + 1
-                  call addH( iqm, x, y, z)
-                endif
-              endif
-
-              if(ktemp.lt.lastprotres .and. .not. ter(ktemp)) then
-!
-!             ---look for "forwards" links to the next residue:
-!
-                if(.not. atomsign(kfinal+3) )then
-                  n1=selectCA(ktemp)
-                  n2=selectC(ktemp)
-                  call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
-                    coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
-                  nlowatom = nlowatom + 1
-                  iqm = iqm + 1
-                  call addH( iqm, x, y, z)
-                endif
-              endif
-
-          endif
-          if( ktemp == lastprotres ) iqmprot = iqm  ! only freeze protein
-        enddo  ! ktemp
-
-        !  check for dangling S--S bonds:
-
-        do kk=1,natom
-          if( atomname(kk)(2:3) == 'SG' .and. atomsign(kk) ) then
-!           write(0,*) 'found SG: ', resno(kk), atomsign(kk)
-            do i=1,natom
-              if( i.eq.kk) cycle
-              if( atomname(i)(2:3) .ne. 'SG') cycle
-              tempdis=dsqrt((coord(1,i)-coord(1,kk))**2.0d0  &
-                 +(coord(2,i)-coord(2,kk))**2.0d0            &
-                 +(coord(3,i)-coord(3,kk))**2.0d0)
-              if(tempdis.le.2.5d0 .and. kk.ne.i   &
-                   .and.  .not. atomsign(i) )then
-                !we have found a "dangling" S--S bond; saturate:
-                call xyzchangeS(coord(1,i),coord(2,i),coord(3,i),  &
-                    coord(1,kk),coord(2,kk),coord(3,kk),x,y,z)
-                iqm = iqm + 1
-                call addH( iqm, x, y, z)
-              endif
-            enddo
-          endif
-        enddo
-        close(31)
+subroutine handle_external_charges()
+      use comafnmr
+      implicit none
+      double precision :: a,b,c,d
+      integer :: iitemp,j,kk,nprotc,nsf
 
 !       Deal with the charges representing the protein and solvent polarization:
 
@@ -838,7 +1074,14 @@ program afnmr_x
         enddo
 60      continue
         close(23)
-        ! close(35)
+        return
+end subroutine handle_external_charges
+
+subroutine finish_program_files( iqmprot )
+      use comafnmr
+      implicit none
+      integer, intent(in) :: iqmprot
+      integer :: i, kbas
 
         !  More program-dependent keywords and instructions:
 
@@ -1072,7 +1315,15 @@ program afnmr_x
 
         close(30)
         if( orca ) close(32)
+        return
+end subroutine finish_program_files
 
+subroutine external_minimizer( cfrag, iqm, kuser )
+      use comafnmr
+      implicit none
+      integer, intent(in) :: cfrag, kuser
+      integer, intent(inout) :: iqm
+      integer :: i,iline
         ! What follows is done last (for each residue): it does a 
         !  quantum minimization of the fragment (using input files
         !  created above), extracts the minimized coordinates, and 
@@ -1162,217 +1413,5 @@ program afnmr_x
                 // '.xyz1' )
           ! TODO: need to call terachem, then transfer the info into demon
         end if
-
-        if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
-
-      enddo  ! big loop over residues
-
-end program afnmr_x
-
-subroutine xyzchange(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
-
-        implicit none
-        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
-
-         grad=dsqrt(1.09d0**2/((xold-xzero)**2+(yold-yzero)**2   &
-           +(zold-zzero)**2))
-         xnew=xzero+grad*(xold-xzero)
-         ynew=yzero+grad*(yold-yzero)
-         znew=zzero+grad*(zold-zzero)
-         return
-end subroutine xyzchange
-
-subroutine xyzchangeS(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
-
-        implicit none
-        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
-
-         grad=dsqrt(1.33d0**2/((xold-xzero)**2+(yold-yzero)**2   &
-           +(zold-zzero)**2))
-         xnew=xzero+grad*(xold-xzero)
-         ynew=yzero+grad*(yold-yzero)
-         znew=zzero+grad*(zold-zzero)
-         return
-end subroutine xyzchangeS
-
-subroutine xyzchangeO(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
-
-        implicit none
-        double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
-
-         grad=dsqrt(0.96d0**2/((xold-xzero)**2+(yold-yzero)**2  &
-           +(zold-zzero)**2))
-         xnew=xzero+grad*(xold-xzero)
-         ynew=yzero+grad*(yold-yzero)
-         znew=zzero+grad*(zold-zzero)
-         return
-end subroutine xyzchangeO
-
-subroutine get_atom_range( kstart, kfinal, ktemp,  &
-           selectC, restype, ter )
-        implicit none
-
-        integer, intent(in)   :: ktemp, selectC(0:*)
-        integer, intent(out)  :: kstart, kfinal
-        logical, intent(in)   :: ter(0:*)
-        character(len=1), intent(in) ::  restype
-
-        if( restype.eq.'P' ) then
-          kstart=selectC(ktemp-1)
-          kfinal=selectC(ktemp)-1
-          if( ter(ktemp) )then
-            kfinal=selectC(ktemp)+2
-          endif
-          if( ter(ktemp-1) ) then
-            kstart=selectC(ktemp-1)+3
-          endif
-        else if( restype.eq.'N' ) then
-          kstart=selectC(ktemp-1)
-          kfinal=selectC(ktemp)-1
-          if( ter(ktemp) )then
-            kfinal=selectC(ktemp)+1
-          endif
-          if( ter(ktemp-1) ) then
-            kstart=selectC(ktemp-1)+2
-          endif
-        else    !  general (G/W) residue type: should be ligand or water
-          kstart=selectC(ktemp)
-          kfinal=selectC(ktemp+1)-1
-        endif
-
         return
-end subroutine get_atom_range
-
-subroutine addatom( kk, iqm, basis )
-
-      use comafnmr
-      implicit none
-      integer, intent(in) ::  kk,iqm
-      character(len=1), intent(in) ::  basis
-      integer :: j, atno
-      character(len=3) ::  i_char
-      character(len=1) ::  elem
-
-      if ( demon .or. jaguar ) then
-        write( i_char, '(i3)' ) iqm
-        dlabel(iqm) = trim(element(kk)) // adjustl(i_char)
-        if( len_trim(element(kk)) == 1 ) dlabel(iqm)(5:5) = ' ' 
-        write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
-      else if ( terachem ) then
-        write(34,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-      else if ( gaussian ) then
-        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-        dlabel(iqm) = element(kk)(2:2)
-      else if ( sqm ) then
-        elem = element(kk)(2:2)
-        if ( elem == 'H' ) atno = 1
-        if ( elem == 'C' ) atno = 6
-        if ( elem == 'N' ) atno = 7
-        if ( elem == 'O' ) atno = 8
-        if ( elem == 'F' ) atno = 9
-        if ( elem == 'P' ) atno = 15
-        if ( elem == 'S' ) atno = 16
-        write(30,'(i2,2x,a2,4x,3f10.4)') atno, element(kk),(coord(j,kk),j=1,3)
-      else
-        write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-        if( orca .and. basis .eq. 'M' ) then
-          write(30,'(a)') 'NewGTO'
-          write(30,'(a)') '"def2-TZVP"'
-          write(30,'(a)') 'end;'
-        endif
-      endif
-      if( xtb .or. quick ) then
-        write(44,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-      endif
-
-      write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
-        kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
-        qmcharge(kk),rad(kk),element(kk)
-
-      return
-end subroutine addatom
-
-subroutine addH( iqm, x, y, z)
-
-      use comafnmr
-      implicit none
-      integer, intent(in) :: iqm
-      double precision, intent(in) ::  x,y,z
-      character(len=3) i_char
-
-      if( demon .or. jaguar ) then
-        write( i_char, '(i3)' ) iqm
-        dlabel(iqm) = ' H' // adjustl(i_char)
-        write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
-      else if ( terachem ) then
-        write(34,'(a2,4x,3f10.4)')'H ',x,y,z
-      else if ( gaussian ) then
-        write(30,'(a2,4x,3f10.4)')' H',x,y,z
-        dlabel(iqm) = 'H'
-      else if ( sqm ) then
-        write(30,'(a2,4x,3f10.4)')' 1  H ',x,y,z
-      else
-        write(30,'(a2,4x,3f10.4)')' H ',x,y,z
-      endif
-      if( xtb .or. quick ) then
-        write(44,'(a2,4x,3f10.4)')' H ',x,y,z
-      end if
-
-      modnum = modnum + 1
-      if( modnum < 10 ) then
-         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
-           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
-      else
-         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
-           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
-      endif
-
-      return
-end subroutine addH
-
-subroutine transfer_minimized_coords(iqm)
-
-      use comafnmr
-      implicit none
-      integer, intent(in) :: iqm
-      integer :: i,j
-
-      !  transfer the minimized coordinates to the .pqr file
-      open(47,file=filek(1:lengthb+3)//'.pqr')
-      open(48,file=filek(1:lengthb+3)//'.pqr1')
-      do i=1,iqm
-         read(47,'(a30,24x,a16)') pqrstart,pqrend
-         write(48,'(a30,3f8.3,a16)') pqrstart, &
-             fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
-      end do
-      close(47)
-      close(48)
-      call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-         // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
-
-      if( demon ) then
-
-         !  transfer the minimized coordinates to the .inp file
-         open(47,file=filek(1:lengthb+3)//'.inp')
-         open(48,file=filek(1:lengthb+3)//'.inp1')
-         do i=1,9999
-            read(47,'(a)',end=106) line
-            write(48,'(a)') trim(line)
-            if( line(1:9) == 'GEOMETRY ' ) then
-               do j=1,iqm
-                  read (47,*) 
-                  write(48,'(a,2x,3f12.5)') dlabel(j), &
-                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
-               end do
-            end if
-         end do
-  106    close(47)
-         close(48)
-         call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-            // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
-
-      else
-         write(6,*) "xtb only works with demon for now"
-         call exit(1)
-      end if
-end subroutine transfer_minimized_coords
+end subroutine external_minimizer
