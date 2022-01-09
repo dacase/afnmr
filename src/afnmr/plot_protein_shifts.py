@@ -150,7 +150,7 @@ alltypes.update(CARBON_TYPES)
 
 def map_to_type(series):
     key = (series.resname, series.atomname)
-    for type, items in alltypes.iteritems():
+    for type, items in alltypes.items():
         if key in items: return type
     if series.atomname == 'N':
         return 'N'
