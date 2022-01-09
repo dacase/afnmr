@@ -22,30 +22,34 @@ Optional flags:
                    If this flag is not present, fragments will be created
                    for residues 1 up to the last protein or nucleic acid
                    residue
-   -mixedb         use a mixed basis with the primary residue at pcSseg-1,
-                   others at DZP
+
+   -dzp            all residues are treated at the pcSseg-0 level (default)
    -tzp            all residues are treated at the pcSseg-1 level
    -aug-tzp        all residues are treated at the aug-pcSseg-1 level
-   -dzp            all residues are treated at the pcSseg-0 level (default)
-   -shape          all residues are treated at the pcseg-0 level
-   -solinprot      use the solinprot program to get surface charges (default)
-   -demon, -deMon  Set up quantum input files to use with deMon
-   -demon5         Set up quantum input files to use with deMon, v5 (default)
+   -mixedb         use a mixed basis with the primary residue at pcSseg-1,
+                   others at DZP
+
    -o3lyp          Use O3LYP in place of OLYP; requires -gau or -orca
-   -qopt           Do quantum optimization with same program as for shifts
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
-   -xtb            Set up quantum input files to use with xtb for optimization
+
+   -demon5         Set up quantum input files to use with deMon, v5 (default)
+   -demon, -deMon  Set up quantum input files to use with deMon3
    -orca           Set up quantum input files to use with Orca
    -gaussian       Set up quantum input files to use with Gaussian
    -jaguar         Set up quantum input files to use with Jaguar
    -qchem          Set up quantum input files to use with Q-Chem
-   -tc             Set up quantum input files to use with TeraChem
-   -sqm            Set up quantum input files to use with sqm
+
+   -qopt           Geometry optimize fragments with same program as for shifts
+                       (default is no geometry optimization)
+   -xtb            Geometry optimize fragments with xtb
+   -quick          Geometry optimize fragments with quick
+   -tc             Geometry optimize fragments with terachem
+
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
-                       (only works with -solinprot)
    -nomin          Skip the minimization steps, but still build from 
                        <basename>.pdb
+
    -frcmod <file>  An additional frcmod file to load in to tleap
    -offlib <file>  An additional library file to load in to tleap
    -afterloadpdb "string"  Additional command(s) to give to tleap after
@@ -106,15 +110,16 @@ while [ $# -gt 0 ]; do
         -deMon)       program="D";;
         -demon5)      program="E";;
         -o3lyp)       functional="O3LYP";;
-        -qopt)        qopt="T";;
+        -qopt)        qopt="Z";;
         -nbcut)       shift; nbcut="$1";;
         -xtb)         qopt="X";;
+        -quick)       qopt="Q";;
+        -tc)          qopt="T";;
         -orca)        program="O";;
         -jaguar)      program="J";;
         -gaussian)    program="G";;
         -gau)         program="G";;    # for backwards compatibility
         -qchem)       program="Q";;
-        -tc)          program="T";;
         -sqm)         program="S";;
         -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
         -workdir)     workdir="T";;
@@ -146,6 +151,15 @@ if [ "$workdir" = "T" ]; then
    /bin/rm -f $1.pdb
    /bin/ln -s ../$1.pdb
    cp ../leap.in .
+fi
+
+if [ "$qopt" = "Z" ]; then
+   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" ]; then
+      $qopt=$program
+   else
+      printf "Bad option for qopt: $qpot\n"
+      exit 1
+   fi
 fi
 
 #  Set the options to afnmr.x:
