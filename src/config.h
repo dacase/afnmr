@@ -27,15 +27,15 @@ endif
 FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
 
 CC=gcc
-CFLAGS=
+CFLAGS=-g
 COPTFLAGS=-O3 -mtune=native
 
 CXX=g++
-CXXFLAGS=
+CXXFLAGS=-g
 CXXOPTFLAGS=-O3
 
 FC=gfortran
-FFLAGS=-I$(INCDIR)
+FFLAGS=-I$(INCDIR) -g
 FOPTFLAGS=-O3 -mtune=native
 
 AR=ar rv
