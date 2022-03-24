@@ -155,7 +155,7 @@ fi
 
 if [ "$qopt" = "Z" ]; then
    if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" ]; then
-      $qopt=$program
+      qopt=$program
    else
       printf "Bad option for qopt: $qpot\n"
       exit 1
