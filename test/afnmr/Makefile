@@ -1,4 +1,4 @@
-test: 1d3z_test2 1d3z_test3 1d3z_test4 1d3z_test5 m6ab_test1 clean
+test: 1d3z_test2 1d3z_test4 1d3z_test5 m6ab_test1 clean
 
 1d3z_test1::
 	@echo "Running test quantum fragmentation on ubiquitin:"

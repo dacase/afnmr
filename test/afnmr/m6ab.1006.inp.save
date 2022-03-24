@@ -1,7 +1,7 @@
-TITLE AF-NMR fragment for residue    6; version = 1.3.1; nbcut =  3.30
-SCFTYPE  RKS Tol=1.0e-6 MAX=100
+TITLE AF-NMR fragment for residue    6; version = 1.5; nbcut =  3.30
+SCFTYPE  RKS Tol=1.0e-7 MAX=100
 GUESS TB
-ORBITALS CARTESIAN
+ORBITALS SPHERICAL
 ERIS MULTIPOLE
 VxcType Auxis OLYP
 GRID FINE
@@ -784,7 +784,7 @@ EMBED READ
        0.597000      -0.489000     -13.694000   -0.36254955
 END
 BASIS  (pcSseg-0)
-AUXIS  (GEN-A2)
+AUXIS  (GEN-A2*)
 NMR READ SHIELDING
  O1    P2    O3    O4    O5    C6    H7    H8    C9    H10   O11   C12   &
  H13   C14   H15   O16   H17   N18   C19   C20   C21   N22   C23   H24   &
