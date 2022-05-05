@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ]; then
+   echo "Usage: $0  <type>  <id>"
+   echo "This is a wrapper for the 'nmrfxs' program from Bruce Johnson.  It"
+   echo "runs the nmr predictions on the file '\$id.pdb' (where id is the second"
+   echo "argument,) and formats the output into a tab-delimited file that is"
+   echo "compatible with the output from make-shiftsrdb script.  The type of"
+   echo "prediction is given in the first argument, and can be 'attr', 'dist',"
+   echo "or 'rc'.  See the nmrfx-structure docs for more information."
+   exit 1
+fi
+
+type=$1
+id=$2
+
+cat <<EOF > $id.$type.rdb
+res	atomname	resname	shift.$type
+4N	4	3	10N
+EOF
+
+#  The following line assumes that the "nmrfxs" script is in your PATH; 
+#  adjust this as needed.
+
+nmrfxs  predict -r $type -o star  $id.pdb | \
+    awk '{printf "%d\t%s\t%s\t%s\n", $6,$8,$7,$11}' | \
+    sort -k1n -k2 >> $id.$type.rdb
