@@ -48,7 +48,7 @@ program afnmr_x
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            solinprot is T or F
 !            qopt controls off quantum geometry optimization: set to
-!                  D/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
+!                  E/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
 !                  quick or terachem), or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
@@ -219,7 +219,7 @@ program afnmr_x
       if( solinprotb .eq. 'T' .or. solinprotb .eq. 'S' ) solinprot = .true.
 
       call get_command_argument( 4, qoptb, lengthb )
-      if( qoptb .eq. 'D' .or. qoptb .eq. 'G' ) then
+      if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' ) then
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
          xtb = .true.
@@ -285,6 +285,8 @@ program afnmr_x
            if( resno_user(i) .ne. prev_resno_user ) then ! found new residue
               nptemp = nptemp + 1
               prev_resno_user = resno_user(i)
+              !  create list if user didn't enter one:
+              if( listsize == 0 ) list(nptemp) = resno_user(i)
            endif
            resno(i) = nptemp
            resmap(resno_user(i)) = nptemp  ! maps user-resno to sequential ones
@@ -428,14 +430,13 @@ program afnmr_x
       do kcount=1,nres
 
         if( listsize > 0 ) then
-           if( kcount > listsize ) exit
-           kuser = list( kcount )
+           if( kcount > listsize ) exit ! done with input list
         else
-           if( kcount > lastprotres ) exit
-           kuser = firstprotres + kcount - 1
+           if( kcount > lastprotres ) exit  ! done with default list
         endif
-        ! We need both "kuser" (user's file number) and "k" (a
+        ! We need both "kuser" (user's residue number) and "k" (a
         !    sequential residue number:
+        kuser = list( kcount )
         k = resmap(kuser)
 
         iqm = 0   !  keep track of the atom number in the output file
