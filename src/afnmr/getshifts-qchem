@@ -5,16 +5,11 @@
 #   usage:  getshifts-qchem reference basename; rdb file fragments to stdout
 #******************************************************************************
 
-import numpy as np
-
-
-sub numerically { $a <=> $b; }
-sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 $resi = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor=1;
+# $fulltensor=0;
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";
@@ -41,13 +36,8 @@ if( $basename eq "header" ){
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   if( $fulltensor ){
-      printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-   } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\n" );
-      printf( "4N\t8\t8\t10N\t10N\n" );
-   }
+   printf( "res\tatomname\tresname\tshift\tdelta\n" );
+   printf( "4N\t8\t8\t10N\t10N\n" );
 
    exit(0);
 }
@@ -73,54 +63,18 @@ open (LOG, "<", "$basename" . ".qcout") or die "cannot open $basename.qcout";
 
 while (<LOG>) {
 
-   if (m/^  -- ATOM /){
+   if (m/^   Atom /){
 
-       @f = split( ' ', $_ ); $iat = $f[3]; $elem = $f[2];
+       @f = split( ' ', $_ ); $iat = $f[2]; $elem = $f[1];
+           $siso = $f[3]; $saniso = $f[4];
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
        next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
                    ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
 
-       <LOG>;<LOG>;<LOG>;
-       @f = split( ' ', $_ ); 
-       $siso = $f[1];
-       $saniso = $f[3];
-       if ($fulltensor == 1) {
-           <LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;
-           <LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;
-           <LOG>;<LOG>;<LOG>;<LOG>;
-
-           #  get full shielding tensor:
-           $_ = <LOG>; @f = split( ' ', $_ ); 
-           $sxx=$f[0]; $sxy=$f[1]; $sxz=$f[2];
-
-           $_ = <LOG>; @f = split( ' ', $_ ); 
-           $syx=$f[0]; $syy=$f[1]; $syz=$f[2];
-
-           $_ = <LOG>; @f = split( ' ', $_ ); 
-           $szx=$f[0]; $szy=$f[1]; $szz=$f[2];
-
-           printf "%8.3f  %8.3f  %8.3f\n", $sxx, $sxy, $sxz;
-           printf "%8.3f  %8.3f  %8.3f\n", $syx, $syy, $syz;
-           printf "%8.3f  %8.3f  %8.3f\n", $szx, $szy, $szz;
-           printf "\n";
-
-           # get the symmetrized shielding tensor:
-           $sxy = ($sxy + $syx)/2.;  $syx = $sxy;
-           $sxz = ($sxz + $szx)/2.;  $szx = $sxz;
-           $syz = ($syz + $szy)/2.;  $szy = $syz;
-
-           printf "%8.3f  %8.3f  %8.3f\n", $sxx, $sxy, $sxz;
-           printf "%8.3f  %8.3f  %8.3f\n", $syx, $syy, $syz;
-           printf "%8.3f  %8.3f  %8.3f\n", $szx, $szy, $szz;
-
-           exit(0);
-
-       } else {
-          printf "%d\t%s\t%s\t%8.3f\t%8.3f\n", 
-             $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso, $saniso;
-       }
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\n", 
+          $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso, $saniso;
 
    }
 }
