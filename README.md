@@ -39,3 +39,5 @@ biomolecules. Biophys. Chem. 267, 106476 (2020).
        using DFT calculations on reference compounds. 
    Version 1.3.1 fixes the ways in which waters and ligands are handled.
    Version 1.4 adds support for jaguar, plus other small tweaks
+   Version 1.5 provides for fixes for non-sequential residue numbers, adds
+       tweaks for quantum geometry optimization
