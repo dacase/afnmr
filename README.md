@@ -41,3 +41,4 @@ biomolecules. Biophys. Chem. 267, 106476 (2020).
    Version 1.4 adds support for jaguar, plus other small tweaks
    Version 1.5 provides for fixes for non-sequential residue numbers, adds
        tweaks for quantum geometry optimization
+   Version 1.6 fixes a bug in how the external charges were written for ORCA
