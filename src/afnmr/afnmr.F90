@@ -29,7 +29,7 @@ module comafnmr
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
-              qopt, solinprot, xtb, sqm, quick
+              qopt, xtb, sqm, quick
    logical :: first=.true.
    double precision :: nbcut
 
@@ -40,13 +40,12 @@ program afnmr_x
 !   (Note: generally the input for afnmr.x is created by the shell script
 !      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
-!   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
+!   Usage: afnmr.x program basis qopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), J (Jaguar), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
-!            solinprot is T or F
 !            qopt controls off quantum geometry optimization: set to
 !                  E/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
 !                  quick or terachem), or use F (false, default) to turn off
@@ -63,7 +62,7 @@ program afnmr_x
 
       double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
-      character(len=1) :: program,solinprotb,qoptb
+      character(len=1) :: program,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: firstprotres, lastprotres
@@ -170,7 +169,6 @@ program afnmr_x
       xtb = .false.
       sqm = .false.
       quick = .false.
-      solinprot = .false.
       qopt = .false.
       listsize = 0
       version = '1.6'
@@ -188,7 +186,7 @@ program afnmr_x
 
       if( command_argument_count() .lt. 5 ) then
          write(6,*) &
-       'Usage: af-nmr program basis solinprot qopt <basename> {list}'
+       'Usage: af-nmr program basis qopt <basename> {list}'
          stop 1
       end if
 
@@ -215,10 +213,7 @@ program afnmr_x
 
       call get_command_argument( 2, basis, lengthb )
 
-      call get_command_argument( 3, solinprotb, lengthb )
-      if( solinprotb .eq. 'T' .or. solinprotb .eq. 'S' ) solinprot = .true.
-
-      call get_command_argument( 4, qoptb, lengthb )
+      call get_command_argument( 3, qoptb, lengthb )
       if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' ) then
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
@@ -232,25 +227,25 @@ program afnmr_x
          stop 1
       endif
 
-      call get_command_argument( 5, functional, lengthb )
+      call get_command_argument( 4, functional, lengthb )
 
-      call get_command_argument( 6, nbcutb, lengthb )
+      call get_command_argument( 5, nbcutb, lengthb )
       read( nbcutb, * ) nbcut
 
-      call get_command_argument( 7, basename, lengthb )
+      call get_command_argument( 6, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
 
-      if( command_argument_count() > 7 ) then
-         do i=8,command_argument_count()
+      if( command_argument_count() > 6 ) then
+         do i=7,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
-            read( lpchar, '(i4)' ) list(i-7)
+            read( lpchar, '(i4)' ) list(i-6)
          end do
-         listsize = command_argument_count() - 7
+         listsize = command_argument_count() - 6
       endif
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
-      write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
-           'Input arguments: ', program, basis, solinprotb, qoptb, &
+      write(6,'(a,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
+           'Input arguments: ', program, basis, qoptb, &
            functional, nbcut, trim(basename(1:lengthb))
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
@@ -570,7 +565,7 @@ program afnmr_x
         call finish_program_files( iqmprot )
         call external_minimizer( cfrag, iqm, kuser )
 
-        if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
+        write(0,'(a,i4)') '    done with residue ', kuser
 
       enddo  ! big loop over residues
 
@@ -818,9 +813,7 @@ subroutine write_header_info(kuser)
         end if
 
         open(31,file=filek(1:lengthb+3)//'.pqr')
-        if( solinprot ) then
-           open(33,file=filek(1:lengthb+3)//'.prot.pqr')
-        end if
+        open(33,file=filek(1:lengthb+3)//'.prot.pqr')
 
         ! regular header info here:
         if( gaussian ) then
@@ -1006,33 +999,23 @@ subroutine handle_external_charges()
 
         do kk=1,natom
           if( .not. atomsign(kk) ) then
-            if( solinprot ) then
-               if ( restype(resno(kk)).ne.'W' ) &
-               write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
-                  'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
-                  (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
-            else if( gaussian .or. qchem .or. demon ) then
-              write(30,'(3f10.4,2x,f12.8)') (coord(j,kk),j=1,3),qmcharge(kk)
-            else if( jaguar ) then
-              write(30,'(f12.8,2x,3f10.4)') qmcharge(kk), (coord(j,kk),j=1,3)
-            !  note that orca needs to write these later, after the number
-            !  of surface points has been computed
-            endif
+            if ( restype(resno(kk)).ne.'W' ) &
+            write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
+               'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
+               (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
           endif
         enddo
 
-        if( solinprot ) then
-          close(33)
-          call execute_command_line('./runsolinprot ' // filek(1:lengthb+3), &
-               exitstat = ier)
-          if( ier .ne. 0 )then
-             write(0,*) "error in solinprot: check solinprot.out"
-             write(0,*) "error code was ", ier
-             write(0,*) "command line was:"
-             write(0,*) './runsolinprot ' // filek(1:lengthb+3)
-             stop 1
-          end if
-        endif
+        close(33)
+        call execute_command_line('./runsolinprot ' // filek(1:lengthb+3), &
+             exitstat = ier)
+        if( ier .ne. 0 )then
+           write(0,*) "error in solinprot: check solinprot.out"
+           write(0,*) "error code was ", ier
+           write(0,*) "command line was:"
+           write(0,*) './runsolinprot ' // filek(1:lengthb+3)
+           stop 1
+        end if
 
         if( orca ) then
           nsf=0  ! number of surface points, just count them here
@@ -1043,21 +1026,7 @@ subroutine handle_external_charges()
           enddo
 59        continue
           close(23)
-
-          if( .not.solinprot ) then
-             nprotc = 0
-             do kk=1,natom
-               if(.not. atomsign(kk)) nprotc = nprotc + 1
-             enddo
-             write(32,'(i7)') nprotc+nsf
-             do kk=1,natom
-                if(.not. atomsign(kk) )then
-                   write(32,'(f12.8,2x,3f10.4)')qmcharge(kk), (coord(j,kk),j=1,3)
-                endif
-             end do
-          else
-             write(32,'(i7)') nsf
-          end if
+          write(32,'(i7)') nsf
         endif
 
         open(23,file='srfchg.pos')

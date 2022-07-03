@@ -1,14 +1,15 @@
-test: 1d3z_test2 1d3z_test4 1d3z_test5 m6ab_test1 clean
+test: 1d3z_test1 1d3z_test2 1d3z_test4 1d3z_test5 m6ab_test1 clean
 
 1d3z_test1::
-	@echo "Running test quantum fragmentation on ubiquitin:"
+	@echo "Running test quantum fragmentation on ubiquitin: orca"
 	@echo
-	../../bin/afnmr -pbsa -list 2 -nomin 1d3z1
-	@../dacdif -a 1.e-5 1d3z1002.inp.save 1d3z1002.inp
-	@/bin/rm -f 1d3z1.afnmr.log 1d3z1002.pqr 1d3z1.min.pqr 1d3z1.pqr
+	../../bin/afnmr -orca -nomin -list 3 1d3z1
+	@../dacdif -a 1.e-5 1d3z1003.orcainp.save 1d3z1003.orcainp
+	@../dacdif 1d3z1003.pos.save 1d3z1003.pos
+	@/bin/rm -f 1d3z1.afnmr.log 1d3z1.pqr 1d31003.pqr
 
 1d3z_test2::
-	@echo "Running test quantum fragmentation on ubiquitin with solinprot:"
+	@echo "Running test quantum fragmentation on ubiquitin: demon"
 	@echo
 	../../bin/afnmr -demon5 -nomin -list 3 1d3z1
 	@../dacdif -a 1.e-5 1d3z1003.inp.save 1d3z1003.inp

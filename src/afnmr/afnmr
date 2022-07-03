@@ -41,9 +41,9 @@ Optional flags:
 
    -qopt           Geometry optimize fragments with same program as for shifts
                        (default is no geometry optimization)
-   -xtb            Geometry optimize fragments with xtb
-   -quick          Geometry optimize fragments with quick
-   -tc             Geometry optimize fragments with terachem
+   -xtb            Geometry optimize fragments with xtb (experimental)
+   -quick          Geometry optimize fragments with quick (experimental)
+   -tc             Geometry optimize fragments with terachem (experimental)
 
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
@@ -68,8 +68,6 @@ check_afnmrhome() {
    fi
 }
 
-implicit_solvent="solinprot"
-solinprot="T"
 program="E"
 qopt="F"
 basis="D"
@@ -121,7 +119,6 @@ while [ $# -gt 0 ]; do
         -gau)         program="G";;    # for backwards compatibility
         -qchem)       program="Q";;
         -sqm)         program="S";;
-        -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
         -nomin)       min="no";;
@@ -163,7 +160,7 @@ if [ "$qopt" = "Z" ]; then
 fi
 
 #  Set the options to afnmr.x:
-AFNMR_OPTIONS="$program $basis $solinprot $qopt $functional $nbcut"
+AFNMR_OPTIONS="$program $basis $qopt $functional $nbcut"
 
 #  Should not need to edit anything below here; (except to perhaps change 
 #  detailed parameters in minimization)
