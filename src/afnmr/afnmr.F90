@@ -451,7 +451,7 @@ program afnmr_x
 
         call write_header_info( kuser )
 
-        atomsign(1:natom)=.false.
+        atomsign(1:natom)=.false.   ! flags whether atom is in the quantum region
 
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
@@ -1015,6 +1015,8 @@ subroutine handle_external_charges()
               write(30,'(3f10.4,2x,f12.8)') (coord(j,kk),j=1,3),qmcharge(kk)
             else if( jaguar ) then
               write(30,'(f12.8,2x,3f10.4)') qmcharge(kk), (coord(j,kk),j=1,3)
+            !  note that orca needs to write these later, after the number
+            !  of surface points has been computed
             endif
           endif
         enddo
@@ -1042,18 +1044,20 @@ subroutine handle_external_charges()
 59        continue
           close(23)
 
-          nprotc = 0
           if( .not.solinprot ) then
+             nprotc = 0
              do kk=1,natom
                if(.not. atomsign(kk)) nprotc = nprotc + 1
              enddo
-          endif
-          write(32,'(i7)') nprotc+nsf
-          do kk=1,natom
-             if(.not. atomsign(kk) )then
-                write(32,'(f12.8,2x,3f10.4)')qmcharge(kk), (coord(j,kk),j=1,3)
-             endif
-          end do
+             write(32,'(i7)') nprotc+nsf
+             do kk=1,natom
+                if(.not. atomsign(kk) )then
+                   write(32,'(f12.8,2x,3f10.4)')qmcharge(kk), (coord(j,kk),j=1,3)
+                endif
+             end do
+          else
+             write(32,'(i7)') nsf
+          end if
         endif
 
         open(23,file='srfchg.pos')
