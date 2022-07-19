@@ -47,7 +47,7 @@ program afnmr_x
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
 !            qopt controls off quantum geometry optimization: set to
-!                  E/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
+!                  E/G/O/X/Q/T (for optimization with demon, Gaussian, ORCA, xtb, 
 !                  quick or terachem), or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
@@ -214,7 +214,8 @@ program afnmr_x
       call get_command_argument( 2, basis, lengthb )
 
       call get_command_argument( 3, qoptb, lengthb )
-      if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' ) then
+      if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' &
+                         .or. qoptb .eq.  'O' ) then
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
          xtb = .true.
@@ -847,8 +848,15 @@ subroutine write_header_info(kuser)
           else
             write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
-          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
+          if( qopt ) write(30,'(a)', advance='no')  ' L-Opt '
           write(30,'(a)') ''
+
+          if( qopt ) then
+             write(30,'(a)') '%geom'
+             write(30,'(a)') '   maxIter 10'
+             write(30,'(a)') '   end'
+             write(30,'(a)') ''
+          endif
 
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
