@@ -17,8 +17,9 @@ module comafnmr
    character(len=2):: cfragtxt
    character(len=160):: commandline
    character(len=30) :: pqrstart
-   character(len=16) :: pqrend
-   character(len=80) :: filek, line, afnmrhome
+   character(len=26) :: pqrend
+   character(len=80) :: filek, afnmrhome
+   character(len=512) :: line
    character(len=5) :: functional
    character(len=5) :: version
    character(len=1) :: basis
@@ -743,8 +744,8 @@ subroutine transfer_minimized_coords(iqm)
       open(47,file=filek(1:lengthb+3)//'.pqr')
       open(48,file=filek(1:lengthb+3)//'.pqr1')
       do i=1,iqm
-         read(47,'(a30,24x,a16)') pqrstart,pqrend
-         write(48,'(a30,3f8.3,a16)') pqrstart, &
+         read(47,'(a30,24x,a26)') pqrstart,pqrend
+         write(48,'(a30,3f8.3,a26)') pqrstart, &
              fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
       end do
       close(47)
@@ -773,8 +774,29 @@ subroutine transfer_minimized_coords(iqm)
          call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
             // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
 
+      else if( orca ) then
+
+         !  transfer the minimized coordinates to the .orcainp file
+         open(47,file=filek(1:lengthb+3)//'.orcainp')
+         open(48,file=filek(1:lengthb+3)//'.orcainp1')
+         do i=1,9999
+            read(47,'(a)',end=107) line
+            write(48,'(a)') trim(line)
+            if( line(1:6) == '* xyz ' ) then
+               do j=1,iqm
+                  read (47,'(a)') line
+                  write(48,'(a2,4x,3f10.4)') line(1:2), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+               end do
+            end if
+         end do
+  107    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
+            // '.orcainp1 ' // filek(1:lengthb+3) // '.orcainp' )
+
       else
-         write(6,*) "external qopt only works with demon for now"
+         write(6,*) "external qopt only works with demon or orca for now"
          call exit(1)
       end if
 end subroutine transfer_minimized_coords
@@ -1332,7 +1354,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-                // '.xyz --opt --cycles 10 --chrg ' // cfragtxt  &
+                // '.xyz --opt --cycles 30 --chrg ' // cfragtxt  &
                 // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
                 // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
