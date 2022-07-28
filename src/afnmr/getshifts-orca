@@ -20,6 +20,13 @@ if( $reference eq "ref_seg0" ){
    $ref{"N"} = 241.0;  # CH3NO2 + 380.5
    $ref{"P"} = 300.0;  # guess
    $ref{"F"} = 130.2;  # CFCl3
+} elsif( $reference eq "ref_seg0_xtb" ){
+   $reference_set = "OLYP ref_seg0_xtb ";
+   $ref{"H"} = 33.3;   # TMS xtb-opt
+   $ref{"C"} = 190.0;  # TMS xtb-opt
+   $ref{"N"} = 241.0;  # CH3NO2 + 380.5
+   $ref{"P"} = 300.0;  # guess
+   $ref{"F"} = 130.2;  # CFCl3
 } elsif( $reference eq "ref_seg1" ){
    $reference_set = "OLYP ref_seg1 ";
    $ref{"H"} = 31.7;   # TMS
