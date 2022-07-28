@@ -1328,6 +1328,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
       integer, intent(in) :: cfrag, kuser
       integer, intent(inout) :: iqm
       integer :: i,iline
+
         ! What follows is done last (for each residue): it does a 
         !  quantum minimization of the fragment (using input files
         !  created above), extracts the minimized coordinates, and 
@@ -1351,14 +1352,19 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           !  do the xtb minimization here:
           write(6,*)
           write(6,*) 'Optimize geometry using xtb'
-          write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
                 // '.xyz --opt --cycles 30 --chrg ' // cfragtxt  &
+                // ' --iterations 750 --gbsa h2o '  &
                 // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
                 // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
-          call execute_command_line( trim(commandline) )
+          call execute_command_line( trim(commandline), exitstat=ier )
+          if( ier .ne. 0 ) then
+             write(0,*) 'xtb failed: see xtb.log file for details'
+             write(6,*) 'xtb failed: see xtb.log file for details'
+             stop
+          end if
           call execute_command_line( &
             '/bin/rm -f charges wbo xtbrestart xtbopt.log xtbtopo.mol' )
           call execute_command_line( &
