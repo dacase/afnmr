@@ -254,9 +254,11 @@ program afnmr_x
 
       ter(0:MAXRES) = .false.
       chargef(1:MAXRES) = 0.d0
-!
+
+!----------------------------------------------------------------------------
 !     Read the input pqr file:
-!
+!----------------------------------------------------------------------------
+
       open(10,file=pdbfile)
 
       nptemp = 0
@@ -270,8 +272,6 @@ program afnmr_x
              resno_user(i),(coord(j,i),j=1,3),qmcharge(i),rad(i),element(i)
 100        format(12x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
            if( element(i) .eq. ' E' ) then  ! skip extra points
-!              .or. element(i).eq.'NA' .or. element(i).eq.'CL' &
-!              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
               i = i - 1
               cycle
            endif
@@ -333,8 +333,10 @@ program afnmr_x
         endif
       enddo
 !
+!----------------------------------------------------------------------------
 !     Populate arrays to identify C and CA atoms (for proteins); equivalent
 !     atoms (O3' and C3') for nucleotides:
+!----------------------------------------------------------------------------
 !
       do i=2,natom
         if( restype(resno(i)).eq.'P' ) then
@@ -358,7 +360,9 @@ program afnmr_x
       selectC(0) = 1
       selectC(nres+1) = natom+1
 !
+!----------------------------------------------------------------------------
 !     Set up the connectivity arrays:
+!----------------------------------------------------------------------------
 !
       connect(1:nres,1:nres)=.false.
       do i=1,nres
@@ -366,8 +370,6 @@ program afnmr_x
       enddo
 
       charge(1:nres) = nint( chargef(1:nres) )
-
-!----------------------------------------------------------------------------
 
       do i=1,natom
         if( element(i).eq.' H' ) cycle
@@ -382,26 +384,9 @@ program afnmr_x
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
-#if 1
             if( dis.le.nbcut ) then
-#else
-            ! test: don't use protein side-chain atoms to determine contacts
-            if( dis.le.nbcut .and. element(i).ne.' H' .and.  &
-                                   element(j).ne.' H' .and.  &
-                ( atomname(i).eq.' C  ' .or. atomname(i).eq.' CA ' .or. &
-                  atomname(i).eq.' N  ' .or. atomname(i).eq.' O  ' .or. &
-                  atomname(j).eq.' C  ' .or. atomname(j).eq.' CA ' .or. &
-                  atomname(j).eq.' N  ' .or. atomname(j).eq.' O  ' ) )then
-#endif
-
-#if 0
-                write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
-                           atomname(i), resno_user(i), &
-                           atomname(j),  resno_user(j), dis
-#endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
-#if 1
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -416,13 +401,14 @@ program afnmr_x
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
-#endif
             endif
 
         enddo  !  j=i+1,natom
       enddo    !  i=1,natom
 !
+!----------------------------------------------------------------------------
 !     Big loop over residues to create fragments:
+!----------------------------------------------------------------------------
 !
       do kcount=1,nres
 
@@ -450,8 +436,10 @@ program afnmr_x
 
         atomsign(1:natom)=.false.   ! flags whether atom is in the quantum region
 
+!----------------------------------------------------------------------------
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
+!----------------------------------------------------------------------------
 
         cfrag = 0
         do ktemp=1,nres
@@ -469,14 +457,18 @@ program afnmr_x
 
         nhighatom=0
         nlowatom=0
-!
+
+!----------------------------------------------------------------------------
 !       get starting, ending atoms for residue "k":
-!
+!----------------------------------------------------------------------------
+
         call get_atom_range( iatstart, iatfinal, k, &
             selectC, restype(k), ter )
-!
+
+!----------------------------------------------------------------------------
 !       write out atoms in principal residue:
-!
+!----------------------------------------------------------------------------
+
         do kk=iatstart,iatfinal
           iqm = iqm + 1
           nhighatom = nhighatom + 1
@@ -488,22 +480,28 @@ program afnmr_x
 
               call get_atom_range( kstart, kfinal, ktemp, &
                    selectC, restype(ktemp), ter)
-!
+
+!----------------------------------------------------------------------------
 !             write out coordinates in a "connected" residue
-!
+!----------------------------------------------------------------------------
+
               do kk=kstart,kfinal
                 nlowatom = nlowatom + 1
                 iqm = iqm + 1
                 call addatom( kk, iqm )
               enddo
-!
+
+!----------------------------------------------------------------------------
 !             add hydrogens to dangling residues:
-!
+!----------------------------------------------------------------------------
+
               if(ktemp.ne.1 .and. ktemp.le.lastprotres  &
                   .and. .not. ter(ktemp-1) )then
-!
+
+!----------------------------------------------------------------------------
 !               ---look for "backwards" links to previous residue:
-!
+!----------------------------------------------------------------------------
+
                 if(.not. atomsign(kstart-1) )then
                   n1=kstart
                   n2=selectCA(ktemp-1)
@@ -521,9 +519,11 @@ program afnmr_x
               endif
 
               if(ktemp.lt.lastprotres .and. .not. ter(ktemp)) then
-!
+
+!----------------------------------------------------------------------------
 !             ---look for "forwards" links to the next residue:
-!
+!----------------------------------------------------------------------------
+
                 if(.not. atomsign(kfinal+3) )then
                   n1=selectCA(ktemp)
                   n2=selectC(ktemp)
@@ -539,7 +539,9 @@ program afnmr_x
           if( ktemp == lastprotres ) iqmprot = iqm  ! only freeze protein
         enddo  ! ktemp
 
-        !  check for dangling S--S bonds:
+!----------------------------------------------------------------------------
+!       check for dangling S--S bonds:
+!----------------------------------------------------------------------------
 
         do kk=1,natom
           if( atomname(kk)(2:3) == 'SG' .and. atomsign(kk) ) then
@@ -805,9 +807,7 @@ subroutine write_header_info(kuser)
       use comafnmr
       implicit none
       integer, intent(in) :: kuser
-!
-!       write header info:
-!
+
         ! regular file opens here:
         if( gaussian ) then
           open(30,file=filek(1:lengthb+3)//'.com')
