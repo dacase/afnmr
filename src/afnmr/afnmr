@@ -70,6 +70,7 @@ check_afnmrhome() {
 
 program="E"
 qopt="F"
+preopt="F"
 basis="D"
 workdir="no"
 min="yes"
@@ -110,9 +111,9 @@ while [ $# -gt 0 ]; do
         -o3lyp)       functional="O3LYP";;
         -qopt)        qopt="Z";;
         -nbcut)       shift; nbcut="$1";;
-        -xtb)         qopt="X";;
-        -quick)       qopt="Q";;
-        -tc)          qopt="T";;
+        -xtb)         preopt="X";;
+        -quick)       preopt="Q";;
+        -tc)          preopt="T";;
         -orca)        program="O";;
         -jaguar)      program="J";;
         -gaussian)    program="G";;
@@ -151,7 +152,7 @@ if [ "$workdir" = "T" ]; then
 fi
 
 if [ "$qopt" = "Z" ]; then
-   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" 
+   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" \
                          -o "$program" = "O" ]; then
       qopt=$program
    else
@@ -161,7 +162,7 @@ if [ "$qopt" = "Z" ]; then
 fi
 
 #  Set the options to afnmr.x:
-AFNMR_OPTIONS="$program $basis $qopt $functional $nbcut"
+AFNMR_OPTIONS="$program $basis $qopt $preopt $functional $nbcut"
 
 #  Should not need to edit anything below here; (except to perhaps change 
 #  detailed parameters in minimization)

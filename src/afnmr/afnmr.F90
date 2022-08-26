@@ -28,7 +28,8 @@ module comafnmr
 !          (note: does not recognize chainID's, so all resno_user() values
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
-   integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
+   integer :: modnum, ier, listsize, lengthb, natom, &
+              nhighatom, nlowatom, iqmprot
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, xtb, sqm, quick
    logical :: first=.true.
@@ -41,15 +42,18 @@ program afnmr_x
 !   (Note: generally the input for afnmr.x is created by the shell script
 !      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
-!   Usage: afnmr.x program basis qopt functional nbcut basename list
+!   Usage: afnmr.x program basis qopt preopt functional nbcut basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), J (Jaguar), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
 !                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
-!            qopt controls off quantum geometry optimization: set to
-!                  E/G/O/X/Q/T (for optimization with demon, Gaussian, ORCA, xtb, 
-!                  quick or terachem), or use F (false, default) to turn off
+!            qopt controls quantum geometry optimization: set to
+!                  E/G/O/ (for optimization with demon, Gaussian, ORCA),
+!                  or use F (false, default) to turn off
+!            preopt controls external quantum geometry optimization: set to
+!                  X/T/Q/ (for optimization with xtb, terachem, or quick)
+!                  or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
 !            <basename>.pqr gives the input structure; put all "general"
@@ -63,11 +67,11 @@ program afnmr_x
 
       double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
-      character(len=1) :: program,qoptb
+      character(len=1) :: program,qoptb,preoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: firstprotres, lastprotres
-      integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
+      integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
       character(len=3) :: rn
@@ -173,6 +177,7 @@ program afnmr_x
       qopt = .false.
       listsize = 0
       version = '1.6'
+      iqmprot = 0
 
       write(6,*)
       write(6,*)'**********************************************'
@@ -185,13 +190,13 @@ program afnmr_x
 
       call get_environment_variable('AFNMRHOME', afnmrhome )
 
-      if( command_argument_count() .lt. 5 ) then
+      if( command_argument_count() .lt. 6 ) then
          write(6,*) &
-       'Usage: af-nmr program basis qopt <basename> {list}'
+       'Usage: afnmr.x program basis qopt preopt functional nbcut <basename> {list}'
          stop 1
       end if
 
-      call get_command_argument( 1, program, lengthb )
+      call get_command_argument( 1, program, lengthb )  ! program
       if( program .eq. 'G' ) then
          gaussian = .true.
       else if( program .eq. 'D' ) then
@@ -212,42 +217,48 @@ program afnmr_x
          stop 1
       endif
 
-      call get_command_argument( 2, basis, lengthb )
+      call get_command_argument( 2, basis, lengthb )   ! basis
 
-      call get_command_argument( 3, qoptb, lengthb )
+      call get_command_argument( 3, qoptb, lengthb )   ! qopt
       if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' &
                          .or. qoptb .eq.  'O' ) then
          qopt = .true.
-      else if (qoptb .eq. 'X' ) then
-         xtb = .true.
-      else if (qoptb .eq. 'Q' ) then
-         quick = .true.
-      else if (qoptb .eq. 'T' ) then
-         terachem = .true.
       else if (qoptb .ne. 'F' ) then
          write(0,*) 'Bad input for qopt: ', qoptb
          stop 1
       endif
 
-      call get_command_argument( 4, functional, lengthb )
+      call get_command_argument( 4, preoptb, lengthb )   ! preopt
+      if( preoptb .eq. 'X' ) then
+         xtb = .true.
+      else if( preoptb .eq. 'T' ) then
+         terachem = .true.
+      else if( preoptb .eq. 'T' ) then
+         quick = .true.
+      else if (preoptb .ne. 'F' ) then
+         write(0,*) 'Bad input for preopt: ', preoptb
+         stop 1
+      endif
 
-      call get_command_argument( 5, nbcutb, lengthb )
+      call get_command_argument( 5, functional, lengthb )   ! functional
+
+      call get_command_argument( 6, nbcutb, lengthb )   ! nbcut
       read( nbcutb, * ) nbcut
 
-      call get_command_argument( 6, basename, lengthb )
+      call get_command_argument( 7, basename, lengthb )   ! basename
       pdbfile = basename(1:lengthb) // '.pqr'
 
-      if( command_argument_count() > 6 ) then
-         do i=7,command_argument_count()
+      if( command_argument_count() > 7 ) then
+         do i=8,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
-            read( lpchar, '(i4)' ) list(i-6)
+            read( lpchar, '(i4)' ) list(i-7)
          end do
-         listsize = command_argument_count() - 6
+         listsize = command_argument_count() - 7
       endif
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
-      write(6,'(a,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
-           'Input arguments: ', program, basis, qoptb, &
+      write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
+           'Input arguments: ', program, basis, qoptb, preoptb, &
            functional, nbcut, trim(basename(1:lengthb))
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
@@ -443,7 +454,9 @@ program afnmr_x
 
         cfrag = 0
         do ktemp=1,nres
-          if(connect(k,ktemp))then
+          ! .or. clause here will get solvent added to first residue;
+          !    specific for uucg example
+          if(connect(k,ktemp) .or. (connect(1,k) .and. connect(1,ktemp)))then
             call get_atom_range( kstart, kfinal, ktemp, &
                    selectC, restype(ktemp), ter)
             atomsign(kstart:kfinal) = .true.
@@ -476,8 +489,9 @@ program afnmr_x
         enddo
 
         do ktemp=1,nres
-          if( ktemp.ne.k .and. connect(k,ktemp) )then
+          if(connect(k,ktemp) .or. (connect(1,k) .and. connect(1,ktemp)))then
 
+              if( ktemp.eq.k ) cycle
               call get_atom_range( kstart, kfinal, ktemp, &
                    selectC, restype(ktemp), ter)
 
@@ -566,7 +580,7 @@ program afnmr_x
         close(31)
 
         call handle_external_charges()
-        call finish_program_files( iqmprot )
+        call finish_program_files()
         call external_minimizer( cfrag, iqm, kuser )
 
         write(0,'(a,i4)') '    done with residue ', kuser
@@ -798,7 +812,7 @@ subroutine transfer_minimized_coords(iqm)
             // '.orcainp1 ' // filek(1:lengthb+3) // '.orcainp' )
 
       else
-         write(6,*) "external qopt only works with demon or orca for now"
+         write(6,*) "external preopt only works with demon or orca for now"
          call exit(1)
       end if
 end subroutine transfer_minimized_coords
@@ -823,7 +837,7 @@ subroutine write_header_info(kuser)
           open(30,file=filek(1:lengthb+3)//'.in')
         end if
 
-        ! qopt file opens here:
+        ! preopt file opens here:
         if ( xtb ) then
           open(44,file=filek(1:lengthb+3)//'.xyz1')
           open(47,file=filek(1:lengthb+3)//'_xtb.inp')
@@ -870,15 +884,8 @@ subroutine write_header_info(kuser)
           else
             write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
-          if( qopt ) write(30,'(a)', advance='no')  ' L-Opt '
+          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
           write(30,'(a)') ''
-
-          if( qopt ) then
-             write(30,'(a)') '%geom'
-             write(30,'(a)') '   maxIter 10'
-             write(30,'(a)') '   end'
-             write(30,'(a)') ''
-          endif
 
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
@@ -936,7 +943,7 @@ subroutine write_header_info(kuser)
 
         end if
 
-        ! qopt headers here:
+        ! preopt headers here:
         if ( terachem ) then
           write(30,'(a)') 'basis 6-31gs'
           write(30,'(a,a)') 'coordinates ',filek(1:lengthb+3)//'.xyz'
@@ -981,7 +988,7 @@ subroutine write_cfrag_header_info(cfrag)
           write(30, '(a)' ) ' /'
         end if
 
-        !  Now a section for qopt-only options
+        !  Now a section for preopt-only options
         if ( quick ) then
           if( cfrag .ge. 0 ) then
              write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
@@ -1081,11 +1088,11 @@ subroutine handle_external_charges()
         return
 end subroutine handle_external_charges
 
-subroutine finish_program_files( iqmprot )
+subroutine finish_program_files()
       use comafnmr
       implicit none
-      integer, intent(in) :: iqmprot
       integer :: i, kbas
+      character(len=3) iqmprotc
 
         !  More program-dependent keywords and instructions:
 
@@ -1235,14 +1242,15 @@ subroutine finish_program_files( iqmprot )
         else if( orca ) then
           write(30,'(a)') '*'
           if( qopt ) then
-            write(30,'(a)') '%geom MaxIter=5'
+            write(30,'(a)') '%geom MaxIter=10'
             if( nhighatom .lt. iqmprot ) then
-               write(30,'(a)') '      Constraints'
-               do i=nhighatom+1,iqmprot
-                  write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
-               end do
+                write(30,'(a)') '      Constraints'
+                write(iqmprotc, '(i3)') iqmprot-1
+                write(30,'(a,i3,a,a,a)') &
+                    '      { C ', nhighatom,':',iqmprotc, ' C } '
                 write(30,'(a)') '      end'
                 write(30,'(a)') '    end'
+                write(30,*)
             endif
           endif
           !  next two lines are for versions of Orca up to 3.0.1
@@ -1294,7 +1302,7 @@ subroutine finish_program_files( iqmprot )
 
         end if
 
-        ! Again, qopt-only options:
+        ! Again, preopt-only options:
         if ( xtb ) then
           if( nhighatom .lt. iqmprot ) then
              write(47,*) '$fix'
@@ -1354,7 +1362,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*) 'Optimize geometry using xtb'
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-                // '.xyz --opt --cycles 30 --chrg ' // cfragtxt  &
+                // '.xyz --opt --cycles 80 --chrg ' // cfragtxt  &
                 // ' --iterations 750 --gbsa h2o '  &
                 // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
                 // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
