@@ -233,7 +233,7 @@ program afnmr_x
          xtb = .true.
       else if( preoptb .eq. 'T' ) then
          terachem = .true.
-      else if( preoptb .eq. 'T' ) then
+      else if( preoptb .eq. 'Q' ) then
          quick = .true.
       else if (preoptb .ne. 'F' ) then
          write(0,*) 'Bad input for preopt: ', preoptb
