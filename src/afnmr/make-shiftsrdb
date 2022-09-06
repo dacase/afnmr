@@ -8,10 +8,14 @@ cat<<EOD
 
 Usage: make-shiftsrdb qpgm reference <basename> fulltensor
 
-   where qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca"
-   reference is the name of a reference shielding set
-   Input are <basename>xxx.{out,log,qcout} files
-   Set fulltensor to 1 to get expanded CSA printouts
+   * qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca"
+   * reference is the name of a reference shielding set
+        The reference sets are defined in the getshifts-demon (etc.)
+        scripts,  and sometimes change as better sets beccome available.  
+        Users can create their own versions.
+   * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout}
+        files, where "nnn" is a three-digit resiude number (such as "001")
+   * fulltensor is 1 to get expanded CSA printouts, 0 otherwise
 
    Output goes to <basename>.rdb
 
