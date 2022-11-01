@@ -95,6 +95,35 @@ while (<OUT>) {
             next if $elem eq "S";
             printf "%d\t%s\t%s\t%8.3f\t%8.3f\n",
               $res[$i],$aname[$i],$rname[$i], $ref{$elem} - $siso, $saniso;
+
+            # handle averaging of methyl proton shifts:
+            if (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB1/) ||
+                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]1/) ||
+                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE1/) ||
+                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H71/) ||
+                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG11/) ||
+                    $aname[$iat]  =~ "HG21" || $aname[$iat]  =~ "HH31"){
+                $mav = $siso;
+            } elsif (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB2/) ||
+                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]2/) ||
+                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE2/) ||
+                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H72/) ||
+                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG12/) ||
+                    $aname[$iat]  =~ /HG22/ || $aname[$iat]  =~ /HH32/){
+                $mav += $siso;
+            } elsif (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB3/) ||
+                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]3/) ||
+                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE3/) ||
+                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H73/) ||
+                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG13/) ||
+                    $aname[$iat]  =~ /HG22/ || $aname[$iat]  =~ /HH32/){
+                $mav += $siso;
+                $mav = $mav / 3.;
+                printf "%d\t%s\t%s\t%8.3f\t%8.3f\n",
+                  $res[$i],substr($aname[$i],0,2) . "av",
+                  $rname[$i], $ref{$elem} - $mav, $saniso;
+            }
+
          }
          exit(0);
       }
