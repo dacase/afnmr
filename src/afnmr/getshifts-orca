@@ -97,31 +97,31 @@ while (<OUT>) {
               $res[$i],$aname[$i],$rname[$i], $ref{$elem} - $siso, $saniso;
 
             # handle averaging of methyl proton shifts:
-            if (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB1/) ||
-                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]1/) ||
-                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE1/) ||
-                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H71/) ||
-                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG11/) ||
-                    $aname[$iat]  =~ "HG21" || $aname[$iat]  =~ "HH31"){
-                $mav = $siso;
-            } elsif (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB2/) ||
-                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]2/) ||
-                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE2/) ||
-                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H72/) ||
-                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG12/) ||
-                    $aname[$iat]  =~ /HG22/ || $aname[$iat]  =~ /HH32/){
-                $mav += $siso;
-            } elsif (($rname[$iat] == "ALA" && $rname[$iat] =~ /HB3/) ||
-                    ($rname[$iat] != "ASN" && $aname[$iat] =~ /HD[12]3/) ||
-                    ($rname[$iat] == "MET" && $aname[$iat] =~ /HE3/) ||
-                    ($rname[$iat] == "DT"  && $aname[$iat] =~ /H73/) ||
-                    ($rname[$iat] == "VAL" && $aname[$iat]e =~ /HG13/) ||
-                    $aname[$iat]  =~ /HG22/ || $aname[$iat]  =~ /HH32/){
-                $mav += $siso;
+            if (($rname[$i] eq "ALA" && $rname[$i] =~ /HB1/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]1/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE1/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H71/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG11/) ||
+                    $aname[$i]  =~ /HG21/ || $aname[$i]  =~ /HH31/){
+                $mav = $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $rname[$i] =~ /HB2/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]2/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE2/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H72/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG12/) ||
+                    $aname[$i]  =~ /HG22/ || $aname[$i]  =~ /HH32/){
+                $mav += $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $rname[$i] =~ /HB3/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]3/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE3/) ||
+                    ($rname[$i] =~ /DT/  && $aname[$i] =~ /H73/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG13/) ||
+                    $aname[$i]  =~ /HG23/ || $aname[$i]  =~ /HH33/){
+                $mav += $ref{$elem} - $siso;
                 $mav = $mav / 3.;
                 printf "%d\t%s\t%s\t%8.3f\t%8.3f\n",
                   $res[$i],substr($aname[$i],0,2) . "av",
-                  $rname[$i], $ref{$elem} - $mav, $saniso;
+                  $rname[$i], $mav, 0.0;
             }
 
          }
