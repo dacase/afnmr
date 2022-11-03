@@ -88,7 +88,7 @@ while (<LOG>) {
        $_ = <LOG>; @g = split( ' ', $_); 
        $xz = $ref{$elem}-$g[1]; $yz = $ref{$elem}-$g[3]; $zz = $ref{$elem}-$g[5];
 
-      if( $fulltensor ){
+       if( $fulltensor ){
          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
            $xx, $yx, $zx, $xy, $yy, $zy, $xz, $yz, $zz;
@@ -154,6 +154,42 @@ while (<LOG>) {
              printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
                 $delta, $eta, $span;
+
+            # handle averaging of methyl proton shifts:
+            $i = $iat;
+            if (($rname[$i] eq "ALA" && $aname[$i] =~ /HB1/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]1/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE1/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H71/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG11/) ||
+                    $aname[$i]  =~ /HG21/ || $aname[$i]  =~ /HH31/ ||
+                    $aname[$i]  =~ /HZ1/ ){
+                $mav = $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $aname[$i] =~ /HB2/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]2/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE2/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H72/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG12/) ||
+                    $aname[$i]  =~ /HG22/ || $aname[$i]  =~ /HH32/ ||
+                    $aname[$i]  =~ /HZ2/ ){
+                $mav += $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $aname[$i] =~ /HB3/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]3/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE3/) ||
+                    ($rname[$i] =~ /DT/  && $aname[$i] =~ /H73/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG13/) ||
+                    $aname[$i]  =~ /HG23/ || $aname[$i]  =~ /HH33/ ||
+                    $aname[$i]  =~ /HZ3/ ){
+                $mav += $ref{$elem} - $siso;
+                $mav = $mav / 3.;
+                if( $aname[$i] =~ /H[E7BZ]/ ){
+                    $label = substr($aname[$i],0,2) . "av";
+                } else {
+                    $label = substr($aname[$i],0,3) . "av";
+                }
+                printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
+                   $res[$iat],$label,$rname[$iat], $mav, 0.0, 0.0, 0.0;
+            }
 
           }
       }
