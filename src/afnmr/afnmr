@@ -151,7 +151,7 @@ if [ "$workdir" = "T" ]; then
 fi
 
 if [ "$qopt" = "Z" ]; then
-   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" 
+   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" \
                          -o "$program" = "O" ]; then
       qopt=$program
    else
