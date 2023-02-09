@@ -850,7 +850,7 @@ subroutine write_header_info(kuser)
           write(30,*)
 
         else if ( orca ) then
-!         write(30,'(a)') '! PAL4'
+          ! write(30,'(a)') '! PAL2'
           if( basis .eq. 'T' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-1 '
