@@ -268,9 +268,8 @@ program afnmr_x
            read(line,100)atomname(i),residue(i),  &
              resno_user(i),(coord(j,i),j=1,3),qmcharge(i),rad(i),element(i)
 100        format(12x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
-           if( element(i) .eq. ' E' ) then  ! skip extra points
-!              .or. element(i).eq.'NA' .or. element(i).eq.'CL' &
-!              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
+           ! skip extra points:
+           if( element(i) .eq. ' E' .or. element(i) .eq. ' ' ) then
               i = i - 1
               cycle
            endif
