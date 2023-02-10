@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-6 September 2022
+10 February 2023
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.6)
+(Version 1.6.1)
 \end_layout
 
 \begin_layout Author
@@ -826,6 +826,11 @@ general
 \end_inset
 
  residues, such as ligands, water molecules, ions, etc.
+ Note that the 
+\family typewriter
+basename
+\family default
+ must be the last argument.
  The commonly used flags are described below in more detail.
 \end_layout
 
@@ -1022,12 +1027,6 @@ default
 \end_layout
 
 \begin_layout Description
--tc Set up QM input files for TeraChem: no shifts are computed, just a quantum
- geometry optimization of the primary residue (plus solvent molecules),
- keeping the remaining residues in each fragment fixed.
-\end_layout
-
-\begin_layout Description
 -xtb Carry out a geometry optimization of each fragment using the 
 \emph on
 xtb
@@ -1039,13 +1038,19 @@ xtb
 xtb
 \emph default
  code must be in your PATH.
- Note that this is an experimental option, and the precise way in which
- minimizations are done is still under study.
- You should examine the options sent to 
+\end_layout
+
+\begin_layout Description
+-tc Same as the 
+\family typewriter
+-xtb
+\family default
+ option, but using terachem as the optimizer.
+ (
 \emph on
-xtb
+Not tested recently, so expect to need to do some tweaking of the options.
 \emph default
-, and consider experimenting with changes.
+)
 \end_layout
 
 \end_deeper
@@ -1059,11 +1064,12 @@ miscellaneous flags:
 \begin_layout Description
 -qopt do a quantum mechanical geometry optimization in place of a molecular
  mechanics optimization.
- (Work in progress: only fully implemented for 
+ (
 \emph on
-terachem
+Work in progress: only fully implemented in Gaussian, Orca and deMon.
+ The number of steps and method of minimization is hard-coded in afnmr.F90.
 \emph default
- so far.)
+)
 \end_layout
 
 \begin_layout Description
@@ -1503,7 +1509,7 @@ parmchk2
 \emph default
  programs in AmberTools to create 
 \emph on
-mol2
+off
 \emph default
  and 
 \emph on
@@ -1522,9 +1528,18 @@ literal "false"
 
 \end_inset
 
-, and then use the 
+, but use the 
+\emph on
+saveOff
+\emph default
+ command in 
 \family typewriter
--mol2
+tleap
+\family default
+ to save an off file.
+ Then use the 
+\family typewriter
+-offlib
 \family default
  and 
 \family typewriter
