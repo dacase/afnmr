@@ -1092,29 +1092,7 @@ subroutine finish_program_files( iqmprot )
               close(11)
 62            write(30,'(a)') '****'
             end do
-#if 1
             write(30,'(i0,a1,i0,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-#else
-            if(nhighatom .ge. 9) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i2,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i2,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else if(nhighatom .ne. 0) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i1,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i1,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else
-               if((nhighatom+nlowatom) .ge. 100) then
-                  write(30,'(i1,a1,i3,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                  write(30,'(i1,a1,i2,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               end if
-            end if
-#endif
             write(30,'(A)') 'SVP'
             write(30,'(A)') '****'
             write(30,*)
@@ -1166,13 +1144,9 @@ subroutine finish_program_files( iqmprot )
           endif
 
           if (qopt) then
-            if( nhighatom .lt. iqmprot ) then
-               write(30,'(a,i0,a,i0,a,i0)') 'noatoms  atoms=1-', nhighatom, &
-                    ', ', iqmprot+1, '-', natom
-            else
-               write(30,'(a,i0)') 'noatoms  atoms=1-', nhighatom
-            end if
-            write(30,*)
+             ! only opmize solvent atoms:
+             write(30,'(a,i0)') 'noatoms  atoms=1-', iqmprot
+             write(30,*)
           endif
 
         else if ( sqm ) then
@@ -1213,9 +1187,10 @@ subroutine finish_program_files( iqmprot )
 
           if( qopt ) then
             write(30,'(a)') 'OPTIMIZE CARTESIAN MAX=5'
-            if( nhighatom .lt. iqmprot ) then
+            ! only optimize solvent atoms:
+            if( natom .gt. iqmprot ) then
                write(30,'(a)') 'CONSTANTS'
-               do i=nhighatom+1,iqmprot
+               do i=1,iqmprot
                   write(30,'(a,a)') dlabel(i), '  XYZ'
                end do
             endif
@@ -1224,23 +1199,17 @@ subroutine finish_program_files( iqmprot )
         else if( orca ) then
           write(30,'(a)') '*'
           if( qopt ) then
-            write(30,'(a)') '%geom MaxIter=10'
-            if( nhighatom .lt. iqmprot ) then
-               ! constrain protein/nuc. acid atoms not in the primary residue
+            write(30,'(a)') '%geom MaxIter=5'
+            if( natom .gt. iqmprot ) then
+               ! only optimize solvents
                write(30,'(a)') '      Constraints'
-               ! do i=nhighatom+1,iqmprot
-               !    write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
-               ! end do
                write(30,'(a,i0,a,i0,a)') &
-                  '        { C ', nhighatom, ':', iqmprot-1, ' C }'
+                  '        { C ', 0, ':', iqmprot-1, ' C }'
 
                 write(30,'(a)') '      end'
                 write(30,'(a)') '    end'
             endif
           endif
-          !  next two lines are for versions of Orca up to 3.0.1
-          ! write(30,'(a)') '%eprnmr  ori IGLO'
-          ! write(30,'(a)') '   LocMet PM'
           !  following line is for Orca 4 or 5:
           write(30,'(a)') '%eprnmr  ori GIAO'
           write(30,'(a)', advance='no') '   nuclei = 1'
