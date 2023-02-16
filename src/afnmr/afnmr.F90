@@ -380,26 +380,10 @@ program afnmr_x
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
-#if 1
             if( dis.le.nbcut ) then
-#else
-            ! test: don't use protein side-chain atoms to determine contacts
-            if( dis.le.nbcut .and. element(i).ne.' H' .and.  &
-                                   element(j).ne.' H' .and.  &
-                ( atomname(i).eq.' C  ' .or. atomname(i).eq.' CA ' .or. &
-                  atomname(i).eq.' N  ' .or. atomname(i).eq.' O  ' .or. &
-                  atomname(j).eq.' C  ' .or. atomname(j).eq.' CA ' .or. &
-                  atomname(j).eq.' N  ' .or. atomname(j).eq.' O  ' ) )then
-#endif
 
-#if 0
-                write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
-                           atomname(i), resno_user(i), &
-                           atomname(j),  resno_user(j), dis
-#endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
-#if 1
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -414,7 +398,6 @@ program afnmr_x
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
-#endif
             endif
 
         enddo  !  j=i+1,natom
@@ -862,7 +845,7 @@ subroutine write_header_info(kuser)
           else
             write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
-          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
+          if( qopt ) write(30,'(a)', advance='no')  ' L-Opt '
           write(30,'(a)') ''
 
           write(30,'(a)') ''
@@ -1200,15 +1183,16 @@ subroutine finish_program_files( iqmprot )
           write(30,'(a)') '*'
           if( qopt ) then
             write(30,'(a)') '%geom MaxIter=5'
-            if( natom .gt. iqmprot ) then
-               ! only optimize solvents
-               write(30,'(a)') '      Constraints'
-               write(30,'(a,i0,a,i0,a)') &
-                  '        { C ', 0, ':', iqmprot-1, ' C }'
-
-                write(30,'(a)') '      end'
-                write(30,'(a)') '    end'
-            endif
+            write(30,'(a)') '      Constraints'
+#if 0 /* optimize only solvent: */
+            write(30,'(a,i0,a,i0,a)') &
+               '        { C ', 0, ':', iqmprot-1, ' C }'
+#else /* optimize primary residue plus solvent: */
+            write(30,'(a,i0,a,i0,a)') &
+               '        { C ', nhighatom, ':', iqmprot-1, ' C }'
+#endif
+            write(30,'(a)') '      end'
+            write(30,'(a)') '    end'
           endif
           !  following line is for Orca 4 or 5:
           write(30,'(a)') '%eprnmr  ori GIAO'
@@ -1258,7 +1242,7 @@ subroutine finish_program_files( iqmprot )
 
         ! Again, qopt-only options:
         if ( xtb ) then
-#if 1   /*  minimize primary residue plus waters */
+#if 0   /*  minimize primary residue plus waters */
           if( nhighatom .lt. iqmprot ) then
              write(47,*) '$fix'
              write(47,*) '   atoms: ', nhighatom+1,'-',iqmprot
@@ -1322,7 +1306,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-                // '.xyz --opt --cycles 20 --chrg ' // cfragtxt  &
+                // '.xyz --opt --cycles 10 --chrg ' // cfragtxt  &
                 // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
                 // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
