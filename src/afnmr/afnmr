@@ -334,7 +334,7 @@ while (<PQR>) {
 	if ( defined(\$type{\$elem}) ){
 		\$r = \$type{\$elem};
 	} else {
-		print "Error in atom type\n";
+		print "Error in atom type: elem = |$elem|\n";
         exit 1;
 	}
 	printf ATM "%10.3f%10.3f%10.3f%5d    2    1\n",\$x,\$y,\$z,\$r;
