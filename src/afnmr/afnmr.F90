@@ -171,7 +171,7 @@ program afnmr_x
       quick = .false.
       qopt = .false.
       listsize = 0
-      version = '1.6'
+      version = '1.6.1'
 
       write(6,*)
       write(6,*)'**********************************************'
@@ -702,8 +702,13 @@ subroutine addH( iqm, x, y, z)
       end if
 
       modnum = modnum + 1
-      write(31,'(a,i5,2x,a,i0,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+      if( modnum < 10 ) then
+         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
            iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
+      else  ! assumes modum is never greater than 99
+         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
+      end if
 
       return
 end subroutine addH
@@ -847,7 +852,9 @@ subroutine write_header_info(kuser)
           endif
           if( qopt ) write(30,'(a)', advance='no')  ' L-Opt '
           write(30,'(a)') ''
-
+          if( functional(2:2) .eq. '3' ) then
+            write(30,'(a)')  '%maxcore 2000'
+          endif
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
                '.pos"'
