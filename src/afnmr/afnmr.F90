@@ -1266,8 +1266,14 @@ subroutine finish_program_files( iqmprot )
           write(30,'(a)') '$rem'
           write(30,'(a)') 'MOPROP        1'
           write(30,'(a)') 'SCF_ALGORITHM DIIS'
-          write(30,'(a)') 'EXCHANGE      OPTX'
-          write(30,'(a)') 'CORRELATION   LYP'
+          if( functional(1:4) == 'OLYP' ) then
+             write(30,'(a)') 'EXCHANGE      OPTX'
+             write(30,'(a)') 'CORRELATION   LYP'
+          else if( functional(1:5) == 'O3LYP' ) then
+             write(30,'(a)') 'METHOD O3LYP'
+          else
+             stop 'bad functional for qchem'
+          endif
           write(30,'(a)') 'SCF_CONVERGENCE  7'
           write(30,'(a)') 'THRESH          10'
           write(30,'(a)') 'BASIS         GEN'
