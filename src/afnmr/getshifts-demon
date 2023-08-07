@@ -159,7 +159,7 @@ while ($_ = <OUT>) {
                 $delta, $eta, $alpha1, $alpha2, $alpha3;
            } else {
               printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
-                $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta
+                $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta;
               # handle averaging of methyl proton shifts:
               $i = $iat;
               if (($rname[$i] eq "ALA" && $aname[$i] =~ /HB1/) ||
