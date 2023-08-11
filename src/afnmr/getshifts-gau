@@ -9,6 +9,7 @@
 sub numerically { $a <=> $b; }
 sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 $resi = 0;
+$span = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
@@ -43,8 +44,8 @@ if( $basename eq "header" ){
       printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
       printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\teta\tspan\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\n" );
+      printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
+      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    }
 
    exit(0);
@@ -104,6 +105,8 @@ while (<LOG>) {
            } else {
               $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
            }
+           # line below uses the solution convention for delta:
+           $delta = -1.5 * $delta;
            $span = $eigv[2] - $eigv[0];
 
            #  eigenvectors:  (NB: fails if eigenvectors are not present!)
@@ -151,9 +154,9 @@ while (<LOG>) {
                 $delta, $eta, $alpha1, $alpha2, $alpha3;
 
           } else {
-             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
+             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-                $delta, $eta, $span;
+                $delta, $eta;
 
             # handle averaging of methyl proton shifts:
             $i = $iat;
@@ -187,8 +190,8 @@ while (<LOG>) {
                 } else {
                     $label = substr($aname[$i],0,3) . "av";
                 }
-                printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
-                   $res[$iat],$label,$rname[$iat], $mav, 0.0, 0.0, 0.0;
+                printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
+                   $res[$iat],$label,$rname[$iat], $mav, 0.0, 0.0;
             }
 
           }

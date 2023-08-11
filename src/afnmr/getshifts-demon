@@ -113,7 +113,7 @@ while ($_ = <OUT>) {
           $delta  = -$diso + $eigval[2];  $eta = ($eigval[1]-$eigval[0])/$delta;
        }
        # uncomment next line to use solution-state definition of delta:
-       # $delta *= -1.5;
+       $delta *= -1.5;
 
        if( $fulltensor == 2 ){
           printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
