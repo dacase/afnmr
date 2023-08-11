@@ -6,7 +6,6 @@
 #******************************************************************************
 
 $basename = "$ARGV[0]";
-
 if( $basename eq "header" ){
    printf( "# results from afnmr-qchem:\n" );
    printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n" );
