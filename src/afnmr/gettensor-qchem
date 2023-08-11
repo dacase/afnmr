@@ -5,6 +5,8 @@
 #   usage:  gettensor-qchem basename; rdb file fragments to stdout
 #******************************************************************************
 
+use Math::MatrixDecomposition qw(eig);
+
 $basename = "$ARGV[0]";
 if( $basename eq "header" ){
    printf( "# results from afnmr-qchem:\n" );
@@ -59,6 +61,16 @@ while (<LOG>) {
           $res[$iat],$aname[$iat],$rname[$iat], 
           $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
 
+       # test of eigenvalues:
+       @shielding = ($xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz);
+       $eigen = eig ( \@shielding );
+       @eigenv = $eigen->values;
+       printf "%8.3f  %8.3f  %8.3f\n", $eigenv[0], $eigenv[1], $eigenv[2];
+       $first = $eigen->vector (0);
+       printf "%8.3f  %8.3f  %8.3f\n", @$first;
+       
+       exit(0); 
    }
+
 }
 close LOG;
