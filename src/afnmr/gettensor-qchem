@@ -1,0 +1,65 @@
+#!/usr/bin/perl -w
+
+#******************************************************************************
+# collect shielding tensor from qchem outputs
+#   usage:  gettensor-qchem basename; rdb file fragments to stdout
+#******************************************************************************
+
+$basename = "$ARGV[0]";
+
+if( $basename eq "header" ){
+   printf( "# results from afnmr-qchem:\n" );
+   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+
+   exit(0);
+}
+
+$_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
+
+# get atom and residue names from pqr file:
+
+open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+$iat = 0;
+while (<PQR>) {
+    next unless m/^ATOM  /; 
+    @f = split( ' ', $_ );
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
+    $rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+}
+close PQR;
+
+# read in the shift data
+
+open (LOG, "<", "$basename" . ".qcout") or die "cannot open $basename.qcout";
+
+while (<LOG>) {
+
+   if (m/^  -- ATOM/){
+
+       @f = split( ' ', $_ ); $iat = $f[3]; $elem = $f[2];
+       next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       next if $elem eq "S";
+       #  get just the shifts in the "primary residue" (includes previous C):
+       next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
+                   ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
+
+       # skip 25 lines:
+       <LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;
+       <LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;<LOG>;
+       <LOG>;<LOG>;<LOG>;<LOG>;<LOG>;
+
+       $_ = <LOG>; @f = split( ' ', $_ );
+       $xx = $f[0]; $xy = $f[1]; $xz = $f[2];
+       $_ = <LOG>; @f = split( ' ', $_ );
+       $yx = $f[0]; $yy = $f[1]; $yz = $f[2];
+       $_ = <LOG>; @f = split( ' ', $_ );
+       $zx = $f[0]; $zy = $f[1]; $zz = $f[2];
+
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
+          $res[$iat],$aname[$iat],$rname[$iat], 
+          $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
+
+   }
+}
+close LOG;
