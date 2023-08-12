@@ -1,0 +1,93 @@
+#!/usr/bin/perl -w
+
+#******************************************************************************
+# collect shielding tensor from gaussian outputs
+#   usage:  gettensor-qchem basename; rdb file fragments to stdout
+#******************************************************************************
+
+use Math::MatrixDecomposition::Eigen;
+
+$basename = "$ARGV[0]";
+if( $basename eq "header" ){
+   printf( "# results from afnmr-gaussian:\n" );
+   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+
+   exit(0);
+}
+
+$_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
+
+# get atom and residue names from pqr file:
+
+open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+$iat = 0;
+while (<PQR>) {
+    next unless m/^ATOM  /; 
+    @f = split( ' ', $_ );
+	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
+    $rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+}
+close PQR;
+
+# read in the shift data
+
+open (LOG, "<", "$basename" . ".log") or die "cannot open $basename.qcout";
+
+while (<LOG>) {
+
+   if (m/ Isotropic = /) {
+       @f = split( ' ', $_ ); $iat = $f[0]; $elem = $f[1];
+       next if $elem eq "O";  next if $rname[$iat] eq "MOD";
+       next if $elem eq "S";
+       #  get just the shifts in the "primary residue" (includes previous C):
+       next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
+                   ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
+       $siso = $f[4];
+       $_ = <LOG>; @g = split( ' ', $_);
+       $xx = $g[1]; $yx = $g[3]; $zx = $g[5];
+
+       $_ = <LOG>; @g = split( ' ', $_);
+       $xy = $g[1]; $yy = $g[3]; $zy = $g[5];
+
+       $_ = <LOG>; @g = split( ' ', $_);
+       $xz = $g[1]; $yz = $g[3]; $zz = $g[5];
+
+       # explicitly balance the matrix:
+       $xy = 0.5 * ($xy + $yx);  $yx = $xy;
+       $xz = 0.5 * ($xz + $zx);  $zx = $xz;
+       $yz = 0.5 * ($yz + $zy);  $zy = $yz;
+
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n",
+         $res[$iat],$aname[$iat],$rname[$iat],
+         $xx, $yx, $zx, $xy, $yy, $zy, $xz, $yz, $zz;
+
+
+       # get the eigenvalues:
+       @shielding = ($xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz);
+
+       $eigen = Math::MatrixDecomposition::Eigen->new ( \@shielding );
+       $eigen->sort( 'asc' );
+
+       @eigv = $eigen->values;
+       printf "%8.3f  %8.3f  %8.3f\n", $eigv[0], $eigv[1], $eigv[2];
+       $first = $eigen->vector (0);
+       printf "%8.3f  %8.3f  %8.3f\n", @$first;
+
+       # Analyze the principal components:
+
+       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
+          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
+       } else {
+          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
+       }
+       # line below uses the solution convention for delta:
+       $delta = -1.5 * $delta;
+       # $span = $eigv[2] - $eigv[0];
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\n",
+         $res[$iat],$aname[$iat],$rname[$iat],$siso,$delta;
+       
+   }
+
+}
+close LOG;
