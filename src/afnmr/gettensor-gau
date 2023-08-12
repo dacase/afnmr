@@ -10,9 +10,8 @@ use Math::MatrixDecomposition::Eigen;
 $basename = "$ARGV[0]";
 if( $basename eq "header" ){
    printf( "# results from afnmr-gaussian:\n" );
-   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n" );
-   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-
+   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\tdelta\teta\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
 }
 
@@ -37,31 +36,32 @@ open (LOG, "<", "$basename" . ".log") or die "cannot open $basename.qcout";
 while (<LOG>) {
 
    if (m/ Isotropic = /) {
+
        @f = split( ' ', $_ ); $iat = $f[0]; $elem = $f[1];
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
        next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
                    ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
-       $siso = $f[4];
+
        $_ = <LOG>; @g = split( ' ', $_);
        $xx = $g[1]; $yx = $g[3]; $zx = $g[5];
-
        $_ = <LOG>; @g = split( ' ', $_);
        $xy = $g[1]; $yy = $g[3]; $zy = $g[5];
-
        $_ = <LOG>; @g = split( ' ', $_);
        $xz = $g[1]; $yz = $g[3]; $zz = $g[5];
+
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f",
+         $res[$iat],$aname[$iat],$rname[$iat],
+         $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
 
        # explicitly balance the matrix:
        $xy = 0.5 * ($xy + $yx);  $yx = $xy;
        $xz = 0.5 * ($xz + $zx);  $zx = $xz;
        $yz = 0.5 * ($yz + $zy);  $zy = $yz;
 
-       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n",
-         $res[$iat],$aname[$iat],$rname[$iat],
-         $xx, $yx, $zx, $xy, $yy, $zy, $xz, $yz, $zz;
-
+       # get 1/3 of the trace == isotropic shielding:
+       $siso = ( $xx + $yy + $zz )/3.0;
 
        # get the eigenvalues:
        @shielding = ($xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz);
@@ -70,9 +70,9 @@ while (<LOG>) {
        $eigen->sort( 'asc' );
 
        @eigv = $eigen->values;
-       printf "%8.3f  %8.3f  %8.3f\n", $eigv[0], $eigv[1], $eigv[2];
-       $first = $eigen->vector (0);
-       printf "%8.3f  %8.3f  %8.3f\n", @$first;
+       # printf "%8.3f  %8.3f  %8.3f\n", $eigv[0], $eigv[1], $eigv[2];
+       # $first = $eigen->vector (0);
+       # printf "%8.3f  %8.3f  %8.3f\n", @$first;
 
        # Analyze the principal components:
 
@@ -84,8 +84,8 @@ while (<LOG>) {
        # line below uses the solution convention for delta:
        $delta = -1.5 * $delta;
        # $span = $eigv[2] - $eigv[0];
-       printf "%d\t%s\t%s\t%8.3f\t%8.3f\n",
-         $res[$iat],$aname[$iat],$rname[$iat],$siso,$delta;
+
+       printf "\t%8.3f\t%8.3f\n", $delta, $eta;
        
    }
 

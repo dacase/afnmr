@@ -5,14 +5,13 @@
 #   usage:  gettensor-qchem basename; rdb file fragments to stdout
 #******************************************************************************
 
-use Math::MatrixDecomposition qw(eig);
+use Math::MatrixDecomposition::Eigen;
 
 $basename = "$ARGV[0]";
 if( $basename eq "header" ){
    printf( "# results from afnmr-qchem:\n" );
-   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n" );
-   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-
+   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\tdelta\teta\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
 }
 
@@ -57,19 +56,42 @@ while (<LOG>) {
        $_ = <LOG>; @f = split( ' ', $_ );
        $zx = $f[0]; $zy = $f[1]; $zz = $f[2];
 
-       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
-          $res[$iat],$aname[$iat],$rname[$iat], 
-          $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
+       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f",
+         $res[$iat],$aname[$iat],$rname[$iat],
+         $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
 
-       # test of eigenvalues:
+       # explicitly balance the matrix:
+       $xy = 0.5 * ($xy + $yx);  $yx = $xy;
+       $xz = 0.5 * ($xz + $zx);  $zx = $xz;
+       $yz = 0.5 * ($yz + $zy);  $zy = $yz;
+
+       # get 1/3 of the trace == isotropic shielding:
+       $siso = ( $xx + $yy + $zz )/3.0;
+
+       # get the eigenvalues:
        @shielding = ($xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz);
-       $eigen = eig ( \@shielding );
-       @eigenv = $eigen->values;
-       printf "%8.3f  %8.3f  %8.3f\n", $eigenv[0], $eigenv[1], $eigenv[2];
-       $first = $eigen->vector (0);
-       printf "%8.3f  %8.3f  %8.3f\n", @$first;
+
+       $eigen = Math::MatrixDecomposition::Eigen->new ( \@shielding );
+       $eigen->sort( 'asc' );
+
+       @eigv = $eigen->values;
+       # printf "%8.3f  %8.3f  %8.3f\n", $eigv[0], $eigv[1], $eigv[2];
+       # $first = $eigen->vector (0);
+       # printf "%8.3f  %8.3f  %8.3f\n", @$first;
+
+       # Analyze the principal components:
+
+       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
+          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
+       } else {
+          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
+       }
+       # line below uses the solution convention for delta:
+       $delta = -1.5 * $delta;
+       # $span = $eigv[2] - $eigv[0];
+
+       printf "\t%8.3f\t%8.3f\n", $delta, $eta;
        
-       exit(0); 
    }
 
 }
