@@ -7,10 +7,9 @@
 
 sub numerically { $a <=> $b; }
 
-@ARGV == 3 or die " usage: getshifts-orca reference basename fulltensor\n";
+@ARGV == 2 or die " usage: getshifts-orca reference basename\n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor = $ARGV[2];
 
 #  reference shieldings; (these are basis/functional dependent!)
 if( $reference eq "ref_seg0" ){
@@ -60,32 +59,6 @@ open (OUT, "<", "$basename" . ".out") or die "cannot open $basename.out";
 
 while (<OUT>) {
 
-   if( $fulltensor ) {
-   if (m/^ Nucleus /) {
-       @f = split( ' ', $_ ); $_ = $f[1]; s/(\d+)(\w)/x/; 
-       $iat = $1 + 1;   $elem = $2;
-       next if $elem eq "O";  next if $rname[$iat] eq "MOD";
-       next if $elem eq "S";
-       # skip 23 lines:
-       <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>;
-       <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>; <OUT>;
-       <OUT>; <OUT>; <OUT>; 
-       $total = <OUT>; @f = split( ' ', $total );
-       if( $f[0] ne "Total" ){ print "Did not find Total for atom $iat\n"; }
-       $siso = $f[5]; $xx=$f[1]; $yy=$f[2]; $zz=$f[3];
-       @eigv = sort numerically $xx,$yy,$zz;
-       if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
-          $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
-       } else {
-          $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
-       }
-       # for the solution state convention:
-       $delta = -1.5 * $delta;
-       printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\n", 
-            $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-            $delta, $eta;
-   }
-   } else {
       if( m/^CHEMICAL SHIELDING SUMMARY/){
          <OUT>;<OUT>;<OUT>;<OUT>;<OUT>;
          @a = (1..$nat);
@@ -138,6 +111,5 @@ while (<OUT>) {
          }
          exit(0);
       }
-   }
 }
 close OUT;

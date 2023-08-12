@@ -9,7 +9,6 @@ $resi = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-# $fulltensor=0;
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";

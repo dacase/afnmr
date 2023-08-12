@@ -2,7 +2,7 @@
 
 #******************************************************************************
 # collect shifts from Gaussian outputs
-#   usage:  getshifts-gau reference basename fulltensor 
+#   usage:  getshifts-gau reference basename
 #           rdb file to stdout
 #******************************************************************************
 
@@ -13,7 +13,6 @@ $span = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor = "$ARGV[2]";
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";
@@ -40,13 +39,8 @@ if( $basename eq "header" ){
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   if( $fulltensor ){
-      printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-   } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-   }
+    printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
+    printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
 
    exit(0);
 }
@@ -88,12 +82,6 @@ while (<LOG>) {
 
        $_ = <LOG>; @g = split( ' ', $_); 
        $xz = $ref{$elem}-$g[1]; $yz = $ref{$elem}-$g[3]; $zz = $ref{$elem}-$g[5];
-
-       if( $fulltensor ){
-         printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
-           $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-           $xx, $yx, $zx, $xy, $yy, $zy, $xz, $yz, $zz;
-       } else {
 
            # Analyze the principal components:
 
@@ -195,7 +183,6 @@ while (<LOG>) {
             }
 
           }
-      }
    }
 }
 close LOG;
