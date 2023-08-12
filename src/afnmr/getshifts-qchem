@@ -65,7 +65,7 @@ while (<LOG>) {
    if (m/^   Atom /){
 
        @f = split( ' ', $_ ); $iat = $f[2]; $elem = $f[1];
-           $siso = $f[3]; $saniso = $f[4];
+           $siso = $f[3]; $saniso = -$f[4];
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
