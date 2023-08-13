@@ -8,7 +8,7 @@ cat<<EOD
 
 Usage: make-tensorrdb qpgm <basename>
 
-   * qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca"
+   * qpgm must be one of "gaussian", "qchem", or "orca"
    * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout}
         files, where "nnn" is a three-digit resiude number (such as "001")
 
@@ -33,49 +33,16 @@ check_afnmrhome
 
 if [ $# -lt 2 ]; then usage; exit 1;  fi
 
-case "$1" in
-        -demon)       program="demon";;
-        -orca)        program="orca";;
-        -gau)         program="gau";;
-        -qchem)       program="qchem";;
-        -jaguar)      program="jaguar";;
-        -help)        usage; exit 0;;
-        --help)       usage; exit 0;;
-        -h)           usage; exit 0;;
-
-        -*) echo "Error: unknown flag: $1"
-            usage
-            exit 1;;
-esac
-
+program=$1
 basename=$2
 
 #  header:
-$AFNMRHOME/bin/gettensor-$program header > $basename.tensor.rdb
+$AFNMRHOME/bin/gettensor $program header > $basename.tensor.rdb
 
-#  body:
-if [ "$program" = "demon" -o "$program" = "orca" ]
-then
-    for i in ${basename}???.out
-    do
-        $AFNMRHOME/bin/gettensor-$program ${i%.*} >> $basename.rdbi
-    done
-elif [ "$program" = "gau" ]; then
-    for i in ${basename}???.log
-    do
-        $AFNMRHOME/bin/gettensor-$program ${i%.*} >> $basename.rdbi
-    done
-elif [ "$program" = "qchem" ]; then
-    for i in ${basename}???.qcout
-    do
-        $AFNMRHOME/bin/gettensor-$program ${i%.*} >> $basename.rdbi
-    done
-elif [ "$program" = "jaguar" ]; then
-    for i in ${basename}???.out
-    do
-        $AFNMRHOME/bin/gettensor-$program $reference ${i%.*} >> $basename.rdbi
-    done
-fi
+for i in ${basename}???.out
+do
+    $AFNMRHOME/bin/gettensor $program ${i%.*} >> $basename.rdbi
+done
 
 #  now sort the shifts by residue and atom name:
 #    the tr kludge seems needed since (some) Linux sorts do not treat "'"
