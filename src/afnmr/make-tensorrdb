@@ -60,5 +60,5 @@ done
 #  now sort the shifts by residue and atom name:
 #    the tr kludge seems needed since (some) Linux sorts do not treat "'"
 #    in a consistent way.  Assumes that "z" will not appear in an atomname
-tr "'" "z" < $basename.rdbi | sort -k1n -k2 | tr "z" "'" >> $basename.tensor.rdb
+tr "'" "z" < $basename.rdbi | LC_COLLATE=C sort -k1n -k2 | tr "z" "'" >> $basename.tensor.rdb
 /bin/rm $basename.rdbi
