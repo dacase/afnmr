@@ -36,10 +36,23 @@ if [ $# -lt 2 ]; then usage; exit 1;  fi
 program=$1
 basename=$2
 
+case "$1" in
+        orca)        suffix="out";;
+        gaussian)    suffix="log";;
+        qchem)       suffix="qcout";;
+        -help)        usage; exit 0;;
+        --help)       usage; exit 0;;
+        -h)           usage; exit 0;;
+
+        -*) echo "Error: unknown flag: $1"
+            usage
+            exit 1;;
+esac
+
 #  header:
 $AFNMRHOME/bin/gettensor $program header > $basename.tensor.rdb
 
-for i in ${basename}???.out
+for i in ${basename}???.${suffix}
 do
     $AFNMRHOME/bin/gettensor $program ${i%.*} >> $basename.rdbi
 done

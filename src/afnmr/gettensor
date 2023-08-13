@@ -9,8 +9,9 @@ use Math::MatrixDecomposition::Eigen;
 
 $program = "$ARGV[0]";
 $basename = "$ARGV[1]";
+
 if( $basename eq "header" ){
-   printf( "# results from afnmr-orca:\n" );
+   printf( "# results from afnmr-$program:\n" );
    printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\tdelta\teta\n" );
    printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
@@ -36,7 +37,6 @@ if( $program eq "orca" ){
    open (LOG, "<", "$basename" . ".out") or die "cannot open $basename.out";
 } elsif( $program eq "qchem" ){
    open (LOG, "<", "$basename" . ".qcout") or die "cannot open $basename.qcout";
-   print "opening $basename.qcout\n";
 } elsif( $program eq "gaussian" ){
    open (LOG, "<", "$basename" . ".log") or die "cannot open $basename.log";
 } else {
