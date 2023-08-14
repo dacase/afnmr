@@ -62,15 +62,18 @@ open (LOG, "<", "$basename" . ".qcout") or die "cannot open $basename.qcout";
 
 while (<LOG>) {
 
-   if (m/^   Atom /){
+   if (m/^  -- ATOM/){
 
-       @f = split( ' ', $_ ); $iat = $f[2]; $elem = $f[1];
-           $siso = $f[3]; $saniso = -$f[4];
+       @f = split( ' ', $_ ); $iat = $f[3]; $elem = $f[2];
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
        next unless $iat<3 or ($res[$iat]==$resi and $aname[$iat] ne "C")  or
                    ($aname[$iat] eq "C" and $res[$iat]==$resi - 1);
+
+       <LOG>;<LOG>;
+       $_ = <LOG>; @f = split( ' ', $_ );
+       $siso = $f[1]; $saniso = -$f[3];
 
        printf "%d\t%s\t%s\t%8.3f\t%8.3f\n", 
           $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso, $saniso;
