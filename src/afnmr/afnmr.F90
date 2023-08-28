@@ -65,7 +65,7 @@ program afnmr_x
       character(len=1) :: program,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
-      integer :: firstprotres, lastprotres
+      integer :: firstprotres, lastprotres, lastprotatom
       integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
@@ -309,6 +309,7 @@ program afnmr_x
       end do
 101   natom = i
       nres = max(1,nptemp)
+
       !  figure out the last protein residue:
       lastprotres = nres
       do i=1,nres
@@ -316,6 +317,11 @@ program afnmr_x
            lastprotres = i-1
            exit
         endif
+      end do
+
+      !  figure out last protein atom:
+      do i=1,natom
+         if( resno(i) .eq. lastprotres ) lastprotatom = i
       end do
 
 !     lastprotres has to be a terminal residue:
@@ -350,7 +356,7 @@ program afnmr_x
       enddo
       if( residuename(lastprotres).eq.'NHE' .or. &
           residuename(lastprotres).eq.'NME' ) then
-        selectC(lastprotres) = natom-2  !! will make kfinal=natom
+        selectC(lastprotres) = lastprotatom-2  !! will make kfinal=lastprotatom
       endif
       if( restype(1).eq.'G' .or. restype(1) .eq. 'W' ) selectC(1) = 1
       selectC(0) = 1
