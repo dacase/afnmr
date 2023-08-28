@@ -9,8 +9,13 @@ use Math::MatrixDecomposition::Eigen;
 
 $program = "$ARGV[0]";
 $basename = "$ARGV[1]";
+if( $#ARGV == 2 ){
+   $header = "$ARGV[2]";
+} else {
+   $header = "";
+}
 
-if( $basename eq "header" ){
+if( $header eq "header" ){
    printf( "# results from afnmr-$program:\n" );
    printf(
 "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\n" );

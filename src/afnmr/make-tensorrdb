@@ -50,7 +50,7 @@ case "$1" in
 esac
 
 #  header:
-$AFNMRHOME/bin/gettensor $program header > $basename.tensor.rdb
+$AFNMRHOME/bin/gettensor $program $basename header > $basename.tensor.rdb
 
 for i in ${basename}???.${suffix}
 do
