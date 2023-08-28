@@ -12,7 +12,8 @@ $basename = "$ARGV[1]";
 
 if( $basename eq "header" ){
    printf( "# results from afnmr-$program:\n" );
-   printf( "res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\tdelta\teta\n" );
+   printf(
+"res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\n" );
    printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
 }
