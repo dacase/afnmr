@@ -58,7 +58,7 @@ while (<LOG>) {
     if( m/^ Nucleus /){
 
        $found = 1;
-       $iat = substr($_,9,3) + 1; $elem = substr($_,10,1);
+       $iat = substr($_,9,3) + 1; $elem = substr($_,12,1);
        next if $elem eq "O";  next if $rname[$iat] eq "MOD";
        next if $elem eq "S";
        #  get just the shifts in the "primary residue" (includes previous C):
