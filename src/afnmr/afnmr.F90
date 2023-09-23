@@ -864,9 +864,15 @@ subroutine write_header_info(kuser)
           if( basis .eq. 'T' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-1 '
-          else
+          else if( basis .eq. 'A' ) then
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' aug-pcSseg-1 '
+          else if( basis .eq. 'D' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-0 '
+          else
+            write(0,*) 'Bad basis for orca: ', basis
+            stop 1
           end if
           if( functional(2:2) .eq. '3' ) then
             write(30,'(a)', advance='no')  'AutoAux TightSCF RIJCOSX KDIIS '
