@@ -159,7 +159,49 @@ while (<LOG>) {
        $delta = -1.5 * $delta;
        # $span = $eigv[2] - $eigv[0];
 
-       printf "\t%8.3f\t%8.3f\n", $delta, $eta;
+       printf "\t%8.3f\t%8.3f", $delta, $eta;
+
+       if( $aname[$iat] eq "N" ){
+
+          # N-H vector:
+          $NHx = $x[4]-$x[3]; $NHy = $y[4]-$y[3]; $NHz = $z[4]-$z[3];
+          $NH = sqrt( $NHx*$NHx + $NHy*$NHy + $NHz*$NHz );
+          $NHx /= $NH; $NHy /= $NH; $NHz /= $NH;
+
+          # Angles to N-H vector:
+          $ev = $eigen->vector(0)
+          $alpha1 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(1)
+          $alpha2 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(2)
+          $alpha3 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+          if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+          if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+          printf "\t%6.1f\t%6.1f\t%6.1f\n", $alpha1, $alpha2, $alpha3;
+
+       } elsif( $aname[$iat] eq "CA" ){
+
+          # CA-H vector:
+          $CHx = $x[6]-$x[5]; $CHy = $y[6]-$y[5]; $CHz = $z[6]-$z[5];
+          $CH = sqrt( $CHx*$CHx + $CHy*$CHy + $CHz*$CHz );
+          $CHx /= $CH; $CHy /= $CH; $CHz /= $CH;
+
+          # Angles to C-H vector:
+          $ev = $eigen->vector(0)
+          $alpha1 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(1)
+          $alpha2 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(2)
+          $alpha3 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
+          if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
+          if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
+          printf "\t%6.1f\t%6.1f\t%6.1f\n", $alpha1, $alpha2, $alpha3;
+
+      } else {
+          printf "\n";
+      }
   }
 
 }
