@@ -6,9 +6,11 @@
 #******************************************************************************
 
 use Math::MatrixDecomposition::Eigen;
+use Math::Trig;
 
 $program = "$ARGV[0]";
 $basename = "$ARGV[1]";
+
 if( $#ARGV == 2 ){
    $header = "$ARGV[2]";
 } else {
@@ -18,8 +20,8 @@ if( $#ARGV == 2 ){
 if( $header eq "header" ){
    printf( "# results from afnmr-$program:\n" );
    printf(
-"res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\n" );
-   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+"res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\t${basename}_theta\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
 }
 
@@ -34,6 +36,7 @@ while (<PQR>) {
     @f = split( ' ', $_ );
 	$iat++; $aname[$iat] = $f[2]; $rname[$iat] = $f[3]; $res[$iat] = $f[4];
     $rname[$iat] =~ s/^([ACTGU])[35]$/$1/;  # fix 3',5' ends of nucleic acids
+    $x[$iat] = $f[5]; $y[$iat] = $f[6]; $z[$iat] = $f[7];
 }
 close PQR;
 
@@ -129,7 +132,7 @@ while (<LOG>) {
          $res[$iat],$aname[$iat],$rname[$iat],
          $xx,$xy,$xz,$yx,$yy,$yz,$zx,$zy,$zz;
 
-       # explicitly balance the matrix:
+       # explicitly symmetrize the matrix:
        $xy = 0.5 * ($xy + $yx);  $yx = $xy;
        $xz = 0.5 * ($xz + $zx);  $zx = $xz;
        $yz = 0.5 * ($yz + $zy);  $zy = $yz;
@@ -144,10 +147,9 @@ while (<LOG>) {
        $eigen->sort( 'asc' );
 
        @eigv = $eigen->values;
-       # printf "%8.3f  %8.3f  %8.3f\n", $eigv[0], $eigv[1], $eigv[2];
-       # $first = $eigen->vector (0);
-       # printf "%8.3f  %8.3f  %8.3f\n", @$first;
 
+       # $first = $eigen->vector (0);
+       # printf "first:  %8.3f  %8.3f  %8.3f\n", $$first[0], $$first[1], $$first[2];
        # Analyze the principal components:
 
        if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
@@ -169,16 +171,17 @@ while (<LOG>) {
           $NHx /= $NH; $NHy /= $NH; $NHz /= $NH;
 
           # Angles to N-H vector:
-          $ev = $eigen->vector(0)
-          $alpha1 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
-          $ev = $eigen->vector(1)
-          $alpha2 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
-          $ev = $eigen->vector(2)
-          $alpha3 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(0);
+          $alpha1 = acos($$ev[0]*$NHx + $$ev[1]*$NHy + $$ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(1);
+          $alpha2 = acos($$ev[0]*$NHx + $$ev[1]*$NHy + $$ev[2]*$NHz)*180./3.14159;
+          $ev = $eigen->vector(2);
+          $alpha3 = acos($$ev[0]*$NHx + $$ev[1]*$NHy + $$ev[2]*$NHz)*180./3.14159;
           if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
           if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
           if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
-          printf "\t%6.1f\t%6.1f\t%6.1f\n", $alpha1, $alpha2, $alpha3;
+          printf "\t%6.1f\n", $alpha1;
+          exit(0);
 
        } elsif( $aname[$iat] eq "CA" ){
 
@@ -188,19 +191,19 @@ while (<LOG>) {
           $CHx /= $CH; $CHy /= $CH; $CHz /= $CH;
 
           # Angles to C-H vector:
-          $ev = $eigen->vector(0)
+          $ev = $eigen->vector(0);
           $alpha1 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
-          $ev = $eigen->vector(1)
+          $ev = $eigen->vector(1);
           $alpha2 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
-          $ev = $eigen->vector(2)
+          $ev = $eigen->vector(2);
           $alpha3 = acos($ev[0]*$NHx + $ev[1]*$NHy + $ev[2]*$NHz)*180./3.14159;
           if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
           if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
           if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
-          printf "\t%6.1f\t%6.1f\t%6.1f\n", $alpha1, $alpha2, $alpha3;
+          printf "\t%6.1f\n", $alpha1;
 
       } else {
-          printf "\n";
+          printf "\t\n";
       }
   }
 
