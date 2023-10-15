@@ -236,7 +236,7 @@ $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.min.x > $1.min.pqr 2> /de
 ln -s $1.min.pqr $1.pqr
 
 
-#cpptraj is missing from ambermini (for now?)
+#cpptraj must come from AmberTools:
 if true; then
 #============================================================================
 #  Check how far the struture has moved from the initial conformation:
