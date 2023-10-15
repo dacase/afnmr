@@ -405,7 +405,6 @@ program afnmr_x
 #endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
-#if 1
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -420,7 +419,6 @@ program afnmr_x
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
-#endif
             endif
 
         enddo  !  j=i+1,natom
@@ -1112,29 +1110,7 @@ subroutine finish_program_files( iqmprot )
               close(11)
 62            write(30,'(a)') '****'
             end do
-#if 1
             write(30,'(i0,a1,i0,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-#else
-            if(nhighatom .ge. 9) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i2,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i2,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else if(nhighatom .ne. 0) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i1,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i1,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else
-               if((nhighatom+nlowatom) .ge. 100) then
-                  write(30,'(i1,a1,i3,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                  write(30,'(i1,a1,i2,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               end if
-            end if
-#endif
             write(30,'(A)') 'SVP'
             write(30,'(A)') '****'
             write(30,*)
