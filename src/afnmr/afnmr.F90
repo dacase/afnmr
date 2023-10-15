@@ -484,7 +484,7 @@ program afnmr_x
         do kk=iatstart,iatfinal
           iqm = iqm + 1
           nhighatom = nhighatom + 1
-          call addatom( kk, iqm )
+          call addatom( kk, iqm, .true. )
         enddo
 
         do ktemp=1,nres
@@ -498,7 +498,7 @@ program afnmr_x
               do kk=kstart,kfinal
                 nlowatom = nlowatom + 1
                 iqm = iqm + 1
-                call addatom( kk, iqm )
+                call addatom( kk, iqm, .false. )
               enddo
 !
 !             add hydrogens to dangling residues:
@@ -651,11 +651,12 @@ subroutine get_atom_range( kstart, kfinal, ktemp,  &
         return
 end subroutine get_atom_range
 
-subroutine addatom( kk, iqm )
+subroutine addatom( kk, iqm, principal )
 
       use comafnmr
       implicit none
       integer, intent(in) ::  kk,iqm
+      logical, intent(in) :: principal
       integer :: j, atno
       character(len=3) ::  i_char
       character(len=1) ::  elem
@@ -670,8 +671,8 @@ subroutine addatom( kk, iqm )
       else if ( gaussian .or. orca ) then
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = trim(element(kk))
-        if( orca .and. basis .eq. 'M' ) then
-          write(30,'(a)') 'NewGTO "def2-TZVP" end;'
+        if( orca .and. basis .eq. 'M' .and. principal) then
+          write(30,'(a)') 'NewGTO "pcSseg-1" end;'
         endif
       else if ( sqm ) then
         elem = element(kk)(2:2)
@@ -867,7 +868,7 @@ subroutine write_header_info(kuser)
           else if( basis .eq. 'A' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' aug-pcSseg-1 '
-          else if( basis .eq. 'D' ) then
+          else if( basis .eq. 'D' .or. basis .eq. 'M' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-0 '
           else

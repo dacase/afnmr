@@ -23,11 +23,11 @@ Optional flags:
                    for residues 1 up to the last protein or nucleic acid
                    residue
 
-   -dzp            all residues are treated at the pcSseg-0 level (default)
-   -tzp            all residues are treated at the pcSseg-1 level
-   -aug-tzp        all residues are treated at the aug-pcSseg-1 level
+   -seg0           all residues are treated at the pcSseg-0 level (default)
+   -seg1           all residues are treated at the pcSseg-1 level
+   -aug-seg1       all residues are treated at the aug-pcSseg-1 level
    -mixedb         use a mixed basis with the primary residue at pcSseg-1,
-                   others at DZP
+                   others at pcSseg-0
 
    -o3lyp          Use O3LYP in place of OLYP; requires -gau, -qchem, or -orca
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
@@ -100,9 +100,9 @@ while [ $# -gt 0 ]; do
     case "$1" in
         -list)        shift; list=`eval echo $1`;;
         -mixedb)      basis="M";;
-        -tzp)         basis="T";;
-        -aug-tzp)     basis="A";;
-        -dzp)         basis="D";;
+        -seg1)        basis="T";;
+        -aug-seg1)    basis="A";;
+        -seg0)        basis="D";;
         -shape)       basis="S";;
         -demon)       program="D";;
         -deMon)       program="D";;
