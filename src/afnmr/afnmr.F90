@@ -882,7 +882,7 @@ subroutine write_header_info(kuser)
           if( qopt ) write(30,'(a)', advance='no')  ' Opt '
           write(30,'(a)') ''
           if( functional(2:2) .eq. '3' ) then
-            write(30,'(a)')  '%maxcore 2000'
+            write(30,'(a)')  '%maxcore 3000'
           endif
           write(30,'(a)') ''
           write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
