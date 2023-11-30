@@ -2,14 +2,20 @@
 
 #***************************************************************
 # collect shifts from orca outputs
-#   usage:  getshifts-orca reference basename; rdb file to stdout
+#   usage:  getshifts-orca reference basename [header]; rdb file to stdout
 #***************************************************************
 
 sub numerically { $a <=> $b; }
 
-@ARGV == 2 or die " usage: getshifts-orca reference basename\n";
+@ARGV >= 2 or die " usage: getshifts-orca reference basename [header] \n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
+
+if( $#ARGV == 2 ){
+   $header = "$ARGV[2]";
+} else {
+   $header = "";
+}
 
 #  reference shieldings; (these are basis/functional dependent!)
 if( $reference eq "ref_seg0" ){
@@ -26,16 +32,23 @@ if( $reference eq "ref_seg0" ){
    $ref{"N"} = 255.2;  # CH3NO2 + 380.5
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 139.6;  # CFCl3
+} elsif( $reference eq "ref3_seg1" ){
+   $reference_set = "O3LYP pcSseg-1 ";
+   $ref{"H"} = 31.5;   # TMS
+   $ref{"C"} = 184.4;  # TMS
+   $ref{"N"} = 231.5;  # CH3NO2 + 380.5
+   $ref{"P"} = 325.0;  # guess
+   $ref{"F"} = 149.7;  # CFCl3
 } else {
    die "unrecognized reference set: $reference\n";
 }
 
-if( $basename eq "header" ){
+if( $header eq "header" ){
    # document the reference shieldings being used:
    printf( "# results from afnmr-orca:\n" );
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
-   printf( "res\tatomname\tresname\tshift\tsaniso\n" );
+   printf( "res\tatomname\tresname\t${basename}_shift\t${basename}_saniso\n" );
    printf( "4N\t8\t8\t10N\t10N\n" );
    exit(0);
 }

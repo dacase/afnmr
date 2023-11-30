@@ -6,7 +6,7 @@
 usage(){
 cat<<EOD
 
-Usage: make-shiftsrdb qpgm reference <basename>
+Usage: make-shiftsrdb qpgm reference <basename> [header]
 
    * qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca"
    * reference is the name of a reference shielding set
@@ -56,7 +56,7 @@ reference=$2
 basename=$3
 
 #  header:
-getshifts-$program $reference header > $basename.rdb
+getshifts-$program $reference $basename header > $basename.rdb
 
 #  body:
 if [ "$program" = "demon" -o "$program" = "orca" ]
