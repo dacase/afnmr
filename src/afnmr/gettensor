@@ -2,7 +2,7 @@
 
 #******************************************************************************
 # collect shielding tensor from quantum chemistry outputs
-#   usage:  gettensor-qchem program basename; rdb file fragments to stdout
+#   usage:  gettensor program basename [header] ; rdb file fragments to stdout
 #******************************************************************************
 
 use Math::MatrixDecomposition::Eigen;
