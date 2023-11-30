@@ -5,7 +5,7 @@
 #   and adjust the xlabal and ylabel names to match your project
 
 #   Note that your PYTHONPATH variable must input parmed (most likely from
-#   AmberTools), and your pytyon must be able to import matplotlib, 
+#   AmberTools), and your python must be able to import matplotlib, 
 #   numpy, pandas and scipy.
 
 from parmed.residue import AminoAcidResidue 
