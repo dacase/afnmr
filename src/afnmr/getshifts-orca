@@ -34,9 +34,9 @@ if( $reference eq "ref_seg0" ){
    $ref{"F"} = 139.6;  # CFCl3
 } elsif( $reference eq "ref3_seg1" ){
    $reference_set = "O3LYP pcSseg-1 ";
-   $ref{"H"} = 31.5;   # TMS
-   $ref{"C"} = 184.4;  # TMS
-   $ref{"N"} = 231.5;  # CH3NO2 + 380.5
+   $ref{"H"} = 32.0;   # TMS, then fit to ernst_avg
+   $ref{"C"} = 182.4;  # TMS, then fit to ernst_avg
+   $ref{"N"} = 234.8;  # CH3NO2 + 380.5, then fit to ernst_avg
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 149.7;  # CFCl3
 } else {
