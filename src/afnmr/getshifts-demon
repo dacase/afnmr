@@ -8,9 +8,15 @@
 sub numerically { $a <=> $b; }
 sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 
-@ARGV == 2 or die " usage: getshifts-demon reference basename\n";
+@ARGV >= 2 or die " usage: getshifts-demon reference basename [header]\n";
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
+
+if( $#ARGV == 2 ){
+   $header = "$ARGV[2]";
+} else {
+   $header = "";
+}
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 GEN-A2";
@@ -30,13 +36,13 @@ if( $reference eq "ref_seg0" ){
    die "unrecognized reference set: $reference\n";
 }
 
-if( $basename eq "header" ){
+if( $header eq "header" ){
    # document the reference shieldings being used:
    printf( "# results from afnmr-demon:\n" );
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
+   printf( "res\tatomname\tresname\t${basename}_shift\t${basename}_delta\t${basename}_eta\tphi1\tphi2\tphi3\n" );
    printf( "8N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
 
    exit(0);
@@ -70,13 +76,13 @@ while ($_ = <OUT>) {
 
        #  get full shielding tensor:
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $sxx=$f[1]; $sxy=$f[2]; $sxz=$f[3];
+       # $sxx=$f[1]; $sxy=$f[2]; $sxz=$f[3];
 
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $syx=$f[1]; $syy=$f[2]; $syz=$f[3];
+       # $syx=$f[1]; $syy=$f[2]; $syz=$f[3];
 
        $_ = <OUT>; @f = split( ' ', $_ ); 
-       $szx=$f[1]; $szy=$f[2]; $szz=$f[3];
+       # $szx=$f[1]; $szy=$f[2]; $szz=$f[3];
 
        #  get the isotropic shift:
        <OUT>; <OUT>; <OUT>; $_ = <OUT>; @f = split( ' ', $_ ); 
