@@ -42,8 +42,9 @@ if( $header eq "header" ){
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   printf( "res\tatomname\tresname\t${basename}_shift\t${basename}_delta\t${basename}_eta\tphi1\tphi2\tphi3\n" );
-   printf( "8N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+   printf(
+"res\tatomname\tresname\t${basename}_shift\t${basename}_delta\t${basename}_eta\t${basename}_theta\n" );
+   printf( "8N\t8\t8\t10N\t10N\t10N\t10N\n" );
 
    exit(0);
 }
@@ -126,9 +127,9 @@ while ($_ = <OUT>) {
           if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
           if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
 
-          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\n", 
             $res[$iat],$aname[$iat],$rname[$iat], $diso,
-            $delta, $eta, $alpha1, $alpha2, $alpha3;
+            $delta, $eta, $alpha1;
 
        } elsif( $aname[$iat] eq "CA" ){
           # CA-H vector:
@@ -143,9 +144,9 @@ while ($_ = <OUT>) {
           if( $alpha1 > 90. ){ $alpha1 = 180. - $alpha1; }
           if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
           if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
-          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\t%6.1f\t%6.1f\n", 
+          printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%6.1f\n", 
             $res[$iat],$aname[$iat],$rname[$iat], $diso,
-            $delta, $eta, $alpha1, $alpha2, $alpha3;
+            $delta, $eta, $alpha1;
        } else {
           printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
             $res[$iat],$aname[$iat],$rname[$iat],$diso, $delta, $eta;
