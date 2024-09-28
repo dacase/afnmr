@@ -39,6 +39,13 @@ if( $reference eq "ref_seg0" ){
    $ref{"N"} = 234.8;  # CH3NO2 + 380.5, then fit to ernst_avg
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 149.7;  # CFCl3
+} elsif( $reference eq "ref3_seg2" ){
+   $reference_set = "O3LYP pcSseg-2 ";
+   $ref{"H"} = 32.0;   # TMS
+   $ref{"C"} = 182.4;  # TMS
+   $ref{"N"} = 234.8;  # CH3NO2 + 380.5
+   $ref{"P"} = 325.0;  # guess
+   $ref{"F"} = 148.2;  # CFCl3
 } else {
    die "unrecognized reference set: $reference\n";
 }
