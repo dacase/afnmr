@@ -1,6 +1,6 @@
 #
-#  Load TIP3P-FB water model and ions for TIP3P + Joung-Chetham  monovalent
-#    ions + Li/Merz highly charged ions (+2 to +4, 12-6 normal usage set)
+#  Load TIP3P-FB water model and ions for TIP3P-FB + Li/Merz ion parameters
+#  (-1 to +4, 12-6 normal usage set)
 #
 addAtomTypes {
 	{ "F-"   "F" "sp3" }
@@ -72,6 +72,5 @@ loadOff solvents.lib
 HOH = FB3
 WAT = FB3
 mods2 = loadamberparams frcmod.tip3pfb
-loadAmberParams frcmod.ionsjc_tip3p
-loadAmberParams frcmod.ions234lm_126_tip3p
+loadAmberParams frcmod.ionslm_126_fb3
 

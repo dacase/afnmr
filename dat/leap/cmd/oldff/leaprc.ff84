@@ -75,9 +75,9 @@ addAtomTypes {
 #
 parm84 = loadamberparams parm91X.ua.dat
 
-loadOff protein.amberua.lib
-loadOff dna.amberua.lib
-loadOff rna.amberua.lib
+loadOff oldff/protein.amberua.lib
+loadOff oldff/dna.amberua.lib
+loadOff oldff/rna.amberua.lib
 
 loadOff ions94.lib
 loadOff solvents.lib

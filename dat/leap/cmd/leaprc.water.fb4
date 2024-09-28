@@ -1,6 +1,6 @@
 #
-#       Load water and ions for TIP4P-ew + Joung-Chetham monovalent ions
-#       + Li/Merz highly charged ions (+2 to +4, 12-6 normal usage set)
+#  Load TIP4P-FB water model and ions for TIP4P-FB + Li/Merz ion parameters
+#  (-1 to +4, 12-6 normal usage set)
 # 
 addAtomTypes {
 	{ "F-"   "F" "sp3" }
@@ -73,6 +73,5 @@ loadOff solvents.lib
 HOH = FB4
 WAT = FB4
 mods2 = loadamberparams frcmod.tip4pfb
-loadAmberParams frcmod.ionsjc_tip4pew
-loadAmberParams frcmod.ions234lm_126_tip4pew
+loadAmberParams frcmod.ionslm_126_fb4
 

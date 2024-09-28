@@ -1,6 +1,7 @@
 logFile leap.log
 #
 # ----- leaprc for loading the modified amino acids AZF,CYF,ALY,CNX,MSE forcefield
+# ----- support for glycans with ff19sb
 # ----- NOTE: this is designed for PDB format 3!
 #
 #	load atom type hybridizations
@@ -24,15 +25,9 @@ addAtomTypes {
 
 #	Load the main parameter set.
 #
-parm19 = loadamberparams parm19.dat
-frcmod19SB = loadamberparams frcmod.ff19SB
 frcmod19SBmodAA = loadamberparams frcmod.ff19SBmodAA
 #
 #	Load main chain and terminating amino acid libraries
-#
-loadOff amino19.lib
-loadOff aminoct12.lib
-loadOff aminont12.lib
 loadOff mod_amino19.lib
 
 #
@@ -43,5 +38,10 @@ addPdbResMap {
   { 0 "AZF" "NAZF" } { 1 "AZF" "CAZF" }
   { 0 "CYF" "NCYF" } { 1 "CYF" "CCYF" }
   { 0 "CNX" "NCNX" } { 1 "CNX" "CCNX" }
-  { 0 "MSE" "NMSE" } { 1 "CMSE" "CMSE" }
+  { 0 "MSE" "NMSE" } { 1 "MSE" "CMSE" }
 }
+
+#####
+4II = AZF
+4CF = CYF
+MTN = CNX

@@ -91,18 +91,18 @@ WAT = TP3
 #
 #	Load ion library
 #
-loadOff ions91.lib
+loadOff oldff/ions91.lib
 #
 #	Load DNA/RNA libraries
 #
-loadOff all_nucleic91.lib
+loadOff oldff/all_nucleic91.lib
 #
 #	Load main chain and terminating 
 #	amino acid libraries.
 #
-loadOff all_amino91.lib
-loadOff all_aminoct91.lib
-loadOff all_aminont91.lib
+loadOff oldff/all_amino91.lib
+loadOff oldff/all_aminoct91.lib
+loadOff oldff/all_aminont91.lib
 
 #
 #	Define the PDB name map for the amino acids.

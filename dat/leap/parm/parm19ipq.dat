@@ -32,7 +32,6 @@ H4                   1.0080      0.1670  H arom. bond. to C with 1 electrwd. gro
 H5                   1.0080      0.1670  H arom.at C with 2 elctrwd. gr,+HCOO group
 HO                   1.0080      0.1350  hydroxyl group
 HS                   1.0080      0.1350  hydrogen bonded to sulphur (pol?)
-HW                   1.0080      0.0000  H in TIP3P water
 HP                   1.0080      0.1350  H bonded to C next to positively charged gr
 HZ                   1.0080      0.1610  H bond sp C (Howard et al.JCC,16,243,1995)
 F                   19.0000      0.3200  fluorine (not fluoride!)
@@ -51,7 +50,6 @@ N*                  14.0100      0.5300  sp2 N
 NY                  14.0100      0.5300  nitrile N (Howard et al.JCC,16,243,1995)
 O                   16.0000      0.4340  carbonyl group oxygen
 O2                  16.0000      0.4340  carboxyl and phosphate group oxygen
-OW                  16.0000      0.0000  oxygen in TIP3P water
 OH                  16.0000      0.4650  oxygen in hydroxyl group
 OS                  16.0000      0.4650  ether and ester oxygen
 OP                  16.0000      0.4650  2- phosphate oxygen
@@ -80,8 +78,6 @@ TA                  12.0100      0.3600  HID/HIE/PHE/TRP/TYR CB
 EP                   0.0000      0.0000  Extra point
 
 C   H   HO  N   NA  NB  NC  N2  NT  N2  N3  N*  O   OH  OS  P   O2  
-OW-HW   553.0000    0.9572    0.0000  100.0000    0.0000  100.0000  ! TIP3P water
-HW-HW   553.0000    1.5136    0.0000  100.0000    0.0000  100.0000  TIP3P water
 C -C    310.0000    1.5250    0.0000  100.0000    0.0000  100.0000  Junmei et al, 1999
 C -CB   447.0000    1.4190    0.0000  100.0000    0.0000  100.0000  JCC,7,(1986),230; GUA
 C -CM   410.0000    1.4440    0.0000  100.0000    0.0000  100.0000  JCC,7,(1986),230; THY,URA
@@ -289,8 +285,6 @@ C8-H1   340.0000    1.0900    0.0000  100.0000    0.0000  100.0000  ARG
 C8-HP   340.0000    1.0900    0.0000  100.0000    0.0000  100.0000  LYS
 N2-TH   434.0000    1.0100    0.0000  100.0000    0.0000  100.0000  ARG, ktd 6/15
 
-HW-OW-HW           100.0000      104.52  TIP3P water
-HW-HW-OW             0.0000      127.74  (found in crystallographic water with 3 bonds)
 C -C -O             80.0000      120.00  Junmei et al, 1999 acrolein
 C -C -OH            80.0000      120.00  Junmei et al, 1999
 CA-C -OH            70.0000      120.00  AA (not used in tyr)
@@ -2063,7 +2057,6 @@ CW-NB-CC-TA         1.10000  180.0  2.0  HID CG
 CA-CA-CA-TA         1.10000  180.0  2.0  PHE/TYR CG
 CB-CW-C*-TA         1.10000  180.0  2.0  TRP CG
 
-  HW  OW             0.0000      0.0000  4. flag for fast water
 
 N   NA  N2  N*  NC  NB  NT  NY  
 C*  CA  CB  CC  CD  CK  CM  CN  CQ  CR  CV  CW  CY  CZ  CP  CS  
@@ -2102,7 +2095,6 @@ MOD4      RE
   H5               1.359000    0.015000  H arom.at C with 2 elctrwd. gr,+HCOO group
   HO               0.000000    0.000000  hydroxyl group
   HS               0.600000    0.015700  hydrogen bonded to sulphur (pol?)
-  HW               0.000000    0.000000  H in TIP3P water
   HP               1.100000    0.015700  H bonded to C next to positively charged gr
   HZ               1.459000    0.015000  H bond sp C (Howard et al.JCC,16,243,1995)
   F                1.750000    0.061000  fluorine (not fluoride!)
@@ -2121,7 +2113,6 @@ MOD4      RE
   NY               1.824000    0.170000  nitrile N (Howard et al.JCC,16,243,1995)
   O                1.661200    0.210000  carbonyl group oxygen
   O2               1.661200    0.210000  carboxyl and phosphate group oxygen
-  OW               1.768300    0.152000  oxygen in TIP3P water
   OH               1.721000    0.210400  oxygen in hydroxyl group
   OS               1.683700    0.170000  ether and ester oxygen
   OP               1.850000    0.170000  2- phosphate oxygen
