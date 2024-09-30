@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+#
+#  convert the "xyz" output from orca to a pdb file
+#
+open( PUNCH, "$ARGV[0]" ) || die "can't find input file $ARGV[0]\n" ;
+<PUNCH>; <PUNCH>;  # skip 2 line header
+while ($_ = <PUNCH>) {
+	$i++;
+	($ano, $x[$i], $y[$i], $z[$i]) = split(' ', $_ );
+}
+close( PUNCH );
+
+open( PDB, "helix_60.pqr" ) || die "can't find file template\n" ;
+for $j (1..$i){
+	$_ = <PDB>; printf STDOUT "%30s%8.4f%8.4f%8.4f\n", substr($_,0,30),
+		$x[$j], $y[$j], $z[$j];
+}
