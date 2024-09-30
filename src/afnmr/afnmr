@@ -32,9 +32,9 @@ Optional flags:
    -o3lyp          Use O3LYP in place of OLYP; requires -gau, -qchem, or -orca
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
 
-   -demon5         Set up quantum input files to use with deMon, v5 (default)
+   -demon5         Set up quantum input files to use with deMon, v5
    -demon, -deMon  Set up quantum input files to use with deMon3
-   -orca           Set up quantum input files to use with Orca
+   -orca           Set up quantum input files to use with Orca (default)
    -gaussian       Set up quantum input files to use with Gaussian
    -jaguar         Set up quantum input files to use with Jaguar
    -qchem          Set up quantum input files to use with Q-Chem
@@ -68,7 +68,7 @@ check_afnmrhome() {
    fi
 }
 
-program="E"
+program="O"
 qopt="F"
 basis="D"
 workdir="no"
