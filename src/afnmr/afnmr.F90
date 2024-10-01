@@ -863,6 +863,9 @@ subroutine write_header_info(kuser)
           if( basis .eq. 'T' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-1 '
+          else if( basis .eq. 'Q' ) then
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' pcSseg-2 '
           else if( basis .eq. 'A' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' aug-pcSseg-1 '
@@ -1124,42 +1127,53 @@ subroutine finish_program_files( iqmprot )
                write(30,'(a)') trim(line)
             end do
             close(11)
-63          continue
 
           else if( basis .eq. 'D' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcsseg-0.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 64) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-64          continue
 
           else if( basis .eq. 'A' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/aug-pcsseg-1.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 65) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-65          continue
 
           else if( basis .eq. 'S' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcseg-0.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 66) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-66          continue
+
+          else if( basis .eq. 'Q' ) then
+            open( UNIT=11, FILE=trim(afnmrhome) // &
+                '/basis/pcsseg-2.1.gbs')
+            rewind(11)
+            do kbas=1,9999
+               read(11,'(a80)',end = 63) line
+               write(30,'(a)') trim(line)
+            end do
+            close(11)
+
+          else
+            write(0,*) 'Bad basis for gaussian: ', basis
+            stop 1
 
           endif
+63        continue
 
           if (qopt) then
             if( nhighatom .lt. iqmprot ) then
@@ -1187,12 +1201,18 @@ subroutine finish_program_files( iqmprot )
             do i=1,nhighatom
               write(30,'(a,a)') dlabel(i),' (GEN-A2*)'
             end do
+          else if (basis .eq. 'Q' ) then
+            write(30,'(a)') 'BASIS  (pcSseg-2)'
+            write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'T' ) then
             write(30,'(a)') 'BASIS  (pcSseg-1)'
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'D' ) then
             write(30,'(a)') 'BASIS  (pcSseg-0)'
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
+          else
+            write(0,*) 'Bad basis for demon: ', basis
+            stop 1
           endif
 
           if( demon5 ) then
@@ -1276,8 +1296,10 @@ subroutine finish_program_files( iqmprot )
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
           else if( basis .eq. 'T' ) then
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-1.in')
+          else if( basis .eq. 'Q' ) then
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-2.in')
           else
-              write(0,*) 'Qchem currently only supports dzp or tzp basis sets'
+              write(0,*) 'afnmr/qchem only supports seg0, seg1 or seg2 basis sets'
               stop 1
           end if
           rewind(11)

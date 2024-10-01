@@ -25,6 +25,7 @@ Optional flags:
 
    -seg0           all residues are treated at the pcSseg-0 level (default)
    -seg1           all residues are treated at the pcSseg-1 level
+   -seg2           all residues are treated at the pcSseg-2 level
    -aug-seg1       all residues are treated at the aug-pcSseg-1 level
    -mixedb         use a mixed basis with the primary residue at pcSseg-1,
                    others at pcSseg-0
@@ -101,6 +102,7 @@ while [ $# -gt 0 ]; do
         -list)        shift; list=`eval echo $1`;;
         -mixedb)      basis="M";;
         -seg1)        basis="T";;
+        -seg2)        basis="Q";;
         -aug-seg1)    basis="A";;
         -seg0)        basis="D";;
         -shape)       basis="S";;
