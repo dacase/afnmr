@@ -28,7 +28,7 @@ test: 1d3z_test1 1d3z_test2 1d3z_test4 1d3z_test5 m6ab_test1 clean
 1d3z_test4::
 	@echo "Running test quantum fragmentation on ubiquitin: gaussian"
 	@echo
-	../../bin/afnmr -gau -nomin -list 3 1d3z1
+	../../bin/afnmr -gaussian -nomin -list 3 1d3z1
 	@../dacdif -a 1.e-5 1d3z1003.com.save 1d3z1003.com
 	@/bin/rm -f 1d3z1.afnmr.log 1d3z1003.pqr 1d3z1.min.pqr 1d3z1.pqr
 
@@ -57,7 +57,7 @@ test: 1d3z_test1 1d3z_test2 1d3z_test4 1d3z_test5 m6ab_test1 clean
 m6ab_test1::
 	@echo "Running test quantum fragmentation on RNA with demon"
 	@echo
-	../../bin/afnmr -nobuild -list 6 m6ab.1
+	../../bin/afnmr -demon5 -nobuild -list 6 m6ab.1
 	@../dacdif -a 1.e-5 m6ab.1006.inp.save m6ab.1006.inp
 	@../dacdif m6ab.1006.pqr.save m6ab.1006.pqr
 	@/bin/rm -f m6ab.1.afnmr.log 

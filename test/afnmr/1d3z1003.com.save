@@ -2,7 +2,7 @@
 %nprocshared=4
 # OLYP/Gen charge nosymm nmr(printeigenvectors) integral(grid=ultrafine)
 
- AF-NMR fragment for residue    3; version = 1.6; nbcut =  3.30
+ AF-NMR fragment for residue    3; version = 1.7.0; nbcut =  3.30
 
    1   1
  C       48.3930  -87.2460    6.3650
