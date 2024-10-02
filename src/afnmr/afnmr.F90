@@ -45,7 +45,7 @@ program afnmr_x
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), J (Jaguar), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
-!                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
+!                  or M (primary res. Q, rest T), A (aug-tzp), or S (shape)
 !            qopt controls off quantum geometry optimization: set to
 !                  E/G/O/X/Q/T (for optimization with demon, Gaussian, ORCA, xtb, 
 !                  quick or terachem), or use F (false, default) to turn off
@@ -670,7 +670,7 @@ subroutine addatom( kk, iqm, principal )
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = trim(element(kk))
         if( orca .and. basis .eq. 'M' .and. principal) then
-          write(30,'(a)') 'NewGTO "pcSseg-1" end;'
+          write(30,'(a)') 'NewGTO "pcSseg-2" end;'
         endif
       else if ( sqm ) then
         elem = element(kk)(2:2)
@@ -860,7 +860,7 @@ subroutine write_header_info(kuser)
 
         else if ( orca ) then
 !         write(30,'(a)') '! PAL4'
-          if( basis .eq. 'T' ) then
+          if( basis .eq. 'T' .or. basis .eq. 'M' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-1 '
           else if( basis .eq. 'Q' ) then
@@ -869,7 +869,7 @@ subroutine write_header_info(kuser)
           else if( basis .eq. 'A' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' aug-pcSseg-1 '
-          else if( basis .eq. 'D' .or. basis .eq. 'M' ) then
+          else if( basis .eq. 'D' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-0 '
           else
@@ -1101,9 +1101,9 @@ subroutine finish_program_files( iqmprot )
             !    write local basis set
             do i=1,nhighatom
               write(30,'(i3,a)') i,' 0'
-              write(0,'(a)') trim(afnmrhome) // '/basis/pcSseg-1/' &
+              write(0,'(a)') trim(afnmrhome) // '/basis/pcSseg-2/' &
                     // trim(dlabel(i)) // '.gbs'
-              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-1/' &
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-2/' &
                     // trim(dlabel(i)) // '.gbs')
               rewind(11)
               do kbas=1,9999
@@ -1195,7 +1195,7 @@ subroutine finish_program_files( iqmprot )
           if( basis .eq. 'M' )then
             write(30,'(a)') 'BASIS  (DZVP)'
             do i=1,nhighatom
-              write(30,'(a,a)') dlabel(i),' (pcSseg-1)'
+              write(30,'(a,a)') dlabel(i),' (pcSseg-2)'
             end do
             write(30,'(a)') 'AUXIS  (A2)'
             do i=1,nhighatom
