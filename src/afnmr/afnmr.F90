@@ -18,16 +18,15 @@ module comafnmr
    character(len=160):: commandline, line
    character(len=30) :: pqrstart
    character(len=16) :: pqrend
-   character(len=80) :: filek, afnmrhome
-   character(len=5) :: functional
-   character(len=5) :: version
+   character(len=5) functional
+   character(len=:), allocatable :: filek, afnmrhome, version
    character(len=1) :: basis
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
 !          (note: does not recognize chainID's, so all resno_user() values
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
-   integer :: modnum, ier, listsize, lengthb, lengthk,natom, nhighatom, nlowatom
+   integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, xtb, sqm, quick
    logical :: first=.true.
@@ -70,12 +69,13 @@ program afnmr_x
       integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
-      character(len=3) :: rn
+      character(len=3) :: rn, kuser_c
       character(len=6) :: nbcutb
 
       double precision dis
       double precision chargef(MAXRES)
-      character(len=80) basename,pdbfile
+      character(len=80) basename
+      character(len=:), allocatable :: pdbfile
       integer lengthc,iline
 #ifdef __INTEL_COMPILER
       integer system
@@ -444,17 +444,14 @@ program afnmr_x
            ' ==========================================================='
         if( nofrag) then
            filek = basename(1:lengthb)
-           lengthk = lengthb
         else
-           filek = basename(1:lengthb) // char(48+kuser/100)  &
-               // char(48+(kuser-kuser/100*100)/10)  &
-               // char(48+(kuser-kuser/10*10))
-           lengthk = lengthb + 3
+           write(kuser_c,'(i0.3)') kuser
+           filek = basename(1:lengthb)//kuser_c
         end if
 
         call write_header_info( kuser )
 
-        atomsign(1:natom)=.false.   ! flags whether atom is in the quantum region
+        atomsign(1:natom)=.false. ! flags whether atom is in the quantum region
 
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
@@ -734,13 +731,9 @@ subroutine addH( iqm, x, y, z)
       end if
 
       modnum = modnum + 1
-      if( modnum < 10 ) then
-         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+      ! assumes modum is never greater than 99:
+      write(31,'(a,i5,2x,a,i0.2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
            iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
-      else  ! assumes modum is never greater than 99
-         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
-           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
-      end if
 
       return
 end subroutine addH
@@ -753,8 +746,8 @@ subroutine transfer_minimized_coords(iqm)
       integer :: i,j
 
       !  transfer the minimized coordinates to the .pqr file
-      open(47,file=filek(1:lengthk)//'.pqr')
-      open(48,file=filek(1:lengthk)//'.pqr1')
+      open(47,file=filek//'.pqr')
+      open(48,file=filek//'.pqr1')
       do i=1,iqm
          read(47,'(a30,24x,a16)') pqrstart,pqrend
          write(48,'(a30,3f8.3,a16)') pqrstart, &
@@ -762,14 +755,14 @@ subroutine transfer_minimized_coords(iqm)
       end do
       close(47)
       close(48)
-      call execute_command_line( '/bin/mv ' // filek(1:lengthk) &
-         // '.pqr1 ' // filek(1:lengthk) // '.pqr' )
+      call execute_command_line( '/bin/mv ' // filek &
+         // '.pqr1 ' // filek // '.pqr' )
 
       if( demon ) then
 
          !  transfer the minimized coordinates to the .inp file
-         open(47,file=filek(1:lengthk)//'.inp')
-         open(48,file=filek(1:lengthk)//'.inp1')
+         open(47,file=filek//'.inp')
+         open(48,file=filek//'.inp1')
          do i=1,9999
             read(47,'(a)',end=106) line
             write(48,'(a)') trim(line)
@@ -783,14 +776,14 @@ subroutine transfer_minimized_coords(iqm)
          end do
   106    close(47)
          close(48)
-         call execute_command_line( '/bin/mv ' // filek(1:lengthk) &
-            // '.inp1 ' // filek(1:lengthk) // '.inp' )
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.inp1 ' // filek // '.inp' )
 
       else if( orca ) then
 
          !  transfer the minimized coordinates to the .orcainp file
-         open(47,file=filek(1:lengthk)//'.orcainp')
-         open(48,file=filek(1:lengthk)//'.orcainp1')
+         open(47,file=filek//'.orcainp')
+         open(48,file=filek//'.orcainp1')
          do i=1,9999
             read(47,'(a)',end=107) line
             write(48,'(a)') trim(line)
@@ -804,8 +797,8 @@ subroutine transfer_minimized_coords(iqm)
          end do
   107    close(47)
          close(48)
-         call execute_command_line( '/bin/mv ' // filek(1:lengthk) &
-            // '.orcainp1 ' // filek(1:lengthk) // '.orcainp' )
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.orcainp1 ' // filek // '.orcainp' )
 
       else
          write(6,*) "external qopt only works with demon and orca for now"
@@ -822,33 +815,33 @@ subroutine write_header_info(kuser)
 !
         ! regular file opens here:
         if( gaussian ) then
-          open(30,file=filek(1:lengthk)//'.com')
+          open(30,file=filek//'.com')
         else if ( sqm ) then
-          open(30,file=filek(1:lengthk)//'.sqmin')
-          ! open(35,file=filek(1:lengthk)//'.surf.pqr')
+          open(30,file=filek//'.sqmin')
+          ! open(35,file=filek//'.surf.pqr')
         else if ( orca ) then
-          open(30,file=filek(1:lengthk)//'.orcainp')
-          open(32,file=filek(1:lengthk)//'.pos')
+          open(30,file=filek//'.orcainp')
+          open(32,file=filek//'.pos')
         else if ( demon ) then
-          open(30,file=filek(1:lengthk)//'.inp')
+          open(30,file=filek//'.inp')
         else if ( qchem .or. jaguar ) then
-          open(30,file=filek(1:lengthk)//'.in')
+          open(30,file=filek//'.in')
         end if
 
         ! qopt file opens here:
         if ( xtb ) then
-          open(44,file=filek(1:lengthk)//'.xyz1')
-          open(47,file=filek(1:lengthk)//'_xtb.inp')
+          open(44,file=filek//'.xyz1')
+          open(47,file=filek//'_xtb.inp')
         else if( quick ) then
-          open(44,file=filek(1:lengthk)//'_quick.in')
+          open(44,file=filek//'_quick.in')
         else if ( terachem ) then
-          open(30,file=filek(1:lengthk)//'.opt')
-          open(32,file=filek(1:lengthk)//'.pos')
-          open(34,file=filek(1:lengthk)//'.xyz1')
+          open(30,file=filek//'.opt')
+          open(32,file=filek//'.pos')
+          open(34,file=filek//'.xyz1')
         end if
 
-        open(31,file=filek(1:lengthk)//'.pqr')
-        open(33,file=filek(1:lengthk)//'.prot.pqr')
+        open(31,file=filek//'.pqr')
+        open(33,file=filek//'.prot.pqr')
 
         ! regular header info here:
         if( gaussian ) then
@@ -897,7 +890,7 @@ subroutine write_header_info(kuser)
             write(30,'(a)')  '%maxcore 3000'
           endif
           write(30,'(a)') ''
-          write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthk), &
+          write(30,'(a,a,a)') '%pointcharges "', filek, &
                '.pos"'
           write(30,'(a)') ''
           write(30,'(a)') '%output'
@@ -955,9 +948,9 @@ subroutine write_header_info(kuser)
         ! qopt headers here:
         if ( terachem ) then
           write(30,'(a)') 'basis 6-31gs'
-          write(30,'(a,a)') 'coordinates ',filek(1:lengthk)//'.xyz'
-          write(30,'(a,a)') 'pointcharges ',filek(1:lengthk)//'.pos'
-          write(30,'(a,a)') 'scrdir ',filek(1:lengthk)
+          write(30,'(a,a)') 'coordinates ',filek//'.xyz'
+          write(30,'(a,a)') 'pointcharges ',filek//'.pos'
+          write(30,'(a,a)') 'scrdir ',filek
           write(30,'(a)') 'method pbe'
           write(30,'(a)') 'maxit 250'
           write(30,'(a)') 'levelshift yes'
@@ -966,7 +959,7 @@ subroutine write_header_info(kuser)
           write(30,'(a)') 'run minimize'
           write(30,'(a)') 'nstep 10'
           write(34,'(a)') 'put number of atoms here!'
-          write(34,'(a)') filek(1:lengthk)
+          write(34,'(a)') filek
         end if
         return
 end subroutine write_header_info
@@ -990,7 +983,7 @@ subroutine write_cfrag_header_info(cfrag)
           write(30,'(a,i3)')'MULTIPLCITY  ',1
           write(30,'(a)') 'GEOMETRY CARTESIAN ANGSTROM'
         else if ( sqm ) then
-          write(30, '(a)' ) filek(1:lengthk)
+          write(30, '(a)' ) filek
           write(30, '(a)' ) ' &qmmm'
           write(30, '(a,i3,a)' ) " qm_theory='AM1', qmcharge=", cfrag, &
                 ', maxcyc=0, qmmm_int=1,'
@@ -1053,13 +1046,13 @@ subroutine handle_external_charges()
         enddo
 
         close(33)
-        call execute_command_line('./runsolinprot ' // filek(1:lengthk), &
+        call execute_command_line('./runsolinprot ' // filek, &
              exitstat = ier)
         if( ier .ne. 0 )then
            write(0,*) "error in solinprot: check solinprot.out"
            write(0,*) "error code was ", ier
            write(0,*) "command line was:"
-           write(0,*) './runsolinprot ' // filek(1:lengthk)
+           write(0,*) './runsolinprot ' // filek
            stop 1
         end if
 
@@ -1368,8 +1361,8 @@ subroutine external_minimizer( cfrag, iqm, kuser )
 
         if( xtb ) then
           !  first, fix the xyz file, since we finally know iqm:
-          open(44,file=filek(1:lengthk)//'.xyz1')
-          open(35,file=filek(1:lengthk)//'.xyz')
+          open(44,file=filek//'.xyz1')
+          open(35,file=filek//'.xyz')
           write(35,*) iqm
           write(35,*)
           do i=1,iqm
@@ -1378,7 +1371,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           end do
           close(44)
           close(35)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthk) &
+          call execute_command_line( '/bin/rm -f ' // filek &
                 // '.xyz1' )
           
           !  do the xtb minimization here:
@@ -1386,18 +1379,18 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*) 'Optimize geometry using xtb'
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
-          commandline = 'xtb ' // filek(1:lengthk) &
+          commandline = 'xtb ' // filek &
                 // '.xyz --opt --cycles 20 --chrg ' // cfragtxt  &
-                // ' --input ' // filek(1:lengthk) // '_xtb.inp' &
-                // ' > ' // filek(1:lengthk) // '.xtb.log' 
+                // ' --input ' // filek // '_xtb.inp' &
+                // ' > ' // filek // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
           call execute_command_line( &
             '/bin/rm -f charges wbo xtbrestart xtbopt.log xtbtopo.mol' )
           call execute_command_line( &
-            '/bin/rm -f ' // filek(1:lengthk) // '_xtb.inp' )
+            '/bin/rm -f ' // filek // '_xtb.inp' )
           call execute_command_line( &
-            '/bin/rm -f ' // filek(1:lengthk) // '.xyz' )
+            '/bin/rm -f ' // filek // '.xyz' )
 
           !  extract the coordinates from the xtb output file:
           open(46,file='xtbopt.xyz')
@@ -1417,10 +1410,10 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*) 'Optimize geometry using quick'
           write(0,*) 'Optimize geometry using quick for residue', kuser
           call execute_command_line( &
-             'quick.cuda ' // filek(1:lengthk) // '_quick.in' )
+             'quick.cuda ' // filek // '_quick.in' )
 
           !  extract the coordinates from the quick output file:
-          open(46,file=filek(1:lengthk) // '_quick.out')
+          open(46,file=filek // '_quick.out')
           do iline=1,100000
              read(46,'(a)') line
              if( line(1:32) .ne. ' OPTIMIZED GEOMETRY IN CARTESIAN' ) cycle
@@ -1436,8 +1429,8 @@ subroutine external_minimizer( cfrag, iqm, kuser )
         else if( terachem ) then
           close(32)
           close(34)
-          open(34,file=filek(1:lengthk)//'.xyz1')
-          open(35,file=filek(1:lengthk)//'.xyz')
+          open(34,file=filek//'.xyz1')
+          open(35,file=filek//'.xyz')
           read(34,*)  ! skip dummy first line
           write(35,'(i4)') iqm   ! number of atoms goes on first line
           do i=1,9999
@@ -1446,7 +1439,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           end do
   105     close(34)
           close(35)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthk) &
+          call execute_command_line( '/bin/rm -f ' // filek &
                 // '.xyz1' )
           ! TODO: need to call terachem, then transfer the info into demon
         end if
