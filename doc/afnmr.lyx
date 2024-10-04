@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-10 February 2023
+04 October 2024
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.6.1)
+(Version 1.7.0)
 \end_layout
 
 \begin_layout Author
@@ -875,13 +875,23 @@ afnmr
 \emph default
  is not present, fragments will be made for residues 1 up to the last protein
  or nucleic acid residue.
+ If the list argument is 
+\begin_inset Quotes eld
+\end_inset
+
+0
+\begin_inset Quotes erd
+\end_inset
+
+, no fragmentation will be done, and the entire molecule will be treated
+ at the quantum level.
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
 
 \emph on
-basis set selection:
+basis set and functional selection:
 \end_layout
 
 \begin_deeper
@@ -889,30 +899,42 @@ basis set selection:
 -mixedb Uses a mixed basis set in which the central residue whose shifts
  are being computed are treated with a larger, (
 \emph on
-pcS-seg1
+pcS-seg
 \emph default
-) basis set while the surrounding QM residues outside the primary region
+2) basis set while the surrounding QM residues outside the primary region
  use a smaller (
 \emph on
-dzp
+pcSseg-1
 \emph default
 ) basis.
 \end_layout
 
 \begin_layout Description
--tzp Use a larger basis (
+-seg2 Use 
 \emph on
-pcS-seg1
+pcS-seg2
 \emph default
- by default) for all residues
+ for all residues
 \end_layout
 
 \begin_layout Description
--dzp Use a smaller basis (
+-seg1 Use 
+\emph on
+pcS-seg1
+\emph default
+ for all residues
+\end_layout
+
+\begin_layout Description
+-seg0 Use a smaller basis (
 \emph on
 pcS-seg0
 \emph default
  by default) for all residues; this is the default if no basis flag is present.
+\end_layout
+
+\begin_layout Description
+-o3lyp Use o3lyp in place of olyp; requires -gau, -qchem or -orca (below)
 \end_layout
 
 \begin_layout Description
@@ -1003,15 +1025,14 @@ quantum program to use:
 \end_layout
 
 \begin_layout Description
--demon5 Set up QM input files to run with the deMon program, version 5 (
-\emph on
-default
-\emph default
-)
+-demon5 Set up QM input files to run with the deMon program, version 5
 \end_layout
 
 \begin_layout Description
--orca Set up QM input files to run with the Orca program
+-orca Set up QM input files to run with the Orca program, version 5 or 6
+ 
+\emph on
+(default)
 \end_layout
 
 \begin_layout Description
@@ -1024,6 +1045,18 @@ default
 
 \begin_layout Description
 -qchem Set up QM input files to run with the Q-Chem program
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+geometry optimization:
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+-nomin Do not minimize the input structure.
 \end_layout
 
 \begin_layout Description
@@ -1048,7 +1081,18 @@ xtb
  option, but using terachem as the optimizer.
  (
 \emph on
-Not tested recently, so expect to need to do some tweaking of the options.
+experimental, probably not working
+\emph default
+)
+\end_layout
+
+\begin_layout Description
+-qopt do a quantum mechanical geometry optimization in place of a molecular
+ mechanics optimization.
+ (
+\emph on
+Work in progress: only fully implemented in Gaussian, Orca and deMon.
+ The number of steps and method of minimization is hard-coded in afnmr.F90.
 \emph default
 )
 \end_layout
@@ -1061,17 +1105,6 @@ miscellaneous flags:
 \end_layout
 
 \begin_deeper
-\begin_layout Description
--qopt do a quantum mechanical geometry optimization in place of a molecular
- mechanics optimization.
- (
-\emph on
-Work in progress: only fully implemented in Gaussian, Orca and deMon.
- The number of steps and method of minimization is hard-coded in afnmr.F90.
-\emph default
-)
-\end_layout
-
 \begin_layout Description
 -workdir AF-NMR creates many temporary files.
  By default, they are all created inside the current directory.
@@ -1091,10 +1124,6 @@ Work in progress: only fully implemented in Gaussian, Orca and deMon.
 basename.pqr
 \emph default
  file is present
-\end_layout
-
-\begin_layout Description
--nomin Do not minimize the structure.
 \end_layout
 
 \begin_layout Description
