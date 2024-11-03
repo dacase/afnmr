@@ -733,7 +733,7 @@ subroutine addH( iqm, x, y, z)
       modnum = modnum + 1
       ! assumes modum is never greater than 99:
       write(31,'(a,i5,2x,a,i0.2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
-           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
+           iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
 
       return
 end subroutine addH
