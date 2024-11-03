@@ -15,11 +15,11 @@ module comafnmr
    character(len=4):: atomname(MAXAT), atomname_uniq(MAXAT), tmpnam
    character(len=5):: dlabel(MAXAT)
    character(len=2):: cfragtxt
-   character(len=160):: commandline, line
+   character(len=160):: commandline, line, afnmrhome
    character(len=30) :: pqrstart
    character(len=16) :: pqrend
    character(len=5) functional
-   character(len=:), allocatable :: filek, afnmrhome, version
+   character(len=:), allocatable :: filek, version
    character(len=1) :: basis
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
@@ -854,7 +854,7 @@ subroutine write_header_info(kuser)
           else if (basis .eq. 'S' ) then
             write(30,'(a)') 'Pop=HLY '
           else
-            write(30,'(a)') 'nmr(printeigenvectors) integral(grid=ultrafine)'
+            write(30,'(a)') 'nmr(printeigenvectors) '
           endif
           write(30,*)
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
@@ -1095,6 +1095,7 @@ subroutine finish_program_files( iqmprot )
       implicit none
       integer, intent(in) :: iqmprot
       integer :: i, kbas
+      character(len=256) :: gbsname
 
         !  More program-dependent keywords and instructions:
 
@@ -1104,10 +1105,14 @@ subroutine finish_program_files( iqmprot )
             !    write local basis set
             do i=1,nhighatom
               write(30,'(i3,a)') i,' 0'
-              write(0,'(a)') trim(afnmrhome) // '/basis/pcSseg-2/' &
-                    // trim(dlabel(i)) // '.gbs'
-              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-2/' &
-                    // trim(dlabel(i)) // '.gbs')
+              if( len(trim(adjustr(element(i)))) .eq. 1 ) then
+                 gbsname = trim(afnmrhome) // '/basis/pcSseg-2/' &
+                    // element(i)(2:2) // '.gbs'
+              else
+                 gbsname = trim(afnmrhome) // '/basis/pcSseg-2/' &
+                    // element(i) // '.gbs'
+              endif
+              open( UNIT=11, FILE=trim(gbsname))
               rewind(11)
               do kbas=1,9999
                  read(11,'(a80)',end = 62) line
