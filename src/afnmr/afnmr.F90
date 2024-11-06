@@ -17,7 +17,7 @@ module comafnmr
    character(len=2):: cfragtxt
    character(len=160):: commandline, line, afnmrhome
    character(len=30) :: pqrstart
-   character(len=16) :: pqrend
+   character(len=24) :: pqrend
    character(len=5) functional
    character(len=:), allocatable :: filek, version
    character(len=1) :: basis
@@ -749,7 +749,7 @@ subroutine transfer_minimized_coords(iqm)
       open(47,file=filek//'.pqr')
       open(48,file=filek//'.pqr1')
       do i=1,iqm
-         read(47,'(a30,24x,a16)') pqrstart,pqrend
+         read(47,'(a30,24x,a24)') pqrstart,pqrend
          write(48,'(a30,3f8.3,a16)') pqrstart, &
              fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
       end do
