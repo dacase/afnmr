@@ -27,6 +27,7 @@ module comafnmr
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
+   integer :: firstprotres, lastprotres, lastprotatom, iatfinal, iatstart
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
               qopt, xtb, sqm, quick
    logical :: first=.true.
@@ -65,8 +66,7 @@ program afnmr_x
       character(len=1) :: program,qoptb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
-      integer :: firstprotres, lastprotres, lastprotatom
-      integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
+      integer :: i,j,k,kk,m,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
       character(len=3) :: rn, kuser_c
@@ -789,9 +789,13 @@ subroutine transfer_minimized_coords(iqm)
             write(48,'(a)') trim(line)
             if( line(1:5) == '* xyz' ) then
                do j=1,iqm
-                  read (47,*) 
+                  read (47,*) ! skip coordinate line from .orcainp file
                   write(48,'(a2,4x,3f10.4)') dlabel(j), &
                          fxyz(1,j), fxyz(2,j), fxyz(3,j)
+                  if( basis .eq. 'M' .and. j .le. nhighatom ) then 
+                      read (47,*) ! skip NewGTO line from .orcainp file
+                      write(48,'(a)') 'NewGTO "pcSseg-2" end;'
+                  endif
                end do
             end if
          end do
