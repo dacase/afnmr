@@ -152,12 +152,16 @@ while (<LOG>) {
        # printf "first:  %8.3f  %8.3f  %8.3f\n", $$first[0], $$first[1], $$first[2];
        # Analyze the principal components:
 
+       #  here: delta is what is often called delta^red: solid-state convention
+       #        eta goes from 0 -> 1
        if( abs($siso - $eigv[0]) > abs($siso - $eigv[2]) ){
           $delta  = $siso - $eigv[0];  $eta = ($eigv[2]-$eigv[1])/$delta;
        } else {
           $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
        }
-       # line below uses the solution convention for delta:
+
+       # line below uses the solution convention for delta; should we also
+       #   alter eta to go from 0 -> 2/3?
        $delta = -1.5 * $delta;
        # $span = $eigv[2] - $eigv[0];
 
