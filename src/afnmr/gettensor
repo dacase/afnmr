@@ -181,7 +181,6 @@ while (<LOG>) {
           if( $alpha2 > 90. ){ $alpha2 = 180. - $alpha2; }
           if( $alpha3 > 90. ){ $alpha3 = 180. - $alpha3; }
           printf "\t%6.1f\n", $alpha1;
-          exit(0);
 
        } elsif( $aname[$iat] eq "CA" ){
 
