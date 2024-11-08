@@ -6,11 +6,13 @@
 usage(){
 cat<<EOD
 
-Usage: make-tensorrdb qpgm <basename>
+Usage: make-tensorrdb qpgm <basename> [nofrag]
 
    * qpgm must be one of "gaussian", "qchem", or "orca"
    * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout}
         files, where "nnn" is a three-digit resiude number (such as "001")
+   * if nofrag is "nofrag" quantum outputs are assumed to be in
+        <basename>.{out,log,qcout}.  Corresponds to "list 0" in afnmr.
 
    Output goes to <basename>.tensor.rdb
 
@@ -35,6 +37,7 @@ if [ $# -lt 2 ]; then usage; exit 1;  fi
 
 program=$1
 basename=$2
+nofrag=$3
 
 case "$1" in
         orca)        suffix="out";;
@@ -52,10 +55,15 @@ esac
 #  header:
 $AFNMRHOME/bin/gettensor $program $basename header > $basename.tensor.rdb
 
-for i in ${basename}???.${suffix}
-do
-    $AFNMRHOME/bin/gettensor $program ${i%.*} >> $basename.rdbi
-done
+if [ -z $nofrag ]; then
+
+   for i in ${basename}???.${suffix}
+   do
+       $AFNMRHOME/bin/gettensor $program ${i%.*} >> $basename.rdbi
+   done
+else
+   $AFNMRHOME/bin/gettensor $program $basename >> $basename.rdbi
+fi
 
 #  now sort the shifts by residue and atom name:
 #    the tr kludge seems needed since (some) Linux sorts do not treat "'"

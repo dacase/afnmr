@@ -8,6 +8,8 @@
 use Math::MatrixDecomposition::Eigen;
 use Math::Trig;
 
+$use_pdb = 0;
+
 $program = "$ARGV[0]";
 $basename = "$ARGV[1]";
 
@@ -26,10 +28,16 @@ if( $header eq "header" ){
 }
 
 $_ = $basename; s/.+(\d\d\d)/$1/; $resi = $_;
+if(/\D/){ $resi = 1; $use_pdb = 1;}  # handle "list 0" option
 
-# get atom and residue names from pqr file:
+# get atom and residue names from pdb or pqr file:
 
-open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+if( $use_pdb ){
+   open (PQR, "<", "$basename". ".pdb") or die "cannot open $basename.pdb";
+} else {
+   open (PQR, "<", "$basename". ".pqr") or die "cannot open $basename.pqr";
+}
+
 $iat = 0;
 while (<PQR>) {
     next unless m/^ATOM  /; 
