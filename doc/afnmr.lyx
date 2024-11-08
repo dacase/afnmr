@@ -1452,7 +1452,7 @@ $AFNMRHOME/src/afnmr/make-shiftsrdb
 \end_layout
 
 \begin_layout LyX-Code
-Usage: make-shiftsrdb qpgm reference <basename> fulltensor
+Usage: make-shiftsrdb qpgm reference <basename>
 \end_layout
 
 \begin_layout LyX-Code
@@ -1489,15 +1489,50 @@ Usage: make-shiftsrdb qpgm reference <basename> fulltensor
 \end_layout
 
 \begin_layout LyX-Code
-* fulltensor is 1 to get expanded CSA printouts, 0 otherwise
-\end_layout
-
-\begin_layout LyX-Code
 
 \end_layout
 
 \begin_layout LyX-Code
 Output goes to <basename>.rdb 
+\end_layout
+
+\begin_layout Standard
+For users interested in chemical shift anisotropies, there is a corresponding
+ script, 
+\emph on
+make-tensorrdb
+\emph default
+, that extracts and analyzes the complete shielding tensor.
+ Here is its usage information:
+\end_layout
+
+\begin_layout LyX-Code
+Usage: make-tensorrdb qpgm <basename>
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+   * qpgm must be one of "gaussian", "qchem", or "orca"    
+\end_layout
+
+\begin_layout LyX-Code
+   * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout} files,
+ 
+\end_layout
+
+\begin_layout LyX-Code
+       where "nnn" is a three-digit resiude number (such as "001")
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+   Output goes to <basename>.tensor.rdb 
 \end_layout
 
 \begin_layout LyX-Code
