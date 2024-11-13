@@ -29,7 +29,7 @@ module comafnmr
    integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
    integer :: firstprotres, lastprotres, lastprotatom, iatfinal, iatstart
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
-              qopt, xtb, sqm, quick
+              qopt, xtb, sqm, quick, spinspin
    logical :: first=.true.
    logical :: nofrag=.false.
    double precision :: nbcut
@@ -41,7 +41,7 @@ program afnmr_x
 !   (Note: generally the input for afnmr.x is created by the shell script
 !      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
-!   Usage: afnmr.x program basis qopt functional nbcut basename list
+!   Usage: afnmr.x program basis qopt functional nbcut spinspin basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), J (Jaguar), or S (sqm)
@@ -52,6 +52,7 @@ program afnmr_x
 !                  quick or terachem), or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
+!            spinspin is T for J-couplings, F (default) otherwise
 !            <basename>.pqr gives the input structure; put all "general"
 !                  residues (water, ligands, etc.) after protein or
 !                  nucleic acid residues
@@ -63,7 +64,7 @@ program afnmr_x
 
       double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
-      character(len=1) :: program,qoptb
+      character(len=1) :: program,qoptb,spinspinb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
       integer :: i,j,k,kk,m,iitemp,iqm,iqmprot=0
@@ -171,6 +172,7 @@ program afnmr_x
       sqm = .false.
       quick = .false.
       qopt = .false.
+      spinspin = .false.
       listsize = 0
       version = '1.7.0'
 
@@ -234,11 +236,14 @@ program afnmr_x
       call get_command_argument( 5, nbcutb, lengthb )
       read( nbcutb, * ) nbcut
 
-      call get_command_argument( 6, basename, lengthb )
+      call get_command_argument( 6, spinspinb, lengthb )
+      if( spinspinb .eq. 'T' ) spinspin = .true.
+
+      call get_command_argument( 7, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
 
-      if( command_argument_count() > 6 ) then
-         do i=7,command_argument_count()
+      if( command_argument_count() > 7 ) then
+         do i=8,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
             read( lpchar, '(i4)' ) list(i-6)
          end do

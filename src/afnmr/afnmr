@@ -34,6 +34,7 @@ Optional flags:
 
    -o3lyp          Use O3LYP in place of OLYP; requires -gau, -qchem, or -orca
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
+   -J              Compute spin-spin couplings; requires -gau or -orca
 
    -demon5         Set up quantum input files to use with deMon, v5
    -demon, -deMon  Set up quantum input files to use with deMon3
@@ -73,6 +74,7 @@ check_afnmrhome() {
 
 program="O"
 qopt="F"
+spinspin="F"
 basis="D"
 workdir="no"
 min="yes"
@@ -116,6 +118,7 @@ while [ $# -gt 0 ]; do
         -nbcut)       shift; nbcut="$1";;
         -xtb)         qopt="X";;
         -quick)       qopt="Q";;
+        -J)           spinspin="T";;
         -tc)          qopt="T";;
         -orca)        program="O";;
         -jaguar)      program="J";;
@@ -165,7 +168,7 @@ if [ "$qopt" = "Z" ]; then
 fi
 
 #  Set the options to afnmr.x:
-AFNMR_OPTIONS="$program $basis $qopt $functional $nbcut"
+AFNMR_OPTIONS="$program $basis $qopt $functional $nbcut $spinspin"
 
 #  Should not need to edit anything below here; (except to perhaps change 
 #  detailed parameters in minimization)
