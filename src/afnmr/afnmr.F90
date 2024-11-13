@@ -1237,7 +1237,7 @@ subroutine finish_program_files( iqm, iqmprot )
           endif
 
           if( spinspin .or. basis .eq. 'M' ) then
-             write(30,'(a,i0)') '   atoms = 1-', nhighatom
+             write(30,'(a,i0)') ' atoms=1-', nhighatom
              write(30,*)
           end if
 
