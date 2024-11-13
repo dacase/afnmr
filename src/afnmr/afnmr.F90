@@ -811,8 +811,29 @@ subroutine transfer_minimized_coords(iqm)
          call execute_command_line( '/bin/mv ' // filek &
             // '.orcainp1 ' // filek // '.orcainp' )
 
+      else if( gaussian ) then
+
+         !  transfer the minimized coordinates to the .com file
+         open(47,file=filek//'.com')
+         open(48,file=filek//'.com1')
+         do i=1,9999
+            read(47,'(a)',end=108) line
+            write(48,'(a)') trim(line)
+            if( i == 7 ) then   ! TODO: fragile!
+               do j=1,iqm
+                  read (47,*) ! skip coordinate line from .com file
+                  write(48,'(a2,4x,3f10.4)') dlabel(j), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+               end do
+            end if
+         end do
+  108    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.com1 ' // filek // '.com' )
+
       else
-         write(6,*) "external qopt only works with demon and orca for now"
+         write(6,*) "external qopt only works with demon, gaussian or orca"
          call exit(1)
       end if
 end subroutine transfer_minimized_coords
