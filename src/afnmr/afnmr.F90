@@ -16,7 +16,7 @@ module comafnmr
    character(len=5):: dlabel(MAXAT)
    character(len=2):: cfragtxt
    character(len=160):: commandline, line, afnmrhome
-   character(len=30) :: pqrstart
+   character(len=30) :: pqrstart, atombasis(MAXIQM)
    character(len=24) :: pqrend
    character(len=5) functional
    character(len=:), allocatable :: filek, version
@@ -567,7 +567,7 @@ program afnmr_x
         close(31)
 
         call handle_external_charges()
-        call finish_program_files( iqmprot )
+        call finish_program_files( iqm, iqmprot )
         call external_minimizer( cfrag, iqm, kuser )
 
         write(0,'(a,i4)') '    done with residue ', kuser
@@ -669,10 +669,17 @@ subroutine addatom( kk, iqm, principal )
         write(34,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
       else if ( gaussian .or. orca ) then
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-        dlabel(iqm) = trim(element(kk))
+        dlabel(iqm) = adjustl(element(kk))
         if( orca .and. basis .eq. 'M' .and. principal) then
           write(30,'(a)') 'NewGTO "pcSseg-2" end;'
         endif
+        if( gaussian .and. basis .eq. 'M' ) then
+           if( principal ) then
+              atombasis(iqm) = '/basis/pcJ-2/'
+           else
+              atombasis(iqm) = '/basis/pcSseg-1/'
+           end if
+        end if
       else if ( sqm ) then
         elem = element(kk)(2:2)
         if ( elem == 'H' ) atno = 1
@@ -1094,10 +1101,10 @@ subroutine handle_external_charges()
         return
 end subroutine handle_external_charges
 
-subroutine finish_program_files( iqmprot )
+subroutine finish_program_files( iqm, iqmprot )
       use comafnmr
       implicit none
-      integer, intent(in) :: iqmprot
+      integer, intent(in) :: iqm, iqmprot
       integer :: i, kbas
       character(len=256) :: gbsname
 
@@ -1107,15 +1114,10 @@ subroutine finish_program_files( iqmprot )
           write(30,*)
           if( basis .eq. 'M' ) then
             !    write local basis set
-            do i=1,nhighatom
+            do i=1,iqm
               write(30,'(i3,a)') i,' 0'
-              if( len(trim(adjustr(element(i)))) .eq. 1 ) then
-                 gbsname = trim(afnmrhome) // '/basis/pcSseg-2/' &
-                    // element(i)(2:2) // '.gbs'
-              else
-                 gbsname = trim(afnmrhome) // '/basis/pcSseg-2/' &
-                    // element(i) // '.gbs'
-              endif
+              gbsname = trim(afnmrhome) // trim(atombasis(i)) &
+                    // trim(dlabel(i)) // '.gbs'
               open( UNIT=11, FILE=trim(gbsname))
               rewind(11)
               do kbas=1,9999
@@ -1125,9 +1127,6 @@ subroutine finish_program_files( iqmprot )
               close(11)
 62            write(30,'(a)') '****'
             end do
-            write(30,'(i0,a1,i0,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-            write(30,'(A)') 'SVP'
-            write(30,'(A)') '****'
             write(30,*)
 
           else if( basis .eq. 'T' ) then
