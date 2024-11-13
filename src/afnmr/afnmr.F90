@@ -245,9 +245,9 @@ program afnmr_x
       if( command_argument_count() > 7 ) then
          do i=8,command_argument_count()
             call get_command_argument( i, lpchar, lengthc )
-            read( lpchar, '(i4)' ) list(i-6)
+            read( lpchar, '(i4)' ) list(i-7)
          end do
-         listsize = command_argument_count() - 6
+         listsize = command_argument_count() - 7
       endif
       if( listsize .eq. 1 .and. list(1) .eq. 0 ) then 
          nofrag = .true.
@@ -255,9 +255,9 @@ program afnmr_x
       end if
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
-      write(6,'(a,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
+      write(6,'(a,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a,1x,a)') &
            'Input arguments: ', program, basis, qoptb, &
-           functional, nbcut, trim(basename(1:lengthb))
+           functional, nbcut, spinspinb, trim(basename(1:lengthb))
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
 
@@ -524,7 +524,7 @@ program afnmr_x
                   endif
                   nlowatom = nlowatom + 1
                   iqm = iqm + 1
-                  call addH( iqm, x, y, z)
+                  call addH( iqm, x, y, z )
                 endif
               endif
 
@@ -539,7 +539,7 @@ program afnmr_x
                     coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
                   nlowatom = nlowatom + 1
                   iqm = iqm + 1
-                  call addH( iqm, x, y, z)
+                  call addH( iqm, x, y, z )
                 endif
               endif
 
@@ -680,10 +680,15 @@ subroutine addatom( kk, iqm, principal )
         endif
         if( gaussian .and. basis .eq. 'M' ) then
            if( principal ) then
-              atombasis(iqm) = '/basis/pcJ-2/'
+              if( spinspin ) then
+                 atombasis(iqm) = '/basis/pcJ-2/'
+              else
+                 atombasis(iqm) = '/basis/pcSseg-2/'
+              end if
            else
               atombasis(iqm) = '/basis/pcSseg-1/'
            end if
+           write(6,*) 'atombasis: ', iqm, trim(atombasis(iqm)), dlabel(iqm)
         end if
       else if ( sqm ) then
         elem = element(kk)(2:2)
@@ -716,7 +721,7 @@ subroutine addatom( kk, iqm, principal )
       return
 end subroutine addatom
 
-subroutine addH( iqm, x, y, z)
+subroutine addH( iqm, x, y, z )
 
       use comafnmr
       implicit none
@@ -733,6 +738,10 @@ subroutine addH( iqm, x, y, z)
       else if ( gaussian .or. orca ) then
         write(30,'(a2,4x,3f10.4)')' H',x,y,z
         dlabel(iqm) = 'H'
+        if( gaussian .and. basis .eq. 'M' ) then
+           atombasis(iqm) = '/basis/pcSseg-1/'
+           write(6,*) 'atombasis: ', iqm, trim(atombasis(iqm)), dlabel(iqm)
+        end if
       else if ( sqm ) then
         write(30,'(a2,4x,3f10.4)')' 1  H ',x,y,z
       else
@@ -891,8 +900,12 @@ subroutine write_header_info(kuser)
           else if (basis .eq. 'S' ) then
             write(30,'(a)') 'Pop=HLY '
           else
-            write(30,'(a)') 'nmr(printeigenvectors) '
-          endif
+            if( spinspin ) then
+              write(30,'(a)') 'nmr(spinspin,printeigenvectors,readatoms) '
+            else
+              write(30,'(a)') 'nmr(printeigenvectors) '
+            end if
+          end if
           write(30,*)
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -1144,6 +1157,7 @@ subroutine finish_program_files( iqm, iqmprot )
               write(30,'(i3,a)') i,' 0'
               gbsname = trim(afnmrhome) // trim(atombasis(i)) &
                     // trim(dlabel(i)) // '.gbs'
+              write(6,*) 'finish: ', trim(gbsname)
               open( UNIT=11, FILE=trim(gbsname))
               rewind(11)
               do kbas=1,9999
@@ -1153,7 +1167,6 @@ subroutine finish_program_files( iqm, iqmprot )
               close(11)
 62            write(30,'(a)') '****'
             end do
-            write(30,*)
 
           else if( basis .eq. 'T' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
@@ -1211,6 +1224,7 @@ subroutine finish_program_files( iqm, iqmprot )
 
           endif
 63        continue
+          write(30,*)
 
           if (qopt) then
             if( nhighatom .lt. iqmprot ) then
@@ -1221,6 +1235,11 @@ subroutine finish_program_files( iqm, iqmprot )
             end if
             write(30,*)
           endif
+
+          if( spinspin .or. basis .eq. 'M' ) then
+             write(30,'(a,i0)') '   atoms = 1-', nhighatom
+             write(30,*)
+          end if
 
         else if ( sqm ) then
           write(30,'(a)') '#END'
