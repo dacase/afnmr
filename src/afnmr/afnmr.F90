@@ -676,8 +676,12 @@ subroutine addatom( kk, iqm, principal )
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
         dlabel(iqm) = adjustl(element(kk))
         if( orca .and. basis .eq. 'M' .and. principal) then
-          write(30,'(a)') 'NewGTO "pcSseg-2" end;'
-        endif
+          if( spinspin ) then
+             write(30,'(a)') 'NewGTO "pcJ-2" end;'
+          else
+             write(30,'(a)') 'NewGTO "pcSseg-2" end;'
+          end if
+        end if
         if( gaussian .and. basis .eq. 'M' ) then
            if( principal ) then
               if( spinspin ) then
@@ -815,7 +819,11 @@ subroutine transfer_minimized_coords(iqm)
                          fxyz(1,j), fxyz(2,j), fxyz(3,j)
                   if( basis .eq. 'M' .and. j .le. nhighatom ) then 
                       read (47,*) ! skip NewGTO line from .orcainp file
-                      write(48,'(a)') 'NewGTO "pcSseg-2" end;'
+                      if( spinspin ) then
+                         write(48,'(a)') 'NewGTO "pcJ-2" end;'
+                      else
+                         write(48,'(a)') 'NewGTO "pcSseg-2" end;'
+                      end if
                   endif
                end do
             end if
