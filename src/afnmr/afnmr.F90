@@ -1050,13 +1050,8 @@ subroutine write_cfrag_header_info(cfrag)
 
         !  Now a section for qopt-only options
         if ( quick ) then
-          if( cfrag .ge. 0 ) then
-             write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
-                          ' OPTIMIZE=10 EXTCHARGES'
-          else
-             write(44,'(a,i2,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
-                          ' OPTIMIZE=10 EXTCHARGES'
-          endif
+          write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
+                   ' ICOORD=0 CONSTRAIN OPTIMIZE=10 EXTCHARGES'
           write(44,*)
         else if ( terachem ) then
           write(30,'(a,i3)')'charge  ',cfrag
@@ -1391,6 +1386,20 @@ subroutine finish_program_files( iqm, iqmprot )
           close(47)
           close(44)
         else if ( quick ) then
+          write(44,*)
+#if 1   /*  minimize primary residue plus waters */
+          if( nhighatom .lt. iqmprot ) then
+             do i=nhighatom+1,iqmprot
+                write(44,'(a,i4)') 'FREEZE ', i
+             end do
+          end if
+#else   /*  minimize just waters */
+          if( nhighatom .lt. iqmprot ) then
+             do i=1,iqmprot
+                write(44,'(a,i4)') 'FREEZE ', i
+             end do
+          end if
+#endif
           write(44,*)
           close(44)
         else if ( terachem ) then 
