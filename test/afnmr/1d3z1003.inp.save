@@ -1,4 +1,4 @@
-TITLE AF-NMR fragment for residue    3; version = 1.7.0; nbcut =  3.30
+TITLE AF-NMR fragment for residue    3; version = 1.8.0; nbcut =  3.30
 SCFTYPE  RKS Tol=1.0e-7 MAX=100
 GUESS TB
 ORBITALS SPHERICAL
