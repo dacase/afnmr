@@ -18,19 +18,21 @@ Optional flags:
                       syntax and must be quoted, e.g.:
                       "{1,2,{4..9},13}" or "6 13" or "{5..8}"
                    Residue numbers are those in the pdb file, and must
-                      be unique: afnmr does not process chainID's
+                       be unique: afnmr does not process chainID's
                    If this flag is not present, fragments will be created
-                      for residues 1 up to the last protein or nucleic acid
-                      residue
+                       for residues 1 up to the last protein or nucleic acid
+                       residue
                    If the list is "0", no fragmentation will be done, and
-                      and the entire molecule will be treated by QM
+                       and the entire molecule will be treated by QM
 
-   -seg0           all residues are treated at the pcSseg-0 level (default)
+   -seg0           all residues are treated at the pcSseg-0 level (default,
+                       but mainly for historical reasons; -seg1 is often
+                       better)
    -seg1           all residues are treated at the pcSseg-1 level
    -seg2           all residues are treated at the pcSseg-2 level
    -aug-seg1       all residues are treated at the aug-pcSseg-1 level
    -mixedb         use a mixed basis with the primary residue at pcSseg-2,
-                   others at pcSseg-1
+                   (pcJ-2 if -J is set); others at pcSseg-1
 
    -o3lyp          Use O3LYP in place of OLYP; requires -gau, -qchem, or -orca
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
@@ -45,12 +47,15 @@ Optional flags:
 
    -qopt           Geometry optimize fragments with same program as for shifts
                        (default is no geometry optimization)
-   -xtb            Geometry optimize fragments with xtb (experimental)
-   -quick          Geometry optimize fragments with quick (experimental)
+   -xtb            Geometry optimize fragments with xtb; requires the xtb
+                       executable to be in the user's PATH
+   -quick          Geometry optimize fragments with quick; requires the
+                       quick.cuda exectuable to be in the user's PATH
    -tc             Geometry optimize fragments with terachem (experimental)
 
    -workdir        Do everything inside of a working directory named <basename>
-   -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
+   -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr without
+                       modification
    -nomin          Skip the minimization steps, but still build from 
                        <basename>.pdb
 
