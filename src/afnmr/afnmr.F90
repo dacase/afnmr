@@ -1050,7 +1050,7 @@ subroutine write_cfrag_header_info(cfrag)
 
         !  Now a section for qopt-only options
         if ( quick ) then
-          write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
+          write(44,'(a,i0,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
                    ' ICOORD=0 CONSTRAIN OPTIMIZE=10 EXTCHARGES'
           write(44,*)
         else if ( terachem ) then
