@@ -942,14 +942,13 @@ subroutine write_header_info(kuser)
           else
             write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
-          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
+          if( qopt ) write(30,'(a)', advance='no')  ' COpt '
           write(30,'(a)') ''
           if( functional(2:2) .eq. '3' ) then
             write(30,'(a)')  '%maxcore 3000'
           endif
           write(30,'(a)') ''
-          write(30,'(a,a,a)') '%pointcharges "', filek, &
-               '.pos"'
+          write(30,'(a,a,a)') '%pointcharges "', filek, '.pos"'
           write(30,'(a)') ''
           write(30,'(a)') '%output'
           write(30,'(a)') '  PrintLevel Mini'
@@ -1027,7 +1026,7 @@ subroutine write_cfrag_header_info(cfrag)
       implicit none
       integer, intent(in) :: cfrag
 
-        !  write quantum chemistry files that depend on known cfrag:
+        !  write quantum chemistry files that depend on knowing cfrag:
         if ( gaussian .or. qchem ) then
           write(30,'(1x,I3,2x,I2)') cfrag,1
         else if ( orca ) then
@@ -1048,7 +1047,7 @@ subroutine write_cfrag_header_info(cfrag)
           write(30, '(a)' ) ' /'
         end if
 
-        !  Now a section for qopt-only options
+        !  Now a section for external qopt-only options
         if ( quick ) then
           write(44,'(a,i0,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
                    ' ICOORD=0 CONSTRAIN OPTIMIZE=10 EXTCHARGES'
@@ -1303,9 +1302,6 @@ subroutine finish_program_files( iqm, iqmprot )
             if( nhighatom .lt. iqmprot ) then
                ! constrain protein/nuc. acid atoms not in the primary residue
                write(30,'(a)') '      Constraints'
-               ! do i=nhighatom+1,iqmprot
-               !    write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
-               ! end do
                write(30,'(a,i0,a,i0,a)') &
                   '        { C ', nhighatom, ':', iqmprot-1, ' C }'
 
@@ -1313,10 +1309,6 @@ subroutine finish_program_files( iqm, iqmprot )
                 write(30,'(a)') '    end'
             endif
           endif
-          !  next two lines are for versions of Orca up to 3.0.1
-          ! write(30,'(a)') '%eprnmr  ori IGLO'
-          ! write(30,'(a)') '   LocMet PM'
-          !  following line is for Orca 4 or 5:
           write(30,'(a)') '%eprnmr  ori GIAO'
           write(30,'(a)', advance='no') '   nuclei = 1'
           do i=2,nhighatom
@@ -1450,8 +1442,8 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek &
-                // '.xyz --opt --cycles 20 --chrg ' // cfragtxt  &
-                // ' --input ' // filek // '_xtb.inp' &
+                // '.xyz --opt --cycles 30 --chrg ' // cfragtxt  &
+                // ' --gbsa h2o --input ' // filek // '_xtb.inp' &
                 // ' > ' // filek // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
@@ -1497,6 +1489,9 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           call transfer_minimized_coords( iqm )
  
         else if( terachem ) then
+          write(6,*) 'terachem option for minimization still not ready'
+          write(0,*) 'terachem option for minimization still not ready'
+          stop
           close(32)
           close(34)
           open(34,file=filek//'.xyz1')
@@ -1514,4 +1509,5 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           ! TODO: need to call terachem, then transfer the info into demon
         end if
         return
+
 end subroutine external_minimizer
