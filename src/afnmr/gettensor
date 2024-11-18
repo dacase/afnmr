@@ -22,8 +22,8 @@ if( $#ARGV == 2 ){
 if( $header eq "header" ){
    printf( "# results from afnmr-$program:\n" );
    printf(
-"res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\t${basename}_theta\n" );
-   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
+"res\tatomname\tresname\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\t${basename}_delta\t${basename}_eta\t${basename}_span\t${basename}_theta\n" );
+   printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
    exit(0);
 }
 
@@ -171,9 +171,9 @@ while (<LOG>) {
        # line below uses the solution convention for delta; should we also
        #   alter eta to go from 0 -> 2/3?
        $delta = -1.5 * $delta;
-       # $span = $eigv[2] - $eigv[0];
+       $span = $eigv[2] - $eigv[0];
 
-       printf "\t%8.3f\t%8.3f", $delta, $eta;
+       printf "\t%8.3f\t%8.3f\t%8.3f", $delta, $eta, $span;
 
        if( $aname[$iat] eq "N" ){
 
