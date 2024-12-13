@@ -1364,6 +1364,8 @@ subroutine finish_program_files( iqm, iqmprot )
 
         ! Again, qopt-only options:
         if ( xtb ) then
+          ! write(47,*)  '$opt '
+          ! write(47,*)  '   engine=rf'
 #if 1   /*  minimize primary residue plus waters */
           if( nhighatom .lt. iqmprot ) then
              write(47,*) '$fix'
@@ -1442,7 +1444,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i2)') cfrag
           commandline = 'xtb ' // filek &
-                // '.xyz --opt --cycles 30 --chrg ' // cfragtxt  &
+                // '.xyz --opt --cycles 500 --chrg ' // cfragtxt  &
                 // ' --gbsa h2o --input ' // filek // '_xtb.inp' &
                 // ' > ' // filek // '.xtb.log' 
           write(6,*) trim(commandline)
