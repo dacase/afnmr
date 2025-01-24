@@ -14,7 +14,7 @@ module comafnmr
    character(len=3):: residue(MAXAT), residuename(MAXRES)
    character(len=4):: atomname(MAXAT)
    character(len=5):: dlabel(MAXAT)
-   character(len=2):: cfragtxt
+   character(len=6):: cfragtxt
    character(len=160):: commandline
    character(len=30) :: pqrstart
    character(len=16) :: pqrend
@@ -936,6 +936,7 @@ subroutine write_cfrag_header_info(cfrag)
       implicit none
       integer, intent(in) :: cfrag
 
+        write(cfragtxt,'(i4)') cfrag
         !  write quantum chemistry files that depend on known cfrag:
         if ( gaussian .or. qchem ) then
           write(30,'(1x,I3,2x,I2)') cfrag,1
@@ -959,13 +960,8 @@ subroutine write_cfrag_header_info(cfrag)
 
         !  Now a section for qopt-only options
         if ( quick ) then
-          if( cfrag .ge. 0 ) then
-             write(44,'(a,i1,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
-                          ' OPTIMIZE=10 EXTCHARGES'
-          else
-             write(44,'(a,i2,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
-                          ' OPTIMIZE=10 EXTCHARGES'
-          endif
+          write(44,'(a,a,a)') 'DFT OLYP BASIS=pcSseg-0 CHARGE=', &
+                trim(adjustl(cfragtxt)), ' OPTIMIZE=10 EXTCHARGES'
           write(44,*)
         else if ( terachem ) then
           write(30,'(a,i3)')'charge  ',cfrag
@@ -1348,11 +1344,11 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*)
           write(6,*) 'Optimize geometry using xtb'
           write(0,*) 'Optimize geometry using xtb for residue', kuser
-          write(cfragtxt,'(i2)') cfrag
+          write(cfragtxt,'(i4)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-                // '.xyz --opt --cycles 10 --chrg ' // cfragtxt  &
-                // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
-                // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
+             // '.xyz --opt --cycles 10 --chrg ' // trim(adjustl(cfragtxt))  &
+             // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
+             // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
           call execute_command_line( &
