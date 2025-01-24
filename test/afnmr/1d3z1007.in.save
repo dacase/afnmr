@@ -1,4 +1,4 @@
- AF-NMR fragment for residue    7; version = 1.3.1; nbcut =  3.30
+ AF-NMR fragment for residue    7; version = 1.8.0; nbcut =  3.30
 &gen
 basis=6-31g*
 dftname=olyp

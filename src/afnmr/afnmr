@@ -15,38 +15,47 @@ Usage: `basename $0` [flags] basename
 
 Optional flags:
    -list           list of residues to create fragments for; uses bash 
-                   syntax and must be quoted, e.g.:
-                       "{1,2,{4..9},13}" or "6 13" or "{5..8}"
+                      syntax and must be quoted, e.g.:
+                      "{1,2,{4..9},13}" or "6 13" or "{5..8}"
                    Residue numbers are those in the pdb file, and must
-                      be unique: afnmr does not process chainID's
+                       be unique: afnmr does not process chainID's
                    If this flag is not present, fragments will be created
-                   for residues 1 up to the last protein or nucleic acid
-                   residue
+                       for residues 1 up to the last protein or nucleic acid
+                       residue
+                   If the list is "0", no fragmentation will be done, and
+                       and the entire molecule will be treated by QM
 
-   -dzp            all residues are treated at the pcSseg-0 level (default)
-   -tzp            all residues are treated at the pcSseg-1 level
-   -aug-tzp        all residues are treated at the aug-pcSseg-1 level
-   -mixedb         use a mixed basis with the primary residue at pcSseg-1,
-                   others at DZP
+   -seg0           all residues are treated at the pcSseg-0 level (default,
+                       but mainly for historical reasons; -seg1 is often
+                       better)
+   -seg1           all residues are treated at the pcSseg-1 level
+   -seg2           all residues are treated at the pcSseg-2 level
+   -aug-seg1       all residues are treated at the aug-pcSseg-1 level
+   -mixedb         use a mixed basis with the primary residue at pcSseg-2,
+                   (pcJ-2 if -J is set); others at pcSseg-1
 
-   -o3lyp          Use O3LYP in place of OLYP; requires -gau or -orca
+   -o3lyp          Use O3LYP in place of OLYP; requires -gau, -qchem, or -orca
    -nbcut          Heavy-atom cutoff for fragments; default is 3.3 Ang.
+   -J              Compute spin-spin couplings; requires -gau or -orca
 
-   -demon5         Set up quantum input files to use with deMon, v5 (default)
+   -demon5         Set up quantum input files to use with deMon, v5
    -demon, -deMon  Set up quantum input files to use with deMon3
-   -orca           Set up quantum input files to use with Orca
+   -orca           Set up quantum input files to use with Orca (default)
    -gaussian       Set up quantum input files to use with Gaussian
    -jaguar         Set up quantum input files to use with Jaguar
    -qchem          Set up quantum input files to use with Q-Chem
 
    -qopt           Geometry optimize fragments with same program as for shifts
                        (default is no geometry optimization)
-   -xtb            Geometry optimize fragments with xtb
-   -quick          Geometry optimize fragments with quick
-   -tc             Geometry optimize fragments with terachem
+   -xtb            Geometry optimize fragments with xtb; requires the xtb
+                       executable to be in the user's PATH
+   -quick          Geometry optimize fragments with quick; requires the
+                       quick.cuda exectuable to be in the user's PATH
+   -tc             Geometry optimize fragments with terachem (experimental)
 
    -workdir        Do everything inside of a working directory named <basename>
-   -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr
+   -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr without
+                       modification
    -nomin          Skip the minimization steps, but still build from 
                        <basename>.pdb
 
@@ -68,10 +77,9 @@ check_afnmrhome() {
    fi
 }
 
-implicit_solvent="solinprot"
-solinprot="T"
-program="E"
+program="O"
 qopt="F"
+spinspin="F"
 basis="D"
 workdir="no"
 min="yes"
@@ -102,9 +110,10 @@ while [ $# -gt 0 ]; do
     case "$1" in
         -list)        shift; list=`eval echo $1`;;
         -mixedb)      basis="M";;
-        -tzp)         basis="T";;
-        -aug-tzp)     basis="A";;
-        -dzp)         basis="D";;
+        -seg1)        basis="T";;
+        -seg2)        basis="Q";;
+        -aug-seg1)    basis="A";;
+        -seg0)        basis="D";;
         -shape)       basis="S";;
         -demon)       program="D";;
         -deMon)       program="D";;
@@ -114,6 +123,7 @@ while [ $# -gt 0 ]; do
         -nbcut)       shift; nbcut="$1";;
         -xtb)         qopt="X";;
         -quick)       qopt="Q";;
+        -J)           spinspin="T";;
         -tc)          qopt="T";;
         -orca)        program="O";;
         -jaguar)      program="J";;
@@ -121,7 +131,6 @@ while [ $# -gt 0 ]; do
         -gau)         program="G";;    # for backwards compatibility
         -qchem)       program="Q";;
         -sqm)         program="S";;
-        -solinprot)   solinprot="T"; implicit_solvent="solinprot";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
         -nomin)       min="no";;
@@ -154,16 +163,17 @@ if [ "$workdir" = "T" ]; then
 fi
 
 if [ "$qopt" = "Z" ]; then
-   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" ]; then
-      $qopt=$program
+   if [ "$program" = "E" -o "$program" = "G" -o "$program" = "Q" \
+                         -o "$program" = "O" ]; then
+      qopt=$program
    else
-      printf "Bad option for qopt: $qpot\n"
+      printf "Bad option for qopt: $qopt\n"
       exit 1
    fi
 fi
 
 #  Set the options to afnmr.x:
-AFNMR_OPTIONS="$program $basis $solinprot $qopt $functional $nbcut"
+AFNMR_OPTIONS="$program $basis $qopt $functional $nbcut $spinspin"
 
 #  Should not need to edit anything below here; (except to perhaps change 
 #  detailed parameters in minimization)
@@ -238,7 +248,7 @@ $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.min.x > $1.min.pqr 2> /de
 ln -s $1.min.pqr $1.pqr
 
 
-#cpptraj is missing from ambermini (for now?)
+#cpptraj must come from AmberTools:
 if true; then
 #============================================================================
 #  Check how far the struture has moved from the initial conformation:
@@ -336,7 +346,7 @@ while (<PQR>) {
 	if ( defined(\$type{\$elem}) ){
 		\$r = \$type{\$elem};
 	} else {
-		print "Error in atom type\n";
+		print "Error in atom type: elem = |$elem|\n";
         exit 1;
 	}
 	printf ATM "%10.3f%10.3f%10.3f%5d    2    1\n",\$x,\$y,\$z,\$r;

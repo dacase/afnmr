@@ -1,6 +1,7 @@
 This is the additional/replacement parameter set for TIP4P-D, modified from TIP4PEW.
 MASS
 OW    16.0
+HW     1.008   0.000
 EP     0.0
  
 BOND
@@ -18,5 +19,6 @@ X -HW-OW-X    2       0.0         0.0         1.0
 
 NONBON
   OW       1.776296  0.22384
+  HW       0.0000    0.0000             
   EP       1.0       0.0
 

@@ -12,15 +12,14 @@ module comafnmr
    character(len=1):: restype(MAXRES)
    character(len=2):: element(MAXAT),dummyl
    character(len=3):: residue(MAXAT), residuename(MAXRES)
-   character(len=4):: atomname(MAXAT)
+   character(len=4):: atomname(MAXAT), atomname_uniq(MAXAT), tmpnam
    character(len=5):: dlabel(MAXAT)
    character(len=6):: cfragtxt
-   character(len=160):: commandline
-   character(len=30) :: pqrstart
-   character(len=16) :: pqrend
-   character(len=80) :: filek, line, afnmrhome
-   character(len=5) :: functional
-   character(len=5) :: version
+   character(len=160):: commandline, line, afnmrhome
+   character(len=30) :: pqrstart, atombasis(MAXIQM)
+   character(len=24) :: pqrend
+   character(len=5) functional
+   character(len=:), allocatable :: filek, version
    character(len=1) :: basis
 !     here resno() goes sequentially from 1 to nres;
 !          resno_user() are the residue numbers in the input pdb file
@@ -28,9 +27,11 @@ module comafnmr
 !           should be unique)
    integer ::resno(MAXAT), resno_user(MAXAT), list(MAXRES), prev_resno_user
    integer :: modnum, ier, listsize, lengthb, natom, nhighatom, nlowatom
+   integer :: firstprotres, lastprotres, lastprotatom, iatfinal, iatstart
    logical :: gaussian, orca, demon, demon5, qchem, jaguar, terachem, &
-              qopt, solinprot, xtb, sqm, quick
+              qopt, xtb, sqm, quick, spinspin
    logical :: first=.true.
+   logical :: nofrag=.false.
    double precision :: nbcut
 
 end module
@@ -40,18 +41,18 @@ program afnmr_x
 !   (Note: generally the input for afnmr.x is created by the shell script
 !      "afnmr", which is in the AFNMRHOME/bin directory.)
 !
-!   Usage: afnmr.x program basis solinprot qopt functional nbcut basename list
+!   Usage: afnmr.x program basis qopt functional nbcut spinspin basename list
 !
 !      where program  is G (Gaussian), O (Orca), D (Demon v3,4), E (Demon v5),
 !                     Q (Qchem), J (Jaguar), or S (sqm)
 !            basis is D (double-zeta) or T (triple-zeta) 
-!                  or M (primary res. T, rest D), A (aug-tzp), or S (shape)
-!            solinprot is T or F
+!                  or M (primary res. Q, rest T), A (aug-tzp), or S (shape)
 !            qopt controls off quantum geometry optimization: set to
-!                  D/G/X/Q/T (for optimization with demon, Gaussian, xtb, 
+!                  E/G/O/X/Q/T (for optimization with demon, Gaussian, ORCA, xtb, 
 !                  quick or terachem), or use F (false, default) to turn off
 !            functional is a string giving the desired DFT functional
 !            nbcut is the heavy-atom nonbonded cutoff for fragment creation
+!            spinspin is T for J-couplings, F (default) otherwise
 !            <basename>.pqr gives the input structure; put all "general"
 !                  residues (water, ligands, etc.) after protein or
 !                  nucleic acid residues
@@ -63,19 +64,19 @@ program afnmr_x
 
       double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
-      character(len=1) :: program,solinprotb,qoptb
+      character(len=1) :: program,qoptb,spinspinb
       integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
       integer :: selectCA(MAXRES+2), resmap(MAXRES)
-      integer :: firstprotres, lastprotres
-      integer :: i,j,k,kk,m,iatfinal,iatstart,iitemp,iqm,iqmprot=0
+      integer :: i,j,k,kk,m,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
-      character(len=3) :: rn
+      character(len=3) :: rn, kuser_c
       character(len=6) :: nbcutb
 
       double precision dis
       double precision chargef(MAXRES)
-      character(len=80) basename,pdbfile
+      character(len=80) basename
+      character(len=:), allocatable :: pdbfile
       integer lengthc,iline
 #ifdef __INTEL_COMPILER
       integer system
@@ -170,10 +171,10 @@ program afnmr_x
       xtb = .false.
       sqm = .false.
       quick = .false.
-      solinprot = .false.
       qopt = .false.
+      spinspin = .false.
       listsize = 0
-      version = '1.5'
+      version = '1.8.0'
 
       write(6,*)
       write(6,*)'**********************************************'
@@ -188,7 +189,7 @@ program afnmr_x
 
       if( command_argument_count() .lt. 5 ) then
          write(6,*) &
-       'Usage: af-nmr program basis solinprot qopt <basename> {list}'
+       'Usage: af-nmr program basis qopt <basename> {list}'
          stop 1
       end if
 
@@ -215,11 +216,9 @@ program afnmr_x
 
       call get_command_argument( 2, basis, lengthb )
 
-      call get_command_argument( 3, solinprotb, lengthb )
-      if( solinprotb .eq. 'T' .or. solinprotb .eq. 'S' ) solinprot = .true.
-
-      call get_command_argument( 4, qoptb, lengthb )
-      if( qoptb .eq. 'D' .or. qoptb .eq. 'G' ) then
+      call get_command_argument( 3, qoptb, lengthb )
+      if( qoptb .eq. 'D' .or. qoptb .eq. 'E' .or. qoptb .eq. 'G' &
+                         .or. qoptb .eq.  'O' ) then
          qopt = .true.
       else if (qoptb .eq. 'X' ) then
          xtb = .true.
@@ -232,10 +231,13 @@ program afnmr_x
          stop 1
       endif
 
-      call get_command_argument( 5, functional, lengthb )
+      call get_command_argument( 4, functional, lengthb )
 
-      call get_command_argument( 6, nbcutb, lengthb )
+      call get_command_argument( 5, nbcutb, lengthb )
       read( nbcutb, * ) nbcut
+
+      call get_command_argument( 6, spinspinb, lengthb )
+      if( spinspinb .eq. 'T' ) spinspin = .true.
 
       call get_command_argument( 7, basename, lengthb )
       pdbfile = basename(1:lengthb) // '.pqr'
@@ -247,11 +249,15 @@ program afnmr_x
          end do
          listsize = command_argument_count() - 7
       endif
+      if( listsize .eq. 1 .and. list(1) .eq. 0 ) then 
+         nofrag = .true.
+         write(6,'(a)') 'Setting nofrag to .true.; fragmentation skipped'
+      end if
 
       write(6,'(a,a)') 'Running afnmr, version ',trim(version)
-      write(6,'(a,a1,1x,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a)') &
-           'Input arguments: ', program, basis, solinprotb, qoptb, &
-           functional, nbcut, trim(basename(1:lengthb))
+      write(6,'(a,a1,1x,a1,1x,a1,1x,a,1x,f6.2,1x,a,1x,a)') &
+           'Input arguments: ', program, basis, qoptb, &
+           functional, nbcut, spinspinb, trim(basename(1:lengthb))
       write(6,'(a,f6.3)') &
          'Fragments will be based on heavy atom contacts < ',nbcut
 
@@ -272,12 +278,18 @@ program afnmr_x
            read(line,100)atomname(i),residue(i),  &
              resno_user(i),(coord(j,i),j=1,3),qmcharge(i),rad(i),element(i)
 100        format(12x,a4,1x,a3,2x,I4,4x,3f8.3,f8.4,f8.3,6x,a2)
-           if( element(i) .eq. ' E' ) then  ! skip extra points
-!              .or. element(i).eq.'NA' .or. element(i).eq.'CL' &
-!              .or. element(i).eq.' K' .or. element(i).eq.'BR' ) then
+           ! skip extra points:
+           if( element(i) .eq. ' E' .or. element(i) .eq. ' ' ) then
               i = i - 1
               cycle
            endif
+           ! for nofrag, set all residue numbers to 1; make atom names unique
+           if( nofrag ) then
+              resno_user(i) = 1
+              tmpnam = adjustl(atomname(i))
+              write(atomname_uniq(i), '(a,i0.3)') tmpnam(1:1), i
+           end if
+
            if( first ) then
               firstprotres = resno_user(i)
               first = .false.
@@ -285,6 +297,8 @@ program afnmr_x
            if( resno_user(i) .ne. prev_resno_user ) then ! found new residue
               nptemp = nptemp + 1
               prev_resno_user = resno_user(i)
+              !  create list if user didn't enter one:
+              if( listsize == 0 ) list(nptemp) = resno_user(i)
            endif
            resno(i) = nptemp
            resmap(resno_user(i)) = nptemp  ! maps user-resno to sequential ones
@@ -312,6 +326,7 @@ program afnmr_x
       end do
 101   natom = i
       nres = max(1,nptemp)
+
       !  figure out the last protein residue:
       lastprotres = nres
       do i=1,nres
@@ -319,6 +334,11 @@ program afnmr_x
            lastprotres = i-1
            exit
         endif
+      end do
+
+      !  figure out last protein atom:
+      do i=1,natom
+         if( resno(i) .eq. lastprotres ) lastprotatom = i
       end do
 
 !     lastprotres has to be a terminal residue:
@@ -353,7 +373,7 @@ program afnmr_x
       enddo
       if( residuename(lastprotres).eq.'NHE' .or. &
           residuename(lastprotres).eq.'NME' ) then
-        selectC(lastprotres) = natom-2  !! will make kfinal=natom
+        selectC(lastprotres) = lastprotatom-2  !! will make kfinal=lastprotatom
       endif
       if( restype(1).eq.'G' .or. restype(1) .eq. 'W' ) selectC(1) = 1
       selectC(0) = 1
@@ -383,26 +403,10 @@ program afnmr_x
 !
 !            nonbond distance < nbcut between heavy atom pairs
 !
-#if 1
             if( dis.le.nbcut ) then
-#else
-            ! test: don't use protein side-chain atoms to determine contacts
-            if( dis.le.nbcut .and. element(i).ne.' H' .and.  &
-                                   element(j).ne.' H' .and.  &
-                ( atomname(i).eq.' C  ' .or. atomname(i).eq.' CA ' .or. &
-                  atomname(i).eq.' N  ' .or. atomname(i).eq.' O  ' .or. &
-                  atomname(j).eq.' C  ' .or. atomname(j).eq.' CA ' .or. &
-                  atomname(j).eq.' N  ' .or. atomname(j).eq.' O  ' ) )then
-#endif
 
-#if 0
-                write(6,'(a4,i4,5x,a4,i4,5x,f8.3)') &
-                           atomname(i), resno_user(i), &
-                           atomname(j),  resno_user(j), dis
-#endif
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
-#if 1
 !
 !               need to make sure that next residue is also connected if 
 !               one of the atoms is beyond selectC:
@@ -417,7 +421,6 @@ program afnmr_x
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
                 endif
-#endif
             endif
 
         enddo  !  j=i+1,natom
@@ -428,14 +431,14 @@ program afnmr_x
       do kcount=1,nres
 
         if( listsize > 0 ) then
-           if( kcount > listsize ) exit
-           kuser = list( kcount )
+           if( kcount > listsize ) exit ! done with input list
         else
-           if( kcount > lastprotres ) exit
-           kuser = firstprotres + kcount - 1
+           if( kcount > lastprotres ) exit  ! done with default list
         endif
-        ! We need both "kuser" (user's file number) and "k" (a
+        ! We need both "kuser" (user's residue number) and "k" (a
         !    sequential residue number:
+        kuser = list( kcount )
+        if( kuser .eq. 0 ) kuser = 1  ! handle nofrag option
         k = resmap(kuser)
 
         iqm = 0   !  keep track of the atom number in the output file
@@ -444,13 +447,16 @@ program afnmr_x
         write(6,*)
         write(6,'(a,i4,a)') '==== Residue ',kuser, &
            ' ==========================================================='
-        filek = basename(1:lengthb) // char(48+kuser/100)  &
-            // char(48+(kuser-kuser/100*100)/10)  &
-            // char(48+(kuser-kuser/10*10))
+        if( nofrag) then
+           filek = basename(1:lengthb)
+        else
+           write(kuser_c,'(i0.3)') kuser
+           filek = basename(1:lengthb)//kuser_c
+        end if
 
         call write_header_info( kuser )
 
-        atomsign(1:natom)=.false.
+        atomsign(1:natom)=.false. ! flags whether atom is in the quantum region
 
 !       cycle through all "connected" fragments to get the charge on the
 !       quantum region (cfrag), and to mark each quantum atom by atomsign(i)
@@ -482,7 +488,7 @@ program afnmr_x
         do kk=iatstart,iatfinal
           iqm = iqm + 1
           nhighatom = nhighatom + 1
-          call addatom( kk, iqm )
+          call addatom( kk, iqm, .true. )
         enddo
 
         do ktemp=1,nres
@@ -496,7 +502,7 @@ program afnmr_x
               do kk=kstart,kfinal
                 nlowatom = nlowatom + 1
                 iqm = iqm + 1
-                call addatom( kk, iqm )
+                call addatom( kk, iqm, .false. )
               enddo
 !
 !             add hydrogens to dangling residues:
@@ -518,7 +524,7 @@ program afnmr_x
                   endif
                   nlowatom = nlowatom + 1
                   iqm = iqm + 1
-                  call addH( iqm, x, y, z)
+                  call addH( iqm, x, y, z )
                 endif
               endif
 
@@ -533,7 +539,7 @@ program afnmr_x
                     coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
                   nlowatom = nlowatom + 1
                   iqm = iqm + 1
-                  call addH( iqm, x, y, z)
+                  call addH( iqm, x, y, z )
                 endif
               endif
 
@@ -566,10 +572,10 @@ program afnmr_x
         close(31)
 
         call handle_external_charges()
-        call finish_program_files( iqmprot )
+        call finish_program_files( iqm, iqmprot )
         call external_minimizer( cfrag, iqm, kuser )
 
-        if( solinprot ) write(0,'(a,i4)') '    done with residue ', kuser
+        write(0,'(a,i4)') '    done with residue ', kuser
 
       enddo  ! big loop over residues
 
@@ -649,11 +655,12 @@ subroutine get_atom_range( kstart, kfinal, ktemp,  &
         return
 end subroutine get_atom_range
 
-subroutine addatom( kk, iqm )
+subroutine addatom( kk, iqm, principal )
 
       use comafnmr
       implicit none
       integer, intent(in) ::  kk,iqm
+      logical, intent(in) :: principal
       integer :: j, atno
       character(len=3) ::  i_char
       character(len=1) ::  elem
@@ -665,9 +672,28 @@ subroutine addatom( kk, iqm )
         write(30,'(a,2x,3f12.5)') dlabel(iqm),(coord(j,kk),j=1,3)
       else if ( terachem ) then
         write(34,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-      else if ( gaussian ) then
+      else if ( gaussian .or. orca ) then
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-        dlabel(iqm) = element(kk)(2:2)
+        dlabel(iqm) = adjustl(element(kk))
+        if( orca .and. basis .eq. 'M' .and. principal) then
+          if( spinspin ) then
+             write(30,'(a)') 'NewGTO "pcJ-2" end;'
+          else
+             write(30,'(a)') 'NewGTO "pcSseg-2" end;'
+          end if
+        end if
+        if( gaussian .and. basis .eq. 'M' ) then
+           if( principal ) then
+              if( spinspin ) then
+                 atombasis(iqm) = '/basis/pcJ-2/'
+              else
+                 atombasis(iqm) = '/basis/pcSseg-2/'
+              end if
+           else
+              atombasis(iqm) = '/basis/pcSseg-1/'
+           end if
+           write(6,*) 'atombasis: ', iqm, trim(atombasis(iqm)), dlabel(iqm)
+        end if
       else if ( sqm ) then
         elem = element(kk)(2:2)
         if ( elem == 'H' ) atno = 1
@@ -680,24 +706,26 @@ subroutine addatom( kk, iqm )
         write(30,'(i2,2x,a2,4x,3f10.4)') atno, element(kk),(coord(j,kk),j=1,3)
       else
         write(30,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
-        if( orca .and. basis .eq. 'M' ) then
-          write(30,'(a)') 'NewGTO'
-          write(30,'(a)') '"def2-TZVP"'
-          write(30,'(a)') 'end;'
-        endif
+        dlabel(iqm) = trim(element(kk))
       endif
       if( xtb .or. quick ) then
         write(44,'(a2,4x,3f10.4)')element(kk),(coord(j,kk),j=1,3)
       endif
 
-      write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
-        kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
-        qmcharge(kk),rad(kk),element(kk)
+      if( nofrag ) then
+         write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
+           kk,atomname_uniq(kk),residue(kk),resno_user(kk), &
+           (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
+      else
+         write(31,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ', &
+           kk,atomname(kk),residue(kk),resno_user(kk),(coord(j,kk),j=1,3),   &
+           qmcharge(kk),rad(kk),element(kk)
+       end if
 
       return
 end subroutine addatom
 
-subroutine addH( iqm, x, y, z)
+subroutine addH( iqm, x, y, z )
 
       use comafnmr
       implicit none
@@ -711,9 +739,13 @@ subroutine addH( iqm, x, y, z)
         write(30,'(a,2x,3f12.5)') dlabel(iqm),x,y,z
       else if ( terachem ) then
         write(34,'(a2,4x,3f10.4)')'H ',x,y,z
-      else if ( gaussian ) then
+      else if ( gaussian .or. orca ) then
         write(30,'(a2,4x,3f10.4)')' H',x,y,z
         dlabel(iqm) = 'H'
+        if( gaussian .and. basis .eq. 'M' ) then
+           atombasis(iqm) = '/basis/pcSseg-1/'
+           write(6,*) 'atombasis: ', iqm, trim(atombasis(iqm)), dlabel(iqm)
+        end if
       else if ( sqm ) then
         write(30,'(a2,4x,3f10.4)')' 1  H ',x,y,z
       else
@@ -724,13 +756,9 @@ subroutine addH( iqm, x, y, z)
       end if
 
       modnum = modnum + 1
-      if( modnum < 10 ) then
-         write(31,'(a,i5,2x,a,i1,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
-           iqm,'H',modnum,'  MOD  9999    ',x,y,z,0.0,1.2,' H'
-      else
-         write(31,'(a,i5,2x,a,i2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
+      ! assumes modum is never greater than 99:
+      write(31,'(a,i5,2x,a,i0.2,a,3f8.3,f8.4,f8.3,6x,a2)') 'ATOM  ',  &
            iqm,'H',modnum,' MOD  9999    ',x,y,z,0.0,1.2,' H'
-      endif
 
       return
 end subroutine addH
@@ -743,23 +771,23 @@ subroutine transfer_minimized_coords(iqm)
       integer :: i,j
 
       !  transfer the minimized coordinates to the .pqr file
-      open(47,file=filek(1:lengthb+3)//'.pqr')
-      open(48,file=filek(1:lengthb+3)//'.pqr1')
+      open(47,file=filek//'.pqr')
+      open(48,file=filek//'.pqr1')
       do i=1,iqm
-         read(47,'(a30,24x,a16)') pqrstart,pqrend
+         read(47,'(a30,24x,a24)') pqrstart,pqrend
          write(48,'(a30,3f8.3,a16)') pqrstart, &
              fxyz(1,i), fxyz(2,i), fxyz(3,i), pqrend
       end do
       close(47)
       close(48)
-      call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-         // '.pqr1 ' // filek(1:lengthb+3) // '.pqr' )
+      call execute_command_line( '/bin/mv ' // filek &
+         // '.pqr1 ' // filek // '.pqr' )
 
       if( demon ) then
 
          !  transfer the minimized coordinates to the .inp file
-         open(47,file=filek(1:lengthb+3)//'.inp')
-         open(48,file=filek(1:lengthb+3)//'.inp1')
+         open(47,file=filek//'.inp')
+         open(48,file=filek//'.inp1')
          do i=1,9999
             read(47,'(a)',end=106) line
             write(48,'(a)') trim(line)
@@ -773,11 +801,61 @@ subroutine transfer_minimized_coords(iqm)
          end do
   106    close(47)
          close(48)
-         call execute_command_line( '/bin/mv ' // filek(1:lengthb+3) &
-            // '.inp1 ' // filek(1:lengthb+3) // '.inp' )
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.inp1 ' // filek // '.inp' )
+
+      else if( orca ) then
+
+         !  transfer the minimized coordinates to the .orcainp file
+         open(47,file=filek//'.orcainp')
+         open(48,file=filek//'.orcainp1')
+         do i=1,9999
+            read(47,'(a)',end=107) line
+            write(48,'(a)') trim(line)
+            if( line(1:5) == '* xyz' ) then
+               do j=1,iqm
+                  read (47,*) ! skip coordinate line from .orcainp file
+                  write(48,'(a2,4x,3f10.4)') dlabel(j), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+                  if( basis .eq. 'M' .and. j .le. nhighatom ) then 
+                      read (47,*) ! skip NewGTO line from .orcainp file
+                      if( spinspin ) then
+                         write(48,'(a)') 'NewGTO "pcJ-2" end;'
+                      else
+                         write(48,'(a)') 'NewGTO "pcSseg-2" end;'
+                      end if
+                  endif
+               end do
+            end if
+         end do
+  107    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.orcainp1 ' // filek // '.orcainp' )
+
+      else if( gaussian ) then
+
+         !  transfer the minimized coordinates to the .com file
+         open(47,file=filek//'.com')
+         open(48,file=filek//'.com1')
+         do i=1,9999
+            read(47,'(a)',end=108) line
+            write(48,'(a)') trim(line)
+            if( i == 7 ) then   ! TODO: fragile!
+               do j=1,iqm
+                  read (47,*) ! skip coordinate line from .com file
+                  write(48,'(a2,4x,3f10.4)') dlabel(j), &
+                         fxyz(1,j), fxyz(2,j), fxyz(3,j)
+               end do
+            end if
+         end do
+  108    close(47)
+         close(48)
+         call execute_command_line( '/bin/mv ' // filek &
+            // '.com1 ' // filek // '.com' )
 
       else
-         write(6,*) "external qopt only works with demon for now"
+         write(6,*) "external qopt only works with demon, gaussian or orca"
          call exit(1)
       end if
 end subroutine transfer_minimized_coords
@@ -791,35 +869,33 @@ subroutine write_header_info(kuser)
 !
         ! regular file opens here:
         if( gaussian ) then
-          open(30,file=filek(1:lengthb+3)//'.com')
+          open(30,file=filek//'.com')
         else if ( sqm ) then
-          open(30,file=filek(1:lengthb+3)//'.sqmin')
-          ! open(35,file=filek(1:lengthb+3)//'.surf.pqr')
+          open(30,file=filek//'.sqmin')
+          ! open(35,file=filek//'.surf.pqr')
         else if ( orca ) then
-          open(30,file=filek(1:lengthb+3)//'.orcainp')
-          open(32,file=filek(1:lengthb+3)//'.pos')
+          open(30,file=filek//'.orcainp')
+          open(32,file=filek//'.pos')
         else if ( demon ) then
-          open(30,file=filek(1:lengthb+3)//'.inp')
+          open(30,file=filek//'.inp')
         else if ( qchem .or. jaguar ) then
-          open(30,file=filek(1:lengthb+3)//'.in')
+          open(30,file=filek//'.in')
         end if
 
         ! qopt file opens here:
         if ( xtb ) then
-          open(44,file=filek(1:lengthb+3)//'.xyz1')
-          open(47,file=filek(1:lengthb+3)//'_xtb.inp')
+          open(44,file=filek//'.xyz1')
+          open(47,file=filek//'_xtb.inp')
         else if( quick ) then
-          open(44,file=filek(1:lengthb+3)//'_quick.in')
+          open(44,file=filek//'_quick.in')
         else if ( terachem ) then
-          open(30,file=filek(1:lengthb+3)//'.opt')
-          open(32,file=filek(1:lengthb+3)//'.pos')
-          open(34,file=filek(1:lengthb+3)//'.xyz1')
+          open(30,file=filek//'.opt')
+          open(32,file=filek//'.pos')
+          open(34,file=filek//'.xyz1')
         end if
 
-        open(31,file=filek(1:lengthb+3)//'.pqr')
-        if( solinprot ) then
-           open(33,file=filek(1:lengthb+3)//'.prot.pqr')
-        end if
+        open(31,file=filek//'.pqr')
+        open(33,file=filek//'.prot.pqr')
 
         ! regular header info here:
         if( gaussian ) then
@@ -832,8 +908,12 @@ subroutine write_header_info(kuser)
           else if (basis .eq. 'S' ) then
             write(30,'(a)') 'Pop=HLY '
           else
-            write(30,'(a)') 'nmr(printeigenvectors) integral(grid=ultrafine)'
-          endif
+            if( spinspin ) then
+              write(30,'(a)') 'nmr(spinspin,printeigenvectors,readatoms) '
+            else
+              write(30,'(a)') 'nmr(printeigenvectors) '
+            end if
+          end if
           write(30,*)
           write(30,'(a,i4,a,a,a,f5.2)') ' AF-NMR fragment for residue ', &
                kuser, '; version = ',trim(version), '; nbcut = ', nbcut
@@ -841,24 +921,34 @@ subroutine write_header_info(kuser)
 
         else if ( orca ) then
 !         write(30,'(a)') '! PAL4'
-          if( basis .eq. 'T' ) then
+          if( basis .eq. 'T' .or. basis .eq. 'M' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-1 '
-          else
+          else if( basis .eq. 'Q' ) then
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' pcSseg-2 '
+          else if( basis .eq. 'A' ) then
+            write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
+                ' aug-pcSseg-1 '
+          else if( basis .eq. 'D' ) then
             write(30,'(a,a,a)', advance='no') '! ', trim(functional), &
                 ' pcSseg-0 '
+          else
+            write(0,*) 'Bad basis for orca: ', basis
+            stop 1
           end if
           if( functional(2:2) .eq. '3' ) then
             write(30,'(a)', advance='no')  'AutoAux TightSCF RIJCOSX KDIIS '
           else
             write(30,'(a)', advance='no')  'TightSCF RI KDIIS '
           endif
-          if( qopt ) write(30,'(a)', advance='no')  ' Opt '
+          if( qopt ) write(30,'(a)', advance='no')  ' COpt '
           write(30,'(a)') ''
-
+          if( functional(2:2) .eq. '3' ) then
+            write(30,'(a)')  '%maxcore 3000'
+          endif
           write(30,'(a)') ''
-          write(30,'(a,a,a)') '%pointcharges "', filek(1:lengthb+3), &
-               '.pos"'
+          write(30,'(a,a,a)') '%pointcharges "', filek, '.pos"'
           write(30,'(a)') ''
           write(30,'(a)') '%output'
           write(30,'(a)') '  PrintLevel Mini'
@@ -915,9 +1005,9 @@ subroutine write_header_info(kuser)
         ! qopt headers here:
         if ( terachem ) then
           write(30,'(a)') 'basis 6-31gs'
-          write(30,'(a,a)') 'coordinates ',filek(1:lengthb+3)//'.xyz'
-          write(30,'(a,a)') 'pointcharges ',filek(1:lengthb+3)//'.pos'
-          write(30,'(a,a)') 'scrdir ',filek(1:lengthb+3)
+          write(30,'(a,a)') 'coordinates ',filek//'.xyz'
+          write(30,'(a,a)') 'pointcharges ',filek//'.pos'
+          write(30,'(a,a)') 'scrdir ',filek
           write(30,'(a)') 'method pbe'
           write(30,'(a)') 'maxit 250'
           write(30,'(a)') 'levelshift yes'
@@ -926,7 +1016,7 @@ subroutine write_header_info(kuser)
           write(30,'(a)') 'run minimize'
           write(30,'(a)') 'nstep 10'
           write(34,'(a)') 'put number of atoms here!'
-          write(34,'(a)') filek(1:lengthb+3)
+          write(34,'(a)') filek
         end if
         return
 end subroutine write_header_info
@@ -937,7 +1027,7 @@ subroutine write_cfrag_header_info(cfrag)
       integer, intent(in) :: cfrag
 
         write(cfragtxt,'(i4)') cfrag
-        !  write quantum chemistry files that depend on known cfrag:
+        !  write quantum chemistry files that depend on knowing cfrag:
         if ( gaussian .or. qchem ) then
           write(30,'(1x,I3,2x,I2)') cfrag,1
         else if ( orca ) then
@@ -951,14 +1041,14 @@ subroutine write_cfrag_header_info(cfrag)
           write(30,'(a,i3)')'MULTIPLCITY  ',1
           write(30,'(a)') 'GEOMETRY CARTESIAN ANGSTROM'
         else if ( sqm ) then
-          write(30, '(a)' ) filek(1:lengthb+3)
+          write(30, '(a)' ) filek
           write(30, '(a)' ) ' &qmmm'
           write(30, '(a,i3,a)' ) " qm_theory='AM1', qmcharge=", cfrag, &
                 ', maxcyc=0, qmmm_int=1,'
           write(30, '(a)' ) ' /'
         end if
 
-        !  Now a section for qopt-only options
+        !  Now a section for external qopt-only options
         if ( quick ) then
           write(44,'(a,a,a)') 'DFT OLYP BASIS=pcSseg-0 CHARGE=', &
                 trim(adjustl(cfragtxt)), ' OPTIMIZE=10 EXTCHARGES'
@@ -1001,31 +1091,23 @@ subroutine handle_external_charges()
 
         do kk=1,natom
           if( .not. atomsign(kk) ) then
-            if( solinprot ) then
-               if ( restype(resno(kk)).ne.'W' ) &
-               write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
-                  'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
-                  (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
-            else if( gaussian .or. qchem .or. demon ) then
-              write(30,'(3f10.4,2x,f12.8)') (coord(j,kk),j=1,3),qmcharge(kk)
-            else if( jaguar ) then
-              write(30,'(f12.8,2x,3f10.4)') qmcharge(kk), (coord(j,kk),j=1,3)
-            endif
+            if ( restype(resno(kk)).ne.'W' ) &
+            write(33,'(a,i5,1x,a4,1x,a3,i6,4x,3f8.3,f8.4,f8.3,6x,a2)') &
+               'ATOM  ', kk,atomname(kk),residue(kk),resno_user(kk), &
+               (coord(j,kk),j=1,3), qmcharge(kk),rad(kk),element(kk)
           endif
         enddo
 
-        if( solinprot ) then
-          close(33)
-          call execute_command_line('./runsolinprot ' // filek(1:lengthb+3), &
-               exitstat = ier)
-          if( ier .ne. 0 )then
-             write(0,*) "error in solinprot: check solinprot.out"
-             write(0,*) "error code was ", ier
-             write(0,*) "command line was:"
-             write(0,*) './runsolinprot ' // filek(1:lengthb+3)
-             stop 1
-          end if
-        endif
+        close(33)
+        call execute_command_line('./runsolinprot ' // filek, &
+             exitstat = ier)
+        if( ier .ne. 0 )then
+           write(0,*) "error in solinprot: check solinprot.out"
+           write(0,*) "error code was ", ier
+           write(0,*) "command line was:"
+           write(0,*) './runsolinprot ' // filek
+           stop 1
+        end if
 
         if( orca ) then
           nsf=0  ! number of surface points, just count them here
@@ -1036,19 +1118,7 @@ subroutine handle_external_charges()
           enddo
 59        continue
           close(23)
-
-          nprotc = 0
-          if( .not.solinprot ) then
-             do kk=1,natom
-               if(.not. atomsign(kk)) nprotc = nprotc + 1
-             enddo
-          endif
-          write(32,'(i7)') nprotc+nsf
-          do kk=1,natom
-             if(.not. atomsign(kk) )then
-                write(32,'(f12.8,2x,3f10.4)')qmcharge(kk), (coord(j,kk),j=1,3)
-             endif
-          end do
+          write(32,'(i7)') nsf
         endif
 
         open(23,file='srfchg.pos')
@@ -1073,11 +1143,12 @@ subroutine handle_external_charges()
         return
 end subroutine handle_external_charges
 
-subroutine finish_program_files( iqmprot )
+subroutine finish_program_files( iqm, iqmprot )
       use comafnmr
       implicit none
-      integer, intent(in) :: iqmprot
+      integer, intent(in) :: iqm, iqmprot
       integer :: i, kbas
+      character(len=256) :: gbsname
 
         !  More program-dependent keywords and instructions:
 
@@ -1085,12 +1156,12 @@ subroutine finish_program_files( iqmprot )
           write(30,*)
           if( basis .eq. 'M' ) then
             !    write local basis set
-            do i=1,nhighatom
+            do i=1,iqm
               write(30,'(i3,a)') i,' 0'
-              write(0,'(a)') trim(afnmrhome) // '/basis/pcSseg-1/' &
+              gbsname = trim(afnmrhome) // trim(atombasis(i)) &
                     // trim(dlabel(i)) // '.gbs'
-              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcSseg-1/' &
-                    // trim(dlabel(i)) // '.gbs')
+              write(6,*) 'finish: ', trim(gbsname)
+              open( UNIT=11, FILE=trim(gbsname))
               rewind(11)
               do kbas=1,9999
                  read(11,'(a80)',end = 62) line
@@ -1099,28 +1170,6 @@ subroutine finish_program_files( iqmprot )
               close(11)
 62            write(30,'(a)') '****'
             end do
-            if(nhighatom .ge. 9) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i2,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i2,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else if(nhighatom .ne. 0) then
-               if((nhighatom+nlowatom) .ge. 100) then
-                 write(30,'(i1,a1,i3,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                 write(30,'(i1,a1,i2,a2)') nhighatom+1,'-',nhighatom+nlowatom,' 0'
-               end if
-            else
-               if((nhighatom+nlowatom) .ge. 100) then
-                  write(30,'(i1,a1,i3,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               else if((nhighatom+nlowatom) .lt. 100) then
-                  write(30,'(i1,a1,i2,a2)') 5,'-',nhighatom+nlowatom,' 0'
-               end if
-            end if
-            write(30,'(A)') 'SVP'
-            write(30,'(A)') '****'
-            write(30,*)
 
           else if( basis .eq. 'T' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
@@ -1131,52 +1180,69 @@ subroutine finish_program_files( iqmprot )
                write(30,'(a)') trim(line)
             end do
             close(11)
-63          continue
 
           else if( basis .eq. 'D' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcsseg-0.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 64) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-64          continue
 
           else if( basis .eq. 'A' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/aug-pcsseg-1.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 65) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-65          continue
 
           else if( basis .eq. 'S' ) then
             open( UNIT=11, FILE=trim(afnmrhome) // &
                 '/basis/pcseg-0.1.gbs')
             rewind(11)
             do kbas=1,9999
-               read(11,'(a80)',end = 66) line
+               read(11,'(a80)',end = 63) line
                write(30,'(a)') trim(line)
             end do
             close(11)
-66          continue
+
+          else if( basis .eq. 'Q' ) then
+            open( UNIT=11, FILE=trim(afnmrhome) // &
+                '/basis/pcsseg-2.1.gbs')
+            rewind(11)
+            do kbas=1,9999
+               read(11,'(a80)',end = 63) line
+               write(30,'(a)') trim(line)
+            end do
+            close(11)
+
+          else
+            write(0,*) 'Bad basis for gaussian: ', basis
+            stop 1
 
           endif
+63        continue
+          write(30,*)
 
           if (qopt) then
             if( nhighatom .lt. iqmprot ) then
-               write(30,'(a,i4,a,i4,a,i4)') 'noatoms  atoms=1-', nhighatom, &
+               write(30,'(a,i0,a,i0,a,i0)') 'noatoms  atoms=1-', nhighatom, &
                     ', ', iqmprot+1, '-', natom
             else
-               write(30,'(a,i4)') 'noatoms  atoms=1-', nhighatom
+               write(30,'(a,i0)') 'noatoms  atoms=1-', nhighatom
             end if
             write(30,*)
           endif
+
+          if( spinspin .or. basis .eq. 'M' ) then
+             write(30,'(a,i0)') ' atoms=1-', nhighatom
+             write(30,*)
+          end if
 
         else if ( sqm ) then
           write(30,'(a)') '#END'
@@ -1188,18 +1254,24 @@ subroutine finish_program_files( iqmprot )
           if( basis .eq. 'M' )then
             write(30,'(a)') 'BASIS  (DZVP)'
             do i=1,nhighatom
-              write(30,'(a,a)') dlabel(i),' (pcSseg-1)'
+              write(30,'(a,a)') dlabel(i),' (pcSseg-2)'
             end do
             write(30,'(a)') 'AUXIS  (A2)'
             do i=1,nhighatom
               write(30,'(a,a)') dlabel(i),' (GEN-A2*)'
             end do
+          else if (basis .eq. 'Q' ) then
+            write(30,'(a)') 'BASIS  (pcSseg-2)'
+            write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'T' ) then
             write(30,'(a)') 'BASIS  (pcSseg-1)'
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
           else if (basis .eq. 'D' ) then
             write(30,'(a)') 'BASIS  (pcSseg-0)'
             write(30,'(a)') 'AUXIS  (GEN-A2*)'
+          else
+            write(0,*) 'Bad basis for demon: ', basis
+            stop 1
           endif
 
           if( demon5 ) then
@@ -1227,20 +1299,17 @@ subroutine finish_program_files( iqmprot )
         else if( orca ) then
           write(30,'(a)') '*'
           if( qopt ) then
-            write(30,'(a)') '%geom MaxIter=5'
+            write(30,'(a)') '%geom MaxIter=10'
             if( nhighatom .lt. iqmprot ) then
+               ! constrain protein/nuc. acid atoms not in the primary residue
                write(30,'(a)') '      Constraints'
-               do i=nhighatom+1,iqmprot
-                  write(30,'(a,i4,a)') '        { C ', i-1, ' C }'
-               end do
+               write(30,'(a,i0,a,i0,a)') &
+                  '        { C ', nhighatom, ':', iqmprot-1, ' C }'
+
                 write(30,'(a)') '      end'
                 write(30,'(a)') '    end'
             endif
           endif
-          !  next two lines are for versions of Orca up to 3.0.1
-          ! write(30,'(a)') '%eprnmr  ori IGLO'
-          ! write(30,'(a)') '   LocMet PM'
-          !  following line is for Orca 4 or 5:
           write(30,'(a)') '%eprnmr  ori GIAO'
           write(30,'(a)', advance='no') '   nuclei = 1'
           do i=2,nhighatom
@@ -1258,8 +1327,14 @@ subroutine finish_program_files( iqmprot )
           write(30,'(a)') '$rem'
           write(30,'(a)') 'MOPROP        1'
           write(30,'(a)') 'SCF_ALGORITHM DIIS'
-          write(30,'(a)') 'EXCHANGE      OPTX'
-          write(30,'(a)') 'CORRELATION   LYP'
+          if( functional(1:4) == 'OLYP' ) then
+             write(30,'(a)') 'EXCHANGE      OPTX'
+             write(30,'(a)') 'CORRELATION   LYP'
+          else if( functional(1:5) == 'O3LYP' ) then
+             write(30,'(a)') 'METHOD O3LYP'
+          else
+             stop 'bad functional for qchem'
+          endif
           write(30,'(a)') 'SCF_CONVERGENCE  7'
           write(30,'(a)') 'THRESH          10'
           write(30,'(a)') 'BASIS         GEN'
@@ -1273,9 +1348,11 @@ subroutine finish_program_files( iqmprot )
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-0.in')
           else if( basis .eq. 'T' ) then
               open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-1.in')
+          else if( basis .eq. 'Q' ) then
+              open( UNIT=11, FILE=trim(afnmrhome) // '/basis/pcsseg-2.in')
           else
-              write(0,*) 'Qchem currently only supports dzp or tzp basis sets'
-              stop
+              write(0,*) 'afnmr/qchem only supports seg0, seg1 or seg2 basis sets'
+              stop 1
           end if
           rewind(11)
           do kbas=1,9999
@@ -1288,14 +1365,36 @@ subroutine finish_program_files( iqmprot )
 
         ! Again, qopt-only options:
         if ( xtb ) then
+          ! write(47,*)  '$opt '
+          ! write(47,*)  '   engine=rf'
+#if 1   /*  minimize primary residue plus waters */
           if( nhighatom .lt. iqmprot ) then
              write(47,*) '$fix'
              write(47,*) '   atoms: ', nhighatom+1,'-',iqmprot
              write(47,*) '$end'
           end if
+#else   /*  minimize just waters */
+          write(47,*) '$fix'
+          write(47,'(a,i0)') '   atoms: 1-',iqmprot
+          write(47,*) '$end'
+#endif
           close(47)
           close(44)
         else if ( quick ) then
+          write(44,*)
+#if 1   /*  minimize primary residue plus waters */
+          if( nhighatom .lt. iqmprot ) then
+             do i=nhighatom+1,iqmprot
+                write(44,'(a,i4)') 'FREEZE ', i
+             end do
+          end if
+#else   /*  minimize just waters */
+          if( nhighatom .lt. iqmprot ) then
+             do i=1,iqmprot
+                write(44,'(a,i4)') 'FREEZE ', i
+             end do
+          end if
+#endif
           write(44,*)
           close(44)
         else if ( terachem ) then 
@@ -1327,8 +1426,8 @@ subroutine external_minimizer( cfrag, iqm, kuser )
 
         if( xtb ) then
           !  first, fix the xyz file, since we finally know iqm:
-          open(44,file=filek(1:lengthb+3)//'.xyz1')
-          open(35,file=filek(1:lengthb+3)//'.xyz')
+          open(44,file=filek//'.xyz1')
+          open(35,file=filek//'.xyz')
           write(35,*) iqm
           write(35,*)
           do i=1,iqm
@@ -1337,7 +1436,7 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           end do
           close(44)
           close(35)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+          call execute_command_line( '/bin/rm -f ' // filek &
                 // '.xyz1' )
           
           !  do the xtb minimization here:
@@ -1346,17 +1445,17 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i4)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-             // '.xyz --opt --cycles 10 --chrg ' // trim(adjustl(cfragtxt))  &
-             // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
+             // '.xyz --opt --cycles 500 --chrg ' // trim(adjustl(cfragtxt))  &
+             // ' --gbsa h2o --input ' // filek(1:lengthb+3) // '_xtb.inp' &
              // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
           call execute_command_line( &
             '/bin/rm -f charges wbo xtbrestart xtbopt.log xtbtopo.mol' )
           call execute_command_line( &
-            '/bin/rm -f ' // filek(1:lengthb+3) // '_xtb.inp' )
+            '/bin/rm -f ' // filek // '_xtb.inp' )
           call execute_command_line( &
-            '/bin/rm -f ' // filek(1:lengthb+3) // '.xyz' )
+            '/bin/rm -f ' // filek // '.xyz' )
 
           !  extract the coordinates from the xtb output file:
           open(46,file='xtbopt.xyz')
@@ -1376,10 +1475,10 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*) 'Optimize geometry using quick'
           write(0,*) 'Optimize geometry using quick for residue', kuser
           call execute_command_line( &
-             'quick.cuda ' // filek(1:lengthb+3) // '_quick.in' )
+             'quick.cuda ' // filek // '_quick.in' )
 
           !  extract the coordinates from the quick output file:
-          open(46,file=filek(1:lengthb+3) // '_quick.out')
+          open(46,file=filek // '_quick.out')
           do iline=1,100000
              read(46,'(a)') line
              if( line(1:32) .ne. ' OPTIMIZED GEOMETRY IN CARTESIAN' ) cycle
@@ -1393,10 +1492,13 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           call transfer_minimized_coords( iqm )
  
         else if( terachem ) then
+          write(6,*) 'terachem option for minimization still not ready'
+          write(0,*) 'terachem option for minimization still not ready'
+          stop
           close(32)
           close(34)
-          open(34,file=filek(1:lengthb+3)//'.xyz1')
-          open(35,file=filek(1:lengthb+3)//'.xyz')
+          open(34,file=filek//'.xyz1')
+          open(35,file=filek//'.xyz')
           read(34,*)  ! skip dummy first line
           write(35,'(i4)') iqm   ! number of atoms goes on first line
           do i=1,9999
@@ -1405,9 +1507,10 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           end do
   105     close(34)
           close(35)
-          call execute_command_line( '/bin/rm -f ' // filek(1:lengthb+3) &
+          call execute_command_line( '/bin/rm -f ' // filek &
                 // '.xyz1' )
           ! TODO: need to call terachem, then transfer the info into demon
         end if
         return
+
 end subroutine external_minimizer

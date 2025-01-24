@@ -20,6 +20,7 @@ CQ 12.01         0.360               sp2 C in 5 mem.ring of purines between 2 N
 C5 12.01         0.360               sp2 C 5 memb.ring in purines (A)
 C4 12.01         0.360               sp2 C  pyrimidines in pos. 5 & 6 (C)
 H  1.008         0.161               H bonded to nitrogen atoms
+HW 1.008         0.000
 
 BOND
 CF-CE  469.0    1.404       based on CA-CB
@@ -34,12 +35,15 @@ CF-N2  481.0    1.340       based on CA-N2
 CP-NR  440.0    1.371       based on CP-N*
 C5-NR  440.0    1.371       based on C5-N*
 CT-NR  337.0    1.475       based on CT-N*
+OH-P   230.0    1.610       JCC,7,(1986),230; NA PHOSPHATES
 OQ-P   525.0    1.480       based on O2-P
 OR-P   230.0    1.610       based on OS-P
 OR-CI  320.0    1.410       based on OS-CI
 CT-OR  320.0    1.410       based on CT-OS
 
 ANGLE
+OH-P -OQ    45.0      102.60
+OH-P -OR    45.0      108.23
 CE-CF-N2    70.0      123.50    based on CB-CA-N2 
 CE-CF-ND    70.0      117.30    based on CB-CA-NC
 N2-CF-ND    70.0      119.30    based on N2-CA-NC
@@ -152,6 +156,7 @@ NONBON
   N*          1.88052  0.1700             Tan et al.
   NC          1.88052  0.1700             Tan et al.
   H           0.00000  0.0000             Tan et al.
+  HW          0.0000  0.0000             TIP3P water model
   C           1.84364  0.0538             Tan et al.
   CS          1.84364  0.0538             Tan et al.
   CA          1.84364  0.0538             Tan et al.

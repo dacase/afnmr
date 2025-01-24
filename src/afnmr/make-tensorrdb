@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#------------------------------------------------------------------------------
+#  set up usage statement:
+#------------------------------------------------------------------------------
+usage(){
+cat<<EOD
+
+Usage: make-tensorrdb qpgm <basename> [nofrag]
+
+   * qpgm must be one of "gaussian", "qchem", or "orca"
+   * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout}
+        files, where "nnn" is a three-digit resiude number (such as "001")
+   * if nofrag is "nofrag" quantum outputs are assumed to be in
+        <basename>.{out,log,qcout}.  Corresponds to "list 0" in afnmr.
+
+   Output goes to <basename>.tensor.rdb
+
+EOD
+}
+
+check_afnmrhome() {
+   if [ -z "$AFNMRHOME" ]; then
+      echo ""
+      echo "Your AFNMRHOME environment variable is not set!"
+      exit 1
+   fi
+}
+
+#------------------------------------------------------------------------------
+#  Checking Arguments:
+#------------------------------------------------------------------------------
+
+check_afnmrhome
+
+if [ $# -lt 2 ]; then usage; exit 1;  fi
+
+program=$1
+basename=$2
+nofrag=$3
+
+case "$1" in
+        orca)        suffix="out";;
+        gaussian)    suffix="log";;
+        qchem)       suffix="qcout";;
+        -help)        usage; exit 0;;
+        --help)       usage; exit 0;;
+        -h)           usage; exit 0;;
+
+        -*) echo "Error: unknown flag: $1"
+            usage
+            exit 1;;
+esac
+
+#  header:
+$AFNMRHOME/bin/gettensor $program $basename header > $basename.tensor.rdb
+
+if [ -z $nofrag ]; then
+
+   for i in ${basename}???.${suffix}
+   do
+       $AFNMRHOME/bin/gettensor $program ${i%.*} >> $basename.rdbi
+   done
+else
+   $AFNMRHOME/bin/gettensor $program $basename >> $basename.rdbi
+fi
+
+#  now sort the shifts by residue and atom name:
+#    the tr kludge seems needed since (some) Linux sorts do not treat "'"
+#    in a consistent way.  Assumes that "z" will not appear in an atomname
+tr "'" "z" < $basename.rdbi | LC_COLLATE=C sort -k1n -k2 | tr "z" "'" >> $basename.tensor.rdb
+/bin/rm $basename.rdbi

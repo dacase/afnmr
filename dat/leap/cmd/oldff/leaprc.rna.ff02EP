@@ -78,14 +78,14 @@ parm99EP = loadamberparams parm99EP.dat
 #
 #	Load DNA/RNA libraries
 #
-loadOff all_nucleic02EP.lib
+loadOff oldff/all_nucleic02EP.lib
 #
 #	Load main chain and terminating 
 #	amino acid libraries.
 #
-loadOff all_amino02.lib
-loadOff all_aminoct02.lib
-loadOff all_aminont02.lib
+loadOff oldff/all_amino02.lib
+loadOff oldff/all_aminoct02.lib
+loadOff oldff/all_aminont02.lib
 #
 #	Load ion library
 #

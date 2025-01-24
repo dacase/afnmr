@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+#  This is a sample script, with hard-wired variable names.  Copy this file
+#   to your working directory, then modify the RDB file and column names,
+#   and adjust the xlabal and ylabel names to match your project
+
+#   Note that your PYTHONPATH variable must input parmed (most likely from
+#   AmberTools), and your python must be able to import matplotlib, 
+#   numpy, pandas and scipy.
+
 from parmed.residue import AminoAcidResidue 
 import matplotlib
 matplotlib.use('Agg')

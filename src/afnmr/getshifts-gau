@@ -2,17 +2,17 @@
 
 #******************************************************************************
 # collect shifts from Gaussian outputs
-#   usage:  getshifts-gau reference basename fulltensor 
+#   usage:  getshifts-gau reference basename
 #           rdb file to stdout
 #******************************************************************************
 
 sub numerically { $a <=> $b; }
 sub acos { atan2( sqrt( 1. - $_[0]*$_[0] ), $_[0] ) }
 $resi = 0;
+$span = 0;
 
 $reference = "$ARGV[0]";
 $basename = "$ARGV[1]";
-$fulltensor = "$ARGV[2]";
 
 if( $reference eq "ref_seg0" ){
    $reference_set = "OLYP ref_seg0 ";
@@ -39,13 +39,8 @@ if( $basename eq "header" ){
    printf( "# reference shieldings used for H,C,N,P,F: %6.2f %6.2f %6.2f %6.2f %6.2f %s\n",
        $ref{"H"}, $ref{"C"}, $ref{"N"}, $ref{"P"}, $ref{"F"}, $reference_set );
 
-   if( $fulltensor ){
-      printf("res\tatomname\tresname\tshift\txx\tyx\tzx\txy\tyy\tzy\txz\tyz\tzz\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\t10N\n" );
-   } else {
-      printf( "res\tatomname\tresname\tshift\tdelta\teta\tspan\n" );
-      printf( "4N\t8\t8\t10N\t10N\t10N\t10N\n" );
-   }
+    printf( "res\tatomname\tresname\tshift\tdelta\teta\tphi1\tphi2\tphi3\n" );
+    printf( "4N\t8\t8\t10N\t10N\t10N\t10N\t10N\t10N\n" );
 
    exit(0);
 }
@@ -88,12 +83,6 @@ while (<LOG>) {
        $_ = <LOG>; @g = split( ' ', $_); 
        $xz = $ref{$elem}-$g[1]; $yz = $ref{$elem}-$g[3]; $zz = $ref{$elem}-$g[5];
 
-      if( $fulltensor ){
-         printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
-           $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-           $xx, $yx, $zx, $xy, $yy, $zy, $xz, $yz, $zz;
-       } else {
-
            # Analyze the principal components:
 
            $_ = <LOG>; @f = split( ' ', $_ );
@@ -104,6 +93,8 @@ while (<LOG>) {
            } else {
               $delta  = $siso - $eigv[2];  $eta = ($eigv[0]-$eigv[1])/$delta;
            }
+           # line below uses the solution convention for delta:
+           $delta = -1.5 * $delta;
            $span = $eigv[2] - $eigv[0];
 
            #  eigenvectors:  (NB: fails if eigenvectors are not present!)
@@ -151,12 +142,47 @@ while (<LOG>) {
                 $delta, $eta, $alpha1, $alpha2, $alpha3;
 
           } else {
-             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t%8.3f\n", 
+             printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
                 $res[$iat],$aname[$iat],$rname[$iat], $ref{$elem} - $siso,
-                $delta, $eta, $span;
+                $delta, $eta;
+
+            # handle averaging of methyl proton shifts:
+            $i = $iat;
+            if (($rname[$i] eq "ALA" && $aname[$i] =~ /HB1/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]1/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE1/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H71/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG11/) ||
+                    $aname[$i]  =~ /HG21/ || $aname[$i]  =~ /HH31/ ||
+                    $aname[$i]  =~ /HZ1/ ){
+                $mav = $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $aname[$i] =~ /HB2/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]2/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE2/) ||
+                    ($rname[$i] eq "DT"  && $aname[$i] =~ /H72/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG12/) ||
+                    $aname[$i]  =~ /HG22/ || $aname[$i]  =~ /HH32/ ||
+                    $aname[$i]  =~ /HZ2/ ){
+                $mav += $ref{$elem} - $siso;
+            } elsif (($rname[$i] eq "ALA" && $aname[$i] =~ /HB3/) ||
+                    ($rname[$i] ne "ASN" && $aname[$i] =~ /HD[12]3/) ||
+                    ($rname[$i] eq "MET" && $aname[$i] =~ /HE3/) ||
+                    ($rname[$i] =~ /DT/  && $aname[$i] =~ /H73/) ||
+                    ($rname[$i] eq "VAL" && $aname[$i] =~ /HG13/) ||
+                    $aname[$i]  =~ /HG23/ || $aname[$i]  =~ /HH33/ ||
+                    $aname[$i]  =~ /HZ3/ ){
+                $mav += $ref{$elem} - $siso;
+                $mav = $mav / 3.;
+                if( $aname[$i] =~ /H[E7BZ]/ ){
+                    $label = substr($aname[$i],0,2) . "av";
+                } else {
+                    $label = substr($aname[$i],0,3) . "av";
+                }
+                printf "%d\t%s\t%s\t%8.3f\t%8.3f\t%8.3f\t\t\t\n", 
+                   $res[$iat],$label,$rname[$iat], $mav, 0.0, 0.0;
+            }
 
           }
-      }
    }
 }
 close LOG;

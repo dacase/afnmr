@@ -139,6 +139,36 @@ zMatrix OP3  {
 }
 
 #
+#       OPC3-pol polarizable water
+#       Xiong, Izadi, Onufriev.
+
+h1=createAtom H1 HW 0.305218751332205
+h2=createAtom H2 HW 0.305218751332205
+o=createAtom O OW -1.93207027191373
+y1=createAtom Y1 DR 1.3216327692493177
+set h1 element H
+set h2 element H
+set o element O
+r= createResidue WAT
+add r h1
+add r h2
+add r o
+add r y1
+set o position { 0 0 0 }
+set h1 position { 0 0.988799793 0.699187039 }
+set h2 position { 0 -0.988799793 0.699187039 }
+set y1 position { 0 0 0.01 }
+bond h1 o
+bond h2 o
+bond h1 h2
+bond y1 o
+O3P=createUnit O3P
+add O3P r
+set O3P.1   restype   solvent
+set O3P.1   imagingAtom  O3P.1.O
+
+
+#
 #	TIP3P-FB water
 #       Wang, Martinez, Pande. 
 #       J. Phys. Chem. Lett., 2014, 5 (11), pp 1885–1891
@@ -507,6 +537,7 @@ loadOff ./tip4pbox.off
 loadOff ./tip4pewbox.off
 loadOff ./opcbox.off
 loadOff ./opc3box.off
+loadOff ./opc3polbox.off
 loadOff ./tip5pbox.off
 loadOff ./pol3box.off
 loadOff ./spcebox.off
@@ -518,7 +549,7 @@ loadOff ./nmabox.off
 loadOff ./fb3box.off
 loadOff ./fb4box.off
 
-a = { TP3 TPF SPC OP3 FB3 TP4 T4E FB4 OPC DC4 TP5 PL3 SPF SPG TIP3PBOX TIP3PFBOX TIP4PBOX TIP4PEWBOX OPCBOX OPC3BOX TIP5PBOX SPCBOX QSPCFWBOX SPCFWBOX POL3BOX CHCL3BOX MEOHBOX NMABOX FB3BOX FB4BOX }
+a = { TP3 TPF SPC OP3 O3P FB3 TP4 T4E FB4 OPC DC4 TP5 PL3 SPF SPG TIP3PBOX TIP3PFBOX TIP4PBOX TIP4PEWBOX OPCBOX OPC3BOX OPC3POLBOX TIP5PBOX SPCBOX QSPCFWBOX SPCFWBOX POL3BOX CHCL3BOX MEOHBOX NMABOX FB3BOX FB4BOX }
 saveOff a  ./solvents.lib
 
 quit

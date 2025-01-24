@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ]; then
+   echo "Usage: $0  <type>  <id>"
+   exit 1
+fi
+
+type=$1   # can be dist (use distances), rc (ring currents), attr (attributes)
+id=$2     # reads $id.pdb;  creates $id.$type.rdb with results
+
+cat <<EOF > $id.$type.rdb
+res	atomname	resname	shift.$type
+4N	4	3	10N
+EOF
+
+#  Note: ensure that the nmrfxs script is in your PATH, or hard-wire it here
+
+nmrfxs  predict -r $type -o star  $id.pdb | \
+    awk '{printf "%d\t%s\t%s\t%s\n", $6,$8,$7,$11}' | \
+    sort -k1n -k2 >> $id.$type.rdb

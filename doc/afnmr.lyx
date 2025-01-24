@@ -8,7 +8,7 @@
 \begin_preamble
 \usepackage{multicol}
 \usepackage{tocbibind}
-\usepackage[scaled=.85]{couriers}
+%\usepackage[scaled=.85]{couriers}
 
 \usepackage[font=it]{caption}
 \usepackage{indentfirst}
@@ -116,7 +116,7 @@
 \begin_body
 
 \begin_layout Date
-21 September 2021
+04 October 2024
 \end_layout
 
 \begin_layout Title
@@ -124,7 +124,7 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.4)
+(Version 1.7.0)
 \end_layout
 
 \begin_layout Author
@@ -166,6 +166,10 @@ height "1pt"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Introduction
 \end_layout
 
 \begin_layout Standard
@@ -822,6 +826,11 @@ general
 \end_inset
 
  residues, such as ligands, water molecules, ions, etc.
+ Note that the 
+\family typewriter
+basename
+\family default
+ must be the last argument.
  The commonly used flags are described below in more detail.
 \end_layout
 
@@ -866,13 +875,23 @@ afnmr
 \emph default
  is not present, fragments will be made for residues 1 up to the last protein
  or nucleic acid residue.
+ If the list argument is 
+\begin_inset Quotes eld
+\end_inset
+
+0
+\begin_inset Quotes erd
+\end_inset
+
+, no fragmentation will be done, and the entire molecule will be treated
+ at the quantum level.
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
 
 \emph on
-basis set selection:
+basis set and functional selection:
 \end_layout
 
 \begin_deeper
@@ -880,30 +899,42 @@ basis set selection:
 -mixedb Uses a mixed basis set in which the central residue whose shifts
  are being computed are treated with a larger, (
 \emph on
-pcS-seg1
+pcS-seg
 \emph default
-) basis set while the surrounding QM residues outside the primary region
+2) basis set while the surrounding QM residues outside the primary region
  use a smaller (
 \emph on
-dzp
+pcSseg-1
 \emph default
 ) basis.
 \end_layout
 
 \begin_layout Description
--tzp Use a larger basis (
+-seg2 Use 
 \emph on
-pcS-seg1
+pcS-seg2
 \emph default
- by default) for all residues
+ for all residues
 \end_layout
 
 \begin_layout Description
--dzp Use a smaller basis (
+-seg1 Use 
+\emph on
+pcS-seg1
+\emph default
+ for all residues
+\end_layout
+
+\begin_layout Description
+-seg0 Use a smaller basis (
 \emph on
 pcS-seg0
 \emph default
  by default) for all residues; this is the default if no basis flag is present.
+\end_layout
+
+\begin_layout Description
+-o3lyp Use o3lyp in place of olyp; requires -gau, -qchem or -orca (below)
 \end_layout
 
 \begin_layout Description
@@ -994,15 +1025,14 @@ quantum program to use:
 \end_layout
 
 \begin_layout Description
--demon5 Set up QM input files to run with the deMon program, version 5 (
-\emph on
-default
-\emph default
-)
+-demon5 Set up QM input files to run with the deMon program, version 5
 \end_layout
 
 \begin_layout Description
--orca Set up QM input files to run with the Orca program
+-orca Set up QM input files to run with the Orca program, version 5 or 6
+ 
+\emph on
+(default)
 \end_layout
 
 \begin_layout Description
@@ -1017,10 +1047,16 @@ default
 -qchem Set up QM input files to run with the Q-Chem program
 \end_layout
 
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+geometry optimization:
+\end_layout
+
+\begin_deeper
 \begin_layout Description
--tc Set up QM input files for TeraChem: no shifts are computed, just a quantum
- geometry optimization of the primary residue (plus solvent molecules),
- keeping the remaining residues in each fragment fixed.
+-nomin Do not minimize the input structure.
 \end_layout
 
 \begin_layout Description
@@ -1035,13 +1071,30 @@ xtb
 xtb
 \emph default
  code must be in your PATH.
- Note that this is an experimental option, and the precise way in which
- minimizations are done is still under study.
- You should examine the options sent to 
+\end_layout
+
+\begin_layout Description
+-tc Same as the 
+\family typewriter
+-xtb
+\family default
+ option, but using terachem as the optimizer.
+ (
 \emph on
-xtb
+experimental, probably not working
 \emph default
-, and consider experimenting with changes.
+)
+\end_layout
+
+\begin_layout Description
+-qopt do a quantum mechanical geometry optimization in place of a molecular
+ mechanics optimization.
+ (
+\emph on
+Work in progress: only fully implemented in Gaussian, Orca and deMon.
+ The number of steps and method of minimization is hard-coded in afnmr.F90.
+\emph default
+)
 \end_layout
 
 \end_deeper
@@ -1052,16 +1105,6 @@ miscellaneous flags:
 \end_layout
 
 \begin_deeper
-\begin_layout Description
--qopt do a quantum mechanical geometry optimization in place of a molecular
- mechanics optimization.
- (Work in progress: only fully implemented for 
-\emph on
-terachem
-\emph default
- so far.)
-\end_layout
-
 \begin_layout Description
 -workdir AF-NMR creates many temporary files.
  By default, they are all created inside the current directory.
@@ -1081,10 +1124,6 @@ terachem
 basename.pqr
 \emph default
  file is present
-\end_layout
-
-\begin_layout Description
--nomin Do not minimize the structure.
 \end_layout
 
 \begin_layout Description
@@ -1248,20 +1287,20 @@ afnmr
 \end_layout
 
 \begin_layout LyX-Code
-g09 < 1d3z1001.com > 1d3z1001.log # For Gaussian calculations, g03 or g16
- also work
+g09 < 1d3z1001.com > 1d3z1001.log     # For Gaussian calculations, g03 or
+ g16 also work
 \end_layout
 
 \begin_layout LyX-Code
-orca 1d3z1001.inp > 1d3z1001.out  # For Orca calculations
+orca 1d3z1001.orcainp > 1d3z1001.out  # For Orca calculations
 \end_layout
 
 \begin_layout LyX-Code
-qchem 1d3z1001.in 1d3z1001.out    # For Q-Chem calculations
+qchem 1d3z1001.in 1d3z1001.qcout      # For Q-Chem calculations
 \end_layout
 
 \begin_layout LyX-Code
-deMon 1d3z1001.inp                # For deMon calculations
+deMon 1d3z1001.inp                    # For deMon calculations
 \end_layout
 
 \begin_layout Subsection
@@ -1294,17 +1333,17 @@ deMon
 \emph default
 , 
 \emph on
-Orca
+Jaguar, ORCA
 \emph default
-, or 
-\emph on
-Gaussian
-\emph default
- calculations (no parser is available for 
+, 
 \emph on
 Q-Chem
 \emph default
- currently).
+ or 
+\emph on
+Gaussian
+\emph default
+ calculations.
  These parsers use the PQR files that were generated by AF-NMR to determine
  which nuclei reside in the primary QM region to determine which chemical
  shifts to extract from each output file.
@@ -1313,33 +1352,6 @@ Q-Chem
 make-shiftsrdb
 \emph default
 .
- To use this script, the first argument must be the QM program you used
- (
-\family typewriter
--demon
-\family default
-, 
-\family typewriter
--demon3
-\family default
-, 
-\family typewriter
--orca
-\family default
-, 
-\family typewriter
--qchem, -jaguar
-\family default
- or 
-\family typewriter
--g09
-\family default
-) and the second argument must be the basename of the system (i.e., the name
- of the original PDB file you used without the 
-\family typewriter
-.pdb
-\family default
- extension).
 \end_layout
 
 \begin_layout Standard
@@ -1429,6 +1441,233 @@ res       atomname  resname   1C44
 
 \begin_layout LyX-Code
 1         N         SER          27.88
+\end_layout
+
+\begin_layout Standard
+Here is more detailed usage information (from 
+\family typewriter
+$AFNMRHOME/src/afnmr/make-shiftsrdb
+\family default
+):
+\end_layout
+
+\begin_layout LyX-Code
+Usage: make-shiftsrdb qpgm reference <basename>
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+* qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca" 
+\end_layout
+
+\begin_layout LyX-Code
+* reference is the name of a reference shielding set The reference sets
+ are defined 
+\end_layout
+
+\begin_layout LyX-Code
+     in the getshifts-demon (etc.) scripts, and sometimes change as better
+ sets 
+\end_layout
+
+\begin_layout LyX-Code
+     become available.
+ Users can create their own versions.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+* quantum outputs are assumed to be in <basename>nnn.{out,log,qcout} files,
+ 
+\end_layout
+
+\begin_layout LyX-Code
+     where "nnn" is a three-digit resiude number (such as "001") 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+Output goes to <basename>.rdb 
+\end_layout
+
+\begin_layout Standard
+For users interested in chemical shift anisotropies, there is a corresponding
+ script, 
+\emph on
+make-tensorrdb
+\emph default
+, that extracts and analyzes the complete shielding tensor.
+ Here is its usage information:
+\end_layout
+
+\begin_layout LyX-Code
+Usage: make-tensorrdb qpgm <basename>
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+   * qpgm must be one of "gaussian", "qchem", or "orca"    
+\end_layout
+
+\begin_layout LyX-Code
+   * quantum outputs are assumed to be in <basename>nnn.{out,log,qcout} files,
+ 
+\end_layout
+
+\begin_layout LyX-Code
+       where "nnn" is a three-digit resiude number (such as "001")
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+   Output goes to <basename>.tensor.rdb 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Handling ligands or non-standard residues
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+afnmr
+\emph default
+ code should be able to handle file that follow PDB standards that include
+ proteins, RNA, DNA, water, and monatomic ions.
+ If you have ligands, or non-standard amino acids or nucleotides, the procedure
+ is more involved.
+ Everything is based on the way that Amber handles these situations, so
+ people familiar with Amber should understand what is being said below.
+ (I am hoping to write instructions for more general users in the future.)
+\end_layout
+
+\begin_layout Subsubsection
+Non-covalent ligands
+\end_layout
+
+\begin_layout Standard
+If you have ligands that are not covalently bonded to the macromolecule,
+ use the 
+\emph on
+antechamber
+\emph default
+ and 
+\emph on
+parmchk2
+\emph default
+ programs in AmberTools to create 
+\emph on
+off
+\emph default
+ and 
+\emph on
+frcmod
+\emph default
+ files for your ligand.
+\end_layout
+
+\begin_layout Standard
+Follow this tutorial: 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://ambermd.org/tutorials/basic/tutorial4b/index.php"
+target "https://ambermd.org/tutorials/basic/tutorial4b/index.php"
+literal "false"
+
+\end_inset
+
+, but use the 
+\emph on
+saveOff
+\emph default
+ command in 
+\family typewriter
+tleap
+\family default
+ to save an off file.
+ Then use the 
+\family typewriter
+-offlib
+\family default
+ and 
+\family typewriter
+-frcmod
+\family default
+ flags in afnmr to get these loaded.
+ You can load files for more than one type of ligand, if needed.
+ One current limitation: you need to put all ligand molecules after all
+ protein or nucleic acid residues.
+ (I plan to eliminate this requirement in future updates.) By default, 
+\emph on
+afnmr
+\emph default
+ will only compute shifts up to the last protein or nucleic acid residue,
+ but you can get predicted shifts for ligands by including their residue
+ numbers in the 
+\family typewriter
+-list
+\family default
+ option.
+\end_layout
+
+\begin_layout Subsubsection
+Modified amino acids or nucleotides
+\end_layout
+
+\begin_layout Standard
+These are currently a bit more compilcated.
+ You can create the mol2 and frcmod files following this tutorial: 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://ambermd.org/antechamber/pro4.html"
+target "https://ambermd.org/antechamber/pro4.html"
+literal "false"
+
+\end_inset
+
+.
+ You then use the 
+\family typewriter
+-mol2
+\family default
+ and 
+\family typewriter
+-frcmod
+\family default
+ flags to load these into afnmr, as with ligands.
+ But then, you also need to edit the 
+\emph on
+afnmr.F90
+\emph default
+ file (in src/afnmr) to add the names of these residues to the 
+\family typewriter
+presn
+\family default
+ array (for proteins) or the 
+\family typewriter
+nresn
+\family default
+ array (for RNA and DNA).
+ You will need to update the MAXPRES or MAXNRES variables if you add extra
+ residue names to that list.
+ Again, I am hoping to simplify and automate this process in future versions
+ of the code.
 \end_layout
 
 \end_body
