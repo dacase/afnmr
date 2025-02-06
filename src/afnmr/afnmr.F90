@@ -82,7 +82,7 @@ program afnmr_x
       integer system
 #endif
 
-      integer, parameter ::MAXNRES=33,MAXPRES=41
+      integer, parameter ::MAXNRES=33,MAXPRES=43
       character(len=3) :: nresn(MAXNRES), presn(MAXPRES)
 
       nresn(1) = '  G'
@@ -160,6 +160,8 @@ program afnmr_x
       presn(39) = 'H2D'
       presn(40) = 'H1E'
       presn(41) = 'H2E'
+      presn(42) = 'EEY'
+      presn(43) = 'BTF'
 
       gaussian = .false.
       orca = .false.
@@ -401,9 +403,12 @@ program afnmr_x
             dis=dsqrt((coord(1,i)-coord(1,j))**2   &
              +(coord(2,i)-coord(2,j))**2+(coord(3,i)-coord(3,j))**2)
 !
-!            nonbond distance < nbcut between heavy atom pairs
+!            nonbond distance < nbcut between heavy atom pairs, or
+!                 less than 2*nbcut if atom j is a water oxygen:
 !
-            if( dis.le.nbcut ) then
+            if( dis.le.nbcut .or. &
+                 ( residue(j).eq.'WAT' .and. dis.le.2.*nbcut ) .or. &
+                 ( residue(j).eq.'HOH' .and. dis.le.2.*nbcut ) ) then 
 
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
