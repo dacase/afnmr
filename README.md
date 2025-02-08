@@ -36,5 +36,7 @@
   * Version 1.6 fixes a bug in how the external charges were written for ORCA
   * Version 1.6.1 fixes a mistake in the documentation about the -mol2 flag;
        tweaks for handling extra points
-  * Version 1.7 renames basis functions, adds xtb optimization, etc
-  * Version 1.8 tweaks how xtb is done, adds -J option for spin-spin coupling
+  * Version 1.7 is a significant update: incorporating pcS-seg2 basis, new
+       mixed basis, tweaked fragmentation.
+  * Version 1.8 add support for spin-spin couplings, updates to xtb optimization
+  * Version 1.8.1 increases the cutoff for protein-water interactions

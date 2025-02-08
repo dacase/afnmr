@@ -14,7 +14,7 @@ module comafnmr
    character(len=3):: residue(MAXAT), residuename(MAXRES)
    character(len=4):: atomname(MAXAT), atomname_uniq(MAXAT), tmpnam
    character(len=5):: dlabel(MAXAT)
-   character(len=2):: cfragtxt
+   character(len=6):: cfragtxt
    character(len=160):: commandline, line, afnmrhome
    character(len=30) :: pqrstart, atombasis(MAXIQM)
    character(len=24) :: pqrend
@@ -82,7 +82,7 @@ program afnmr_x
       integer system
 #endif
 
-      integer, parameter ::MAXNRES=33,MAXPRES=41
+      integer, parameter ::MAXNRES=33,MAXPRES=43
       character(len=3) :: nresn(MAXNRES), presn(MAXPRES)
 
       nresn(1) = '  G'
@@ -160,6 +160,8 @@ program afnmr_x
       presn(39) = 'H2D'
       presn(40) = 'H1E'
       presn(41) = 'H2E'
+      presn(42) = 'EEY'
+      presn(43) = 'BTF'
 
       gaussian = .false.
       orca = .false.
@@ -401,9 +403,12 @@ program afnmr_x
             dis=dsqrt((coord(1,i)-coord(1,j))**2   &
              +(coord(2,i)-coord(2,j))**2+(coord(3,i)-coord(3,j))**2)
 !
-!            nonbond distance < nbcut between heavy atom pairs
+!            nonbond distance < nbcut between heavy atom pairs, or
+!                 less than 2*nbcut if atom j is a water oxygen:
 !
-            if( dis.le.nbcut ) then
+            if( dis.le.nbcut .or. &
+                 ( residue(j).eq.'WAT' .and. dis.le.2.*nbcut ) .or. &
+                 ( residue(j).eq.'HOH' .and. dis.le.2.*nbcut ) ) then 
 
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
@@ -1026,6 +1031,7 @@ subroutine write_cfrag_header_info(cfrag)
       implicit none
       integer, intent(in) :: cfrag
 
+        write(cfragtxt,'(i4)') cfrag
         !  write quantum chemistry files that depend on knowing cfrag:
         if ( gaussian .or. qchem ) then
           write(30,'(1x,I3,2x,I2)') cfrag,1
@@ -1049,8 +1055,8 @@ subroutine write_cfrag_header_info(cfrag)
 
         !  Now a section for external qopt-only options
         if ( quick ) then
-          write(44,'(a,i0,a)') 'DFT OLYP BASIS=PC-0 CHARGE=', cfrag, &
-                   ' ICOORD=0 CONSTRAIN OPTIMIZE=10 EXTCHARGES'
+          write(44,'(a,a,a)') 'DFT OLYP BASIS=pcSseg-0 CHARGE=', &
+                trim(adjustl(cfragtxt)), ' OPTIMIZE=10 EXTCHARGES'
           write(44,*)
         else if ( terachem ) then
           write(30,'(a,i3)')'charge  ',cfrag
@@ -1442,11 +1448,11 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(6,*)
           write(6,*) 'Optimize geometry using xtb'
           write(0,*) 'Optimize geometry using xtb for residue', kuser
-          write(cfragtxt,'(i2)') cfrag
-          commandline = 'xtb ' // filek &
-                // '.xyz --opt --cycles 500 --chrg ' // cfragtxt  &
-                // ' --gbsa h2o --input ' // filek // '_xtb.inp' &
-                // ' > ' // filek // '.xtb.log' 
+          write(cfragtxt,'(i4)') cfrag
+          commandline = 'xtb ' // filek(1:lengthb+3) &
+             // '.xyz --opt --cycles 500 --chrg ' // trim(adjustl(cfragtxt))  &
+             // ' --gbsa h2o --input ' // filek(1:lengthb+3) // '_xtb.inp' &
+             // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
           call execute_command_line( &
