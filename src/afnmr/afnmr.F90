@@ -176,7 +176,7 @@ program afnmr_x
       qopt = .false.
       spinspin = .false.
       listsize = 0
-      version = '1.8.0'
+      version = '1.8.1'
 
       write(6,*)
       write(6,*)'**********************************************'
