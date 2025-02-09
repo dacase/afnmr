@@ -404,11 +404,11 @@ program afnmr_x
              +(coord(2,i)-coord(2,j))**2+(coord(3,i)-coord(3,j))**2)
 !
 !            nonbond distance < nbcut between heavy atom pairs, or
-!                 less than 2*nbcut if atom j is a water oxygen:
+!                 less than 1.5*nbcut if atom j is a water oxygen:
 !
             if( dis.le.nbcut .or. &
-                 ( residue(j).eq.'WAT' .and. dis.le.2.*nbcut ) .or. &
-                 ( residue(j).eq.'HOH' .and. dis.le.2.*nbcut ) ) then 
+                 ( residue(j).eq.'WAT' .and. dis.le.1.5*nbcut ) .or. &
+                 ( residue(j).eq.'HOH' .and. dis.le.1.5*nbcut ) ) then 
 
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
