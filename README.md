@@ -39,4 +39,5 @@
   * Version 1.7 is a significant update: incorporating pcS-seg2 basis, new
        mixed basis, tweaked fragmentation.
   * Version 1.8 add support for spin-spin couplings, updates to xtb optimization
-  * Version 1.8.1 increases the cutoff for protein-water interactions
+  * Version 1.9 increases the cutoff for protein-water interactions; allows
+       xtb optimization to go to completion or 500 cycles
