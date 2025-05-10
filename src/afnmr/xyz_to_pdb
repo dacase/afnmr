@@ -13,6 +13,7 @@ close( XYZ );
 
 open( PDB, "$ARGV[1]" ) || die "can't find file template\n" ;
 for $j (1..$i){
-	$_ = <PDB>; printf STDOUT "%30s%8.3f%8.3f%8.3f%24s\n", substr($_,0,30),
-		$x[$j], $y[$j], $z[$j], substr($_,54,24);
+    # note: 12s trailer below might become 24s to get full 80-char pdb
+	$_ = <PDB>; printf STDOUT "%30s%8.3f%8.3f%8.3f%12s\n", substr($_,0,30),
+		$x[$j], $y[$j], $z[$j], substr($_,54,12);
 }
