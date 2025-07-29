@@ -23,23 +23,23 @@ from scipy.stats import linregress
 # If comments are present, skiprows needs to be adjusted to specify the correct
 # absolute line
 
-tab = pd.read_table('1d3z1.rdb', header=0, skiprows=[3], comment='#')
+tab = pd.read_table('md4.seg1.1-18.rdb', header=0, skiprows=[1], comment='#')
 
 # This reads in another RDB and merges it with the above on the residue number,
 # residue name, and atom name.
 #    (note: the residue name is not needed for merging, but somehow that info
 #     gets lost if not included here)
 
-tab = tab.merge(pd.read_table('bmr17769.rdb', header=0, skiprows=[2],
+tab = tab.merge(pd.read_table('../../../ppm.rdb', header=0, skiprows=[2],
                               comment='#'),
                 on=['res', 'resname', 'atomname'])
 
 # These are the names of the columns in the header of the RDB
-CALC_HEADER = '1d3z1s'
+CALC_HEADER = 'avg'
 EXPT_HEADER = 'exp'
 
 # Name of the image file to write. Format is determined by filename extension
-OUTPUT_FIGURE_NAME = '1d3z1s.pdf'
+OUTPUT_FIGURE_NAME = 'md4.seg1.1-18.pdf'
 
 # These are the types of protons and carbons we want to plot
 PROTONS = ['HA', '-CH-', '-CH2-', '-CH3', 'Aromatic-CH', 'HN',
@@ -175,7 +175,7 @@ for key in ax.spines:
 ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off',
                labelsize=23)
 ax.set_xlabel('Experimental chemical shifts (ppm)', fontdict=dict(fontsize=30))
-ax.set_ylabel('AF-QM/MM calculated chemical shifts (ppm)',
+ax.set_ylabel('AFNMR calculated shifts (ppm), OLYP/pcSseg-1',
               fontdict=dict(fontsize=30))
 
 # Add the hydrogens
@@ -204,7 +204,7 @@ y = lambda x: m*x+b
 hmin = min(all_hs[EXPT_HEADER].min(), all_hs[CALC_HEADER].min())
 hmax = max(all_hs[EXPT_HEADER].max(), all_hs[CALC_HEADER].max())
 mse = ((all_hs[CALC_HEADER] - all_hs[EXPT_HEADER])**2).mean()
-ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f\ ppm$' % (r, np.sqrt(mse)),
+ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f$ ppm' % (r, np.sqrt(mse)),
         fontsize=30, transform=ax.transAxes)
 
 ax.plot([-2, 10], [-2, 10], 'k-', linewidth=2)
@@ -226,7 +226,7 @@ y = lambda x: m*x+b
 hmin = min(data[EXPT_HEADER].min(), data[CALC_HEADER].min())
 hmax = max(data[EXPT_HEADER].max(), data[CALC_HEADER].max())
 mse = ((data[EXPT_HEADER] - data[CALC_HEADER])**2).mean()
-ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f\ ppm$' % (r, np.sqrt(mse)),
+ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f$ ppm' % (r, np.sqrt(mse)),
         fontsize=30, transform=ax.transAxes)
 ax.plot([hmin, hmax], [y(hmin), y(hmax)], 'k--', linewidth=2)
 
@@ -255,7 +255,7 @@ y = lambda x: m*x+b
 cmin = min(all_cs[EXPT_HEADER].min(), all_cs[CALC_HEADER].min())
 cmax = max(all_cs[EXPT_HEADER].max(), all_cs[CALC_HEADER].max())
 mse = ((all_cs[EXPT_HEADER] - all_cs[CALC_HEADER])**2).mean()
-ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f\ ppm$' % (r, np.sqrt(mse)),
+ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f$ ppm' % (r, np.sqrt(mse)),
         fontsize=30, transform=ax.transAxes)
 
 ax.plot([cmin, cmax], [y(cmin), y(cmax)], 'k--', linewidth=2)
@@ -279,7 +279,7 @@ y = lambda x: m*x+b
 hmin = data[EXPT_HEADER].min()
 hmax = data[EXPT_HEADER].max()
 mse = ((data[EXPT_HEADER] - data[CALC_HEADER])**2).mean()
-ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f\ ppm$' % (r, np.sqrt(mse)),
+ax.text(0.34, 0.08, '$R = %.3f$\n$RMSE = %.2f$ ppm' % (r, np.sqrt(mse)),
         fontsize=30, transform=ax.transAxes)
 ax.plot([hmin, hmax], [y(hmin), y(hmax)], 'k--', linewidth=2)
 
