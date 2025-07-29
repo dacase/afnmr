@@ -399,16 +399,17 @@ program afnmr_x
 
             if( resno(i).eq.resno(j) ) cycle
             if( element(j).eq.' H' ) cycle
+            if( element(j).eq.'Na' ) cycle
 
             dis=dsqrt((coord(1,i)-coord(1,j))**2   &
              +(coord(2,i)-coord(2,j))**2+(coord(3,i)-coord(3,j))**2)
 !
 !            nonbond distance < nbcut between heavy atom pairs, or
-!                 less than 1.5*nbcut if atom j is a water oxygen:
+!                 less than 1.4*nbcut if atom j is a water oxygen:
 !
             if( dis.le.nbcut .or. &
-                 ( residue(j).eq.'WAT' .and. dis.le.1.5*nbcut ) .or. &
-                 ( residue(j).eq.'HOH' .and. dis.le.1.5*nbcut ) ) then 
+                 ( residue(j).eq.'WAT' .and. dis.le.1.4*nbcut ) .or. &
+                 ( residue(j).eq.'HOH' .and. dis.le.1.4*nbcut ) ) then 
 
                 connect(resno(i),resno(j))=.true.
                 connect(resno(j),resno(i))=.true.
