@@ -19,21 +19,21 @@ if( $#ARGV == 2 ){
 
 #  reference shieldings; (these are basis/functional dependent!)
 if( $reference eq "ref_seg0" ){
-   $reference_set = "OLYP ref_seg0 ";
+   $reference_set = "OLYP pcSseg-0 ";
    $ref{"H"} = 33.2;   # TMS
    $ref{"C"} = 189.8;  # TMS
    $ref{"N"} = 241.0;  # CH3NO2 + 380.5
    $ref{"P"} = 300.0;  # guess
    $ref{"F"} = 130.2;  # CFCl3
 } elsif( $reference eq "ref_seg1" ){
-   $reference_set = "OLYP ref_seg1 ";
+   $reference_set = "OLYP pcSseg-1 ";
    $ref{"H"} = 31.7;   # TMS
-   $ref{"C"} = 183.1;  # TMS
-   $ref{"N"} = 255.2;  # CH3NO2 + 380.5
+   $ref{"C"} = 178.5;  # TMS - 4.6 (fit to pin1)
+   $ref{"N"} = 236.8;  # CH3NO2 + 380.5 - 18.4 (fit to pin1)
    $ref{"P"} = 325.0;  # guess
    $ref{"F"} = 139.6;  # CFCl3
 } elsif( $reference eq "ref_seg2" ){
-   $reference_set = "OLYP ref_seg2 ";
+   $reference_set = "OLYP pcSseg-2 ";
    $ref{"H"} = 31.7;   # TMS
    $ref{"C"} = 182.4;  # TMS
    $ref{"N"} = 240.0;  # CH3NO2 + 380.5
