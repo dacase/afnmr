@@ -777,6 +777,11 @@ subroutine transfer_minimized_coords(iqm)
       integer :: i,j
 
       !  transfer the minimized coordinates to the .pqr file
+
+      ! first, save the original (before opt) pqr file:
+      call execute_command_line( '/bin/cp ' // filek &
+         // '.pqr ' // filek // '.0.pqr' )
+
       open(47,file=filek//'.pqr')
       open(48,file=filek//'.pqr1')
       do i=1,iqm
@@ -1451,8 +1456,8 @@ subroutine external_minimizer( cfrag, iqm, kuser )
           write(0,*) 'Optimize geometry using xtb for residue', kuser
           write(cfragtxt,'(i4)') cfrag
           commandline = 'xtb ' // filek(1:lengthb+3) &
-             // '.xyz --opt --cycles 500 --chrg ' // trim(adjustl(cfragtxt))  &
-             // ' --gbsa h2o --input ' // filek(1:lengthb+3) // '_xtb.inp' &
+             // '.xyz --opt --cycles 50 --chrg ' // trim(adjustl(cfragtxt))  &
+             // ' --input ' // filek(1:lengthb+3) // '_xtb.inp' &
              // ' > ' // filek(1:lengthb+3) // '.xtb.log' 
           write(6,*) trim(commandline)
           call execute_command_line( trim(commandline) )
