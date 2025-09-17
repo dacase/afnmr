@@ -44,10 +44,10 @@ int main( int argc, char *argv[] )
 
 //   setup the force field parameters, and get an initial energy:
 
-   mm_options( "ntpr=1, gb=8, kappa=0.10395, rgbmax=99., cut=99.0, wcons=0. " );
+   mm_options( "ntpr=1, gb=8, kappa=0.10395, rgbmax=9., cut=9.0, wcons=0. " );
 
    // nothing frozen; constrain non-hydrogens:
-   int* frozen = parseMaskString( "@ZZZ", prm, xyz, 2 );
+   int* frozen = parseMaskString( ":WAT,Na+,Cl-", prm, xyz, 2 );
    int* constrained = parseMaskString( "!@H*", prm, xyz, 2 );
 
    mme_init_sff( prm, frozen, constrained, xyz_ref, NULL );
