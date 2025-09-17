@@ -213,8 +213,6 @@ cat tleap.out >> $1.afnmr.log
 
 if [ $min = "yes" ]; then
 
-$AFNMRHOME/bin/ambpdb -p $1.parm7 -bres < $1.x > $1.0.pdb  2> /dev/null
-
 #============================================================================
 #  Do a constrained minimization to regularize the local geometries:
 #============================================================================
