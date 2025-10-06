@@ -26,7 +26,7 @@ int main( int argc, char *argv[] )
 
    xmin_opt_init( &xo );  // sets the default parameters;
 
-   xo.maxiter = 1;                  // non-default minimization options:
+   xo.maxiter = 2;                  // non-default minimization options:
    xo.grms_tol = 0.0005;
    xo.ls_maxatmov = 0.05;
    xo.print_level = 1;
@@ -46,18 +46,20 @@ int main( int argc, char *argv[] )
 
    mm_options( "ntpr=1, gb=8, kappa=0.10395, rgbmax=9., cut=9.0, wcons=0. " );
 
-   // nothing frozen; constrain non-hydrogens:
+   // solvent frozen; constrain non-hydrogens:
    int* frozen = parseMaskString( ":WAT,Na+,Cl-", prm, xyz, 2 );
    int* constrained = parseMaskString( "!@H*", prm, xyz, 2 );
 
    mme_init_sff( prm, frozen, constrained, xyz_ref, NULL );
    iter = -1;   // historical flag to give more verbose output
    energy = mme( xyz, grad, &iter );
+   energy = mme_rattle( xyz, grad, &iter );
 
 //   run the minimization:
 
    char title[] = "minimization";
-   energy = xmin( mme,  &natm, xyz, grad,  &energy,  &grms,  &xo );
+   energy = xmin( mme_rattle,  &natm, xyz, grad,  &energy,  &grms,  &xo );
+   energy = mme_rattle( xyz, grad, &iter );
    energy = mme( xyz, grad, &iter );
    putxv( argv[3], title, natm, start_time, xyz, xyz );
 
