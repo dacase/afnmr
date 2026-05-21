@@ -449,6 +449,10 @@ program afnmr_x
       enddo    !  i=1,natom
 !
 !     Big loop over residues to create fragments:
+!        Fragments will be split along the bond between select_tailm1
+!        and select_tail.  For proteins, this is the CA--C bond; for
+!        nucleic acids, it is the C3'--O3' bond.  (Note that in the input
+!        PDB file, the tail atom must be the last atom in the residue.)
 !
       do kcount=1,nres
 
