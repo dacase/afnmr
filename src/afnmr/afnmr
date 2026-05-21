@@ -55,7 +55,7 @@ Optional flags:
 
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr without
-                       modification
+                       modification; note that -list must be specified
    -nomin          Skip the minimization steps, but still build from 
                        <basename>.pdb
 
