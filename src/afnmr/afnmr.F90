@@ -82,7 +82,7 @@ program afnmr_x
       integer system
 #endif
 
-      integer, parameter ::MAXNRES=33,MAXPRES=43
+      integer, parameter ::MAXNRES=48,MAXPRES=43
       character(len=3) :: nresn(MAXNRES), presn(MAXPRES)
 
       nresn(1) = '  G'
@@ -118,6 +118,22 @@ program afnmr_x
       nresn(31) = 'DMA'
       nresn(32) = 'M6A'
       nresn(33) = 'CYH'
+!     Bergonzo R/S DNA:
+      nresn(34) = '5DT'
+      nresn(35) = 'RDC'
+      nresn(36) = 'RDT'
+      nresn(37) = 'RDA'
+      nresn(38) = 'RDG'
+      nresn(39) = 'SDC'
+      nresn(40) = 'SDT'
+      nresn(41) = 'SDA'
+      nresn(42) = 'SDG'
+      nresn(43) = '3RC'
+      nresn(44) = '3SC'
+      nresn(45) = 'DG '
+      nresn(46) = 'DA '
+      nresn(47) = 'DT '
+      nresn(48) = 'DC '
 
       presn(1) = 'ALA'
       presn(2) = 'ARG'
@@ -474,7 +490,8 @@ program afnmr_x
                    selectC, restype(ktemp), ter)
             atomsign(kstart:kfinal) = .true.
             cfrag = cfrag + charge(ktemp)
-            write(6,'(20x,i5,a4,5i6)') kuser,residuename(ktemp), &
+            write(6,'(20x,i5,a4,2x,a1,5i6)') kuser,residuename(ktemp), &
+                 restype(ktemp), &
                  resno_user(kfinal),kstart,kfinal,charge(ktemp),cfrag
           endif
         enddo
@@ -519,12 +536,12 @@ program afnmr_x
 !               ---look for "backwards" links to previous residue:
 !
                 if(.not. atomsign(kstart-1) )then
-                  n1=kstart
-                  n2=selectCA(ktemp-1)
-                  if(atomname(n1).eq.' C  ') then
-                    call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
+                  n1=kstart  ! atom that needs to be replaced with H
+                  n2=selectCA(ktemp-1)  ! CA (protein) or C3' (na)
+                  if(atomname(n1).eq.' C  ') then  ! protein:
+                    call xyzchangeC(coord(1,n2),coord(2,n2),coord(3,n2),  &
                       coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
-                  else
+                  else  ! nucleic acid:
                     call xyzchangeO(coord(1,n2),coord(2,n2),coord(3,n2), &
                       coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
                   endif
@@ -541,7 +558,7 @@ program afnmr_x
                 if(.not. atomsign(kfinal+3) )then
                   n1=selectCA(ktemp)
                   n2=selectC(ktemp)
-                  call xyzchange(coord(1,n2),coord(2,n2),coord(3,n2),  &
+                  call xyzchangeC(coord(1,n2),coord(2,n2),coord(3,n2),  &
                     coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
                   nlowatom = nlowatom + 1
                   iqm = iqm + 1
@@ -587,8 +604,9 @@ program afnmr_x
 
 end program afnmr_x
 
-subroutine xyzchange(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
+subroutine xyzchangeC(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
 
+        ! create H position 1.09 A away from xzero along xzero -> xold vector
         implicit none
         double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
 
@@ -598,10 +616,11 @@ subroutine xyzchange(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
          ynew=yzero+grad*(yold-yzero)
          znew=zzero+grad*(zold-zzero)
          return
-end subroutine xyzchange
+end subroutine xyzchangeC
 
 subroutine xyzchangeS(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
 
+        ! create H position 1.33 A away from xzero along xzero -> xold vector
         implicit none
         double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
 
@@ -615,6 +634,7 @@ end subroutine xyzchangeS
 
 subroutine xyzchangeO(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
 
+        ! create H position 0.96 A away from xzero along xzero -> xold vector
         implicit none
         double precision xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew,grad
 
