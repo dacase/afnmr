@@ -65,8 +65,8 @@ program afnmr_x
       double precision :: x,y,z,tempdis
       character(len=8) :: lpchar
       character(len=1) :: program,qoptb,spinspinb
-      integer :: selectC(0:MAXRES+2),charge(MAXRES),cfrag
-      integer :: selectCA(MAXRES+2), resmap(MAXRES)
+      integer :: select_tail(0:MAXRES+2),charge(MAXRES),cfrag
+      integer :: select_tailm1(MAXRES+2), resmap(MAXRES)
       integer :: i,j,k,kk,m,iitemp,iqm,iqmprot=0
       integer :: kfinal,ktemp,kstart,kcount,kbas,kuser
       integer :: n1,n2,nprotc,nres,nsf,nptemp
@@ -377,25 +377,25 @@ program afnmr_x
 !
       do i=2,natom
         if( restype(resno(i)).eq.'P' ) then
-           if (atomname(i).eq.' C  ')  selectC(resno(i))=i
-           if (atomname(i).eq.' CA ')  selectCA(resno(i))=i
+           if (atomname(i).eq.' C  ')  select_tail(resno(i))=i
+           if (atomname(i).eq.' CA ')  select_tailm1(resno(i))=i
         else if( restype(resno(i)).eq.'N' ) then
-           if (atomname(i).eq.' O3''')  selectC(resno(i))=i
-           if (atomname(i).eq.' C3''')  selectCA(resno(i))=i
+           if (atomname(i).eq.' O3''')  select_tail(resno(i))=i
+           if (atomname(i).eq.' C3''')  select_tailm1(resno(i))=i
         else
            if ( resno(i-1).ne.resno(i) ) then
-              selectC(resno(i))=i  ! selectC becomes first atom of a gen. res.
-              selectC(resno(i-1)+1)=i  ! if residue numbers are not consecutive
+              select_tail(resno(i))=i  ! first atom of a gen. res.
+              select_tail(resno(i-1)+1)=i  ! if residue numbers are not consecutive
            endif
         endif
       enddo
       if( residuename(lastprotres).eq.'NHE' .or. &
           residuename(lastprotres).eq.'NME' ) then
-        selectC(lastprotres) = lastprotatom-2  !! will make kfinal=lastprotatom
+        select_tail(lastprotres) = lastprotatom-2  !! will make kfinal=lastprotatom
       endif
-      if( restype(1).eq.'G' .or. restype(1) .eq. 'W' ) selectC(1) = 1
-      selectC(0) = 1
-      selectC(nres+1) = natom+1
+      if( restype(1).eq.'G' .or. restype(1) .eq. 'W' ) select_tail(1) = 1
+      select_tail(0) = 1
+      select_tail(nres+1) = natom+1
 !
 !     Set up the connectivity arrays:
 !
@@ -431,14 +431,14 @@ program afnmr_x
                 connect(resno(j),resno(i))=.true.
 !
 !               need to make sure that next residue is also connected if 
-!               one of the atoms is beyond selectC:
+!               one of the atoms is beyond select_tail:
 !
-                if( i.ge.selectC(resno(i)) .and. &
+                if( i.ge.select_tail(resno(i)) .and. &
                 restype(resno(i)).ne.'G' .and. restype(resno(i)).ne.'W') then
                    connect(resno(i)+1,resno(j))=.true.
                    connect(resno(j),resno(i)+1)=.true.
                 endif
-                if( j.ge.selectC(resno(j)) .and. &
+                if( j.ge.select_tail(resno(j)) .and. &
                 restype(resno(j)).ne.'G' .and. restype(resno(j)).ne.'W') then
                    connect(resno(i),resno(j)+1)=.true.
                    connect(resno(j)+1,resno(i))=.true.
@@ -487,7 +487,7 @@ program afnmr_x
         do ktemp=1,nres
           if(connect(k,ktemp))then
             call get_atom_range( kstart, kfinal, ktemp, &
-                   selectC, restype(ktemp), ter)
+                   select_tail, restype(ktemp), ter)
             atomsign(kstart:kfinal) = .true.
             cfrag = cfrag + charge(ktemp)
             write(6,'(20x,i5,a4,2x,a1,5i6)') kuser,residuename(ktemp), &
@@ -504,7 +504,7 @@ program afnmr_x
 !       get starting, ending atoms for residue "k":
 !
         call get_atom_range( iatstart, iatfinal, k, &
-            selectC, restype(k), ter )
+            select_tail, restype(k), ter )
 !
 !       write out atoms in principal residue:
 !
@@ -518,7 +518,7 @@ program afnmr_x
           if( ktemp.ne.k .and. connect(k,ktemp) )then
 
               call get_atom_range( kstart, kfinal, ktemp, &
-                   selectC, restype(ktemp), ter)
+                   select_tail, restype(ktemp), ter)
 !
 !             write out coordinates in a "connected" residue
 !
@@ -537,7 +537,7 @@ program afnmr_x
 !
                 if(.not. atomsign(kstart-1) )then
                   n1=kstart  ! atom that needs to be replaced with H
-                  n2=selectCA(ktemp-1)  ! CA (protein) or C3' (na)
+                  n2=select_tailm1(ktemp-1)  ! CA (protein) or C3' (na)
                   if(atomname(n1).eq.' C  ') then  ! protein:
                     call xyzchangeC(coord(1,n2),coord(2,n2),coord(3,n2),  &
                       coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
@@ -556,8 +556,8 @@ program afnmr_x
 !             ---look for "forwards" links to the next residue:
 !
                 if(.not. atomsign(kfinal+3) )then
-                  n1=selectCA(ktemp)
-                  n2=selectC(ktemp)
+                  n1=select_tailm1(ktemp)
+                  n2=select_tail(ktemp)
                   call xyzchangeC(coord(1,n2),coord(2,n2),coord(3,n2),  &
                     coord(1,n1),coord(2,n1),coord(3,n1),x,y,z)
                   nlowatom = nlowatom + 1
@@ -647,35 +647,35 @@ subroutine xyzchangeO(xold,yold,zold,xzero,yzero,zzero,xnew,ynew,znew)
 end subroutine xyzchangeO
 
 subroutine get_atom_range( kstart, kfinal, ktemp,  &
-           selectC, restype, ter )
+           select_tail, restype, ter )
         implicit none
 
-        integer, intent(in)   :: ktemp, selectC(0:*)
+        integer, intent(in)   :: ktemp, select_tail(0:*)
         integer, intent(out)  :: kstart, kfinal
         logical, intent(in)   :: ter(0:*)
         character(len=1), intent(in) ::  restype
 
         if( restype.eq.'P' ) then
-          kstart=selectC(ktemp-1)
-          kfinal=selectC(ktemp)-1
+          kstart=select_tail(ktemp-1)
+          kfinal=select_tail(ktemp)-1
           if( ter(ktemp) )then
-            kfinal=selectC(ktemp)+2
+            kfinal=select_tail(ktemp)+2
           endif
           if( ter(ktemp-1) ) then
-            kstart=selectC(ktemp-1)+3
+            kstart=select_tail(ktemp-1)+3
           endif
         else if( restype.eq.'N' ) then
-          kstart=selectC(ktemp-1)
-          kfinal=selectC(ktemp)-1
+          kstart=select_tail(ktemp-1)
+          kfinal=select_tail(ktemp)-1
           if( ter(ktemp) )then
-            kfinal=selectC(ktemp)+1
+            kfinal=select_tail(ktemp)+1
           endif
           if( ter(ktemp-1) ) then
-            kstart=selectC(ktemp-1)+2
+            kstart=select_tail(ktemp-1)+2
           endif
         else    !  general (G/W) residue type: should be ligand or water
-          kstart=selectC(ktemp)
-          kfinal=selectC(ktemp+1)-1
+          kstart=select_tail(ktemp)
+          kfinal=select_tail(ktemp+1)-1
         endif
 
         return
