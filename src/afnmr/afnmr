@@ -56,6 +56,8 @@ Optional flags:
    -workdir        Do everything inside of a working directory named <basename>
    -nobuild        Skip the tleap & txmin steps; uses <basename>.pqr without
                        modification; note that -list must be specified
+   -buildfromparm  Skip tleap, but carry out minimization from existing
+                       <basename>.parm7 and <basename>.x files
    -nomin          Skip the minimization steps, but still build from 
                        <basename>.pdb
 
@@ -84,6 +86,7 @@ basis="D"
 workdir="no"
 min="yes"
 build="yes"
+buildfromparm="no"
 functional="OLYP"
 nbcut="3.3"
 list=""
@@ -133,6 +136,7 @@ while [ $# -gt 0 ]; do
         -sqm)         program="S";;
         -workdir)     workdir="T";;
         -nobuild)     build="no";;
+        -buildfromparm)     buildfromparm="yes";;
         -nomin)       min="no";;
         -frcmod)      shift; echo "loadAmberParams $1" >> leap.in;;
         -offlib)      shift; echo "loadOFF $1" >> leap.in;;
@@ -188,6 +192,8 @@ if [ $build = "yes" ]; then
 
 echo "Running AFNMR on $1.pdb"
 
+if [ $buildfromparm = "no" ]; then
+
 #============================================================================
 #  Use tleap to create the Amber prmtop file:
 #============================================================================
@@ -210,6 +216,9 @@ echo "====== tleap.out =====================================================" \
      >> $1.afnmr.log
 cat tleap.out >> $1.afnmr.log
 /bin/rm leap.in tleap.out
+
+# end of buildfromparm loop:
+fi
 
 if [ $min = "yes" ]; then
 
@@ -443,9 +452,9 @@ cat afnmr.out >> $1.afnmr.log
 #  Some fine file clean-ups  (optional)
 #============================================================================
 /bin/rm -f $1.min.x \
-       srfchg.pos runms.solsurf runsolinprot leap.log 
+       srfchg.pos runms.solsurf runsolinprot leap.log leap.in
 
-if [ "$build" = "yes" ]; then
+if [ "$build" = "yes" -a "$buildfromparm" = "no" ]; then
 	/bin/rm -f $1.x $1.parm7
 fi
 
