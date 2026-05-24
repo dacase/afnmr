@@ -1,0 +1,21 @@
+#!/bin/zsh
+
+# sample script to run make-shiftsrdb on a number of individual snapshots,
+#  and then to combine the results into a single overall file
+
+# Use this as a template: edit to fit the needs of your particular system
+
+foreach i (bform_Rp bform_Sp aform_Rp aform_Sp); do
+   echo $i
+
+   make-shiftsrdb -orca ref_seg1 $i 0
+   column < $i.rdb res atomname ${i}_shift > foo
+   mv foo $i.rdb
+   perl -p -i -e"s/${i}_shift/$i/" $i.rdb
+
+   column < $i.rdb $i > $i.rdbs
+
+done
+
+paste bform_Rp.rdb bform_Sp.rdbs aform_Rp.rdbs aform_Rp.rdbs > abform.rdb
+
