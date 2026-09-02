@@ -3,7 +3,8 @@ include ../config.h
 .SUFFIXES: .o .c 
 
 install:  $(BINDIR)/lsq $(BINDIR)/ms $(BINDIR)/afnmr.x  \
-          $(BINDIR)/gridprune $(BINDIR)/pair $(BINDIR)/txmin
+          $(BINDIR)/gridprune $(BINDIR)/pair $(BINDIR)/txmin \
+          $(BINDIR)/get_rmsd
 	$(VB)/bin/cp afnmr getshifts-* make-shiftsrdb gettensor make-tensorrdb \
           multiafnmr.sh log_to_hlypqr get_hlypqr xyz_to_pdb $(BINDIR)
 
@@ -29,6 +30,10 @@ $(BINDIR)/gridprune: gridprune.F90
 	$(VB)$(FC) $(FFLAGS) $(FOPTFLAGS) $(LDFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS)
 
 $(BINDIR)/txmin: txmin.c
+	@echo "[AFNMR]  CC $@"
+	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS) $(LM)
+
+$(BINDIR)/get_rmsd: get_rmsd.c
 	@echo "[AFNMR]  CC $@"
 	$(VB)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -L$(LIBDIR) $(FLIBS) $(LM)
 

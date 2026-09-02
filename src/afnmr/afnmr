@@ -255,32 +255,44 @@ $AFNMRHOME/bin/ambpdb -p $1.parm7 -pqr -ext -bres < $1.min.x > $1.min.pqr 2> /de
 ln -s $1.min.pqr $1.pqr
 
 
-#cpptraj must come from AmberTools:
-if true; then
 #============================================================================
 #  Check how far the struture has moved from the initial conformation:
 #============================================================================
+
 backbone="@C,CA,N,P,O3',O5',C3',C4',C5'"  # should work for both proteins
                                           # and nucleic acids
-$AMBERHOME/bin/cpptraj $1.parm7 <<EOF >& cpptraj.out
-reference $1.x
-trajin $1.min.x
+
+if false; then   # use cpptraj:
+
+   backbone="@C,CA,N,P,O3',O5',C3',C4',C5'"  # should work for both proteins
+                                             # and nucleic acids
+   $AMBERHOME/bin/cpptraj $1.pdb <<EOF >& cpptraj.out
+reference $1.pdb
+trajin $1.min.pqr
 rms all_heavy reference !@H=&!:WAT out rms.dat
 rms backbone reference $backbone out rms.dat
 EOF
 
-if [ "$?" -gt 0 ]; then 
-   echo "Error in cpptraj: check cpptraj.out"
-   exit 1
+   if [ "$?" -gt 0 ]; then 
+      echo "Error in cpptraj: check cpptraj.out"
+      exit 1
+   fi
+
+else   # use nabc get_rmsd
+
+   backbone="::C,CA,N,P,O3',O5',C3',C4',C5'"
+   $AFNMRHOME/bin/get_rmsd $1.min.pqr $backbone $1.pdb $backbone > rms.dat
+   # no error checking yet in get_rmsd
+
 fi
-echo "====== rms.dat  ======================================================" \
-     >> $1.afnmr.log
-cat rms.dat >> $1.afnmr.log
-/bin/rm cpptraj.out rms.dat
-fi
+   echo "====== rms.dat  ======================================================" \
+        >> $1.afnmr.log
+   cat rms.dat >> $1.afnmr.log
+   # /bin/rm -f cpptraj.out rms.dat
 
 #  end of "if min=yes" block:
 else
+
     echo "Skipping minimization"
     #========================================================================
     #  Create pqr for further use, with original residue numbers
@@ -451,8 +463,7 @@ cat afnmr.out >> $1.afnmr.log
 #============================================================================
 #  Some fine file clean-ups  (optional)
 #============================================================================
-/bin/rm -f $1.min.x \
-       srfchg.pos runms.solsurf runsolinprot leap.log leap.in
+/bin/rm -f $1.min.x srfchg.pos runms.solsurf runsolinprot leap.log leap.in
 
 if [ "$build" = "yes" -a "$buildfromparm" = "no" ]; then
 	/bin/rm -f $1.x $1.parm7
