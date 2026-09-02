@@ -24,10 +24,10 @@ else
    LM=-lm
 endif
 
-FLIBS=-lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
+FLIBS=-lnabc -lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
 
 CC=gcc
-CFLAGS=-g
+CFLAGS=-g -I$(INCDIR)
 COPTFLAGS=-O3 -mtune=native
 
 CXX=g++
