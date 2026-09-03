@@ -41,3 +41,4 @@
   * Version 1.8 add support for spin-spin couplings, updates to xtb optimization
   * Version 1.9 increases the cutoff for protein-water interactions; allows
        xtb optimization to go to completion or 500 cycles
+  * Version 1.10 uses 3-step rattle minimization; avoids need for cpptraj
