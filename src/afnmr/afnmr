@@ -288,7 +288,7 @@ fi
    echo "====== rms.dat  ======================================================" \
         >> $1.afnmr.log
    cat rms.dat >> $1.afnmr.log
-   # /bin/rm -f cpptraj.out rms.dat
+   /bin/rm -f cpptraj.out rms.dat
 
 #  end of "if min=yes" block:
 else
