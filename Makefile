@@ -3,7 +3,7 @@
 install: is_afnmrhome_defined
 	./mkdirs
 	cd src && make install
-	@echo "Finished installation of afnmr-1.9"
+	@echo "Finished installation of afnmr-1.10"
 
 clean:
 	-(cd src && make clean)
