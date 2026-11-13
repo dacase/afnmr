@@ -1,5 +1,6 @@
 #  set the lyx location here, if it is not in your path:
-LYX=/Applications/LyX.app/Contents/MacOS/lyx
+# LYX=/Applications/LyX.app/Contents/MacOS/lyx
+LYX=lyx
 
 SHELL = /bin/sh
 .SUFFIXES: .txt .ps .html .lyx .pdf .tex
@@ -19,8 +20,8 @@ SHELL = /bin/sh
 .lyx.html: $<
 	elyxer.py --css=amber.css --title "$@" $<  $@
 		
-shifts.pdf: shifts.lyx
-	$(LYX) --export pdf2 shifts.lyx
+afnmr.pdf: afnmr.lyx
+	$(LYX) --export pdf2 afnmr.lyx
 
 clean::
-	/bin/rm -f shifts.pdf
+	/bin/rm -f afnmr.pdf

@@ -1,5 +1,5 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 544
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
 \begin_document
 \begin_header
 \save_transient_properties true
@@ -27,11 +27,11 @@
 \end_preamble
 \options sort&compress
 \use_default_options false
-\maintain_unincluded_children false
+\maintain_unincluded_children no
 \language american
 \language_package default
 \inputencoding iso8859-1
-\fontencoding global
+\fontencoding auto
 \font_roman "palatino" "default"
 \font_sans "helvet" "default"
 \font_typewriter "courier" "default"
@@ -39,7 +39,9 @@
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
-\font_osf false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
 \font_sf_scale 90 100
 \font_tt_scale 100 100
 \use_microtype false
@@ -62,7 +64,7 @@
 \pdf_backref false
 \pdf_pdfusetitle true
 \pdf_quoted_options "linkcolor=blue,citecolor=blue,urlcolor=black"
-\papersize letterpaper
+\papersize letter
 \use_geometry true
 \use_package amsmath 2
 \use_package amssymb 2
@@ -83,7 +85,9 @@
 \suppress_date false
 \justification true
 \use_refstyle 0
+\use_formatted_ref 0
 \use_minted 0
+\use_lineno 0
 \index Index
 \shortcut idx
 \color #008000
@@ -105,18 +109,23 @@
 \papercolumns 1
 \papersides 2
 \paperpagestyle default
+\tablestyle default
 \listings_params "basicstyle={\small\bfseries\ttfamily},frame=single,frameround=tttt"
 \tracking_changes false
 \output_changes false
+\change_bars false
+\postpone_fragile_content false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
 \end_header
 
 \begin_body
 
 \begin_layout Date
-04 October 2024
+13 November 2026
 \end_layout
 
 \begin_layout Title
@@ -124,11 +133,13 @@ AFNMR Users' Manual
 \begin_inset Newline newline
 \end_inset
 
-(Version 1.7.0)
+(Version 1.10.0)
 \end_layout
 
 \begin_layout Author
-Tong Zhu, Xiao He, Jason Swails and David A.
+Tong Zhu,
+ Xiao He,
+ Jason Swails and David A.
  Case
 \end_layout
 
@@ -145,14 +156,20 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-This program is free software; you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the Free
- Software Foundation; either version 2, or (at your option) any later version.
- The GNU General Public License should be in a file called LICENSE; if not,
- write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- Boston, MA 02111-1307 USA This program is distributed in the hope that
- it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This program is free software;
+ you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation;
+ either version 2,
+ or (at your option) any later version.
+ The GNU General Public License should be in a file called LICENSE;
+ if not,
+ write to the Free Software Foundation,
+ Inc.,
+ 59 Temple Place,
+ Suite 330,
+ Boston,
+ MA 02111-1307 USA This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY;
+ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  See the GNU General Public License for more details.
 \end_layout
 
@@ -173,26 +190,29 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-The AFNMR package provides a useful method to estimate chemical shifts in
- biomolecules, density functional calculations on fragments.
+The AFNMR package provides a useful method to estimate chemical shifts in biomolecules,
+ density functional calculations on fragments.
  The program automatically creates the fragments from an input pdb file,
- prepares a model for environmental effects, then creates input files for
- various quantum chemistry programs.
- Once these quantum runs are complete, results can be extracted from their
- output files and collected into simple database files.
+ prepares a model for environmental effects,
+ then creates input files for various quantum chemistry programs.
+ Once these quantum runs are complete,
+ results can be extracted from their output files and collected into simple database files.
 \end_layout
 
 \begin_layout Standard
-The basic literature references are: 
+The basic literature references are:
+ 
 \end_layout
 
 \begin_layout Enumerate
 X.
- He, B.
- Wang, and K.M.
- Merz, Jr.
- Protein NMR Chemical Shift Calculations Based on the Automated Fragmentation
- QM/MM Approach.
+ He,
+ B.
+ Wang,
+ and K.M.
+ Merz,
+ Jr.
+ Protein NMR Chemical Shift Calculations Based on the Automated Fragmentation QM/MM Approach.
  
 \emph on
 J.
@@ -203,17 +223,19 @@ J.
  
 \series bold
 113,
+
 \series default
  10380-10388 (2009)
 \end_layout
 
 \begin_layout Enumerate
 T.
- Zhu, X.
- He, and J.Z.H.
+ Zhu,
+ X.
+ He,
+ and J.Z.H.
  Zhang.
- Fragment density functional theory calculation of NMR chemical shifts for
- proteins with implicit solvation.
+ Fragment density functional theory calculation of NMR chemical shifts for proteins with implicit solvation.
  
 \emph on
 Phys.
@@ -225,17 +247,19 @@ Phys.
  
 \series bold
 14,
+
 \series default
  7837-7845 (2012)
 \end_layout
 
 \begin_layout Enumerate
 T.
- Zhu, J.Z.H.
- Zhang, and X.
+ Zhu,
+ J.Z.H.
+ Zhang,
+ and X.
  He.
- Automated Fragmentation QM/MM Calculation of Amide Proton Chemical Shifts
- in Proteins with Explicit Solvent Model.
+ Automated Fragmentation QM/MM Calculation of Amide Proton Chemical Shifts in Proteins with Explicit Solvent Model.
 
 \emph on
  J.
@@ -246,6 +270,7 @@ T.
  
 \series bold
 9,
+
 \series default
  2104-2114 (2013)
 \end_layout
@@ -264,6 +289,7 @@ J.
  
 \series bold
 51,
+
 \series default
  303-312 (2011).
 \end_layout
@@ -283,18 +309,21 @@ Curr.
  
 \series bold
 23,
+
 \series default
  172-176 (2013).
 \end_layout
 
 \begin_layout Enumerate
 J.
- Swails, T.
- Zhu, X.
+ Swails,
+ T.
+ Zhu,
+ X.
  He and David A.
  Case.
- AFNMR: Automated fragmentation quantum mechanical calculation of NMR chemical
- shifts for biomolecules.
+ AFNMR:
+ Automated fragmentation quantum mechanical calculation of NMR chemical shifts for biomolecules.
  
 \emph on
 J.
@@ -304,29 +333,46 @@ J.
  
 \series bold
 63,
+
 \series default
  125-139 (2015).
 \end_layout
 
 \begin_layout Enumerate
 H.
- Zhang, G.
- Hou, M.
- Lu, J.
- Ahn, I.-J.
- Byeon, C.J.
- Langmead, J.R.
- Perilla, I.
- Hung, P.L.
- Gor’kov, Z.
- Gan, W.
- Brey, D.A.
- Case, K.
- Schulten, A.M.
- Gronenborn, and T.
+ Zhang,
+ G.
+ Hou,
+ M.
+ Lu,
+ J.
+ Ahn,
+ I.-J.
+ Byeon,
+ C.J.
+ Langmead,
+ J.R.
+ Perilla,
+ I.
+ Hung,
+ P.L.
+ Gor’kov,
+ Z.
+ Gan,
+ W.
+ Brey,
+ D.A.
+ Case,
+ K.
+ Schulten,
+ A.M.
+ Gronenborn,
+ and T.
  Polenova.
- HIV-1 Capsid Function is Regulated by Dynamics: Quantitative Atomic-Resolution
- Insights by Integrating Magic-Angle-Spinning NMR, QM/MM, and MD.
+ HIV-1 Capsid Function is Regulated by Dynamics:
+ Quantitative Atomic-Resolution Insights by Integrating Magic-Angle-Spinning NMR,
+ QM/MM,
+ and MD.
  
 \emph on
 J.
@@ -338,6 +384,7 @@ J.
  
 \series bold
 138,
+
 \series default
  14066-14075 (2016).
  
@@ -345,12 +392,13 @@ J.
 
 \begin_layout Enumerate
 X.
- Jin, T.
- Zhu, J.Z.H.
+ Jin,
+ T.
+ Zhu,
+ J.Z.H.
  Zhang and X.
  He.
- A systematic study on RNA NMR chemical shift calculation based on the automated
- fragmentation QM/MM approach.
+ A systematic study on RNA NMR chemical shift calculation based on the automated fragmentation QM/MM approach.
  
 \emph on
 RSC Adv.
@@ -359,18 +407,20 @@ RSC Adv.
  
 \series bold
 6,
+
 \series default
  108590-108602 (2016).
 \end_layout
 
 \begin_layout Enumerate
 X.
- Jin, T.
- Zhu, J.Z.H.
+ Jin,
+ T.
+ Zhu,
+ J.Z.H.
  Zhang and X.
  He.
- Automated Fragmentation QM/MM Calculation of NMR Chemical Shifts for Protein-Li
-gand Complexes.
+ Automated Fragmentation QM/MM Calculation of NMR Chemical Shifts for Protein-Ligand Complexes.
  
 \emph on
 Front.
@@ -380,21 +430,27 @@ Front.
  
 \series bold
 6,
+
 \series default
  150 (2018).
 \end_layout
 
 \begin_layout Enumerate
 H.
- Shi, M.C.
- Clay, A.
- Rangadurai, B.
- Sathyamoorthy, D.A.
- Case, and H.M.
+ Shi,
+ M.C.
+ Clay,
+ A.
+ Rangadurai,
+ B.
+ Sathyamoorthy,
+ D.A.
+ Case,
+ and H.M.
  Al-Hashimi.
- Atomic Structures of Excited State A-T Hoogsteen Base Pairs in Duplex DNA
- by Combining NMR Relaxation Dispersion, Mutagenesis, and Chemical Shift
- Calculations.
+ Atomic Structures of Excited State A-T Hoogsteen Base Pairs in Duplex DNA by Combining NMR Relaxation Dispersion,
+ Mutagenesis,
+ and Chemical Shift Calculations.
  
 \emph on
 J.
@@ -404,24 +460,32 @@ J.
  
 \series bold
 70,
+
 \series default
  229-244 (2018).
 \end_layout
 
 \begin_layout Enumerate
 M.
- Fritz, C.M.
- Quinn, M.
- Wang, G.
- Hou, X.
- Lu, L.M.I.
- Koharudin, J.
- Struppe, D.A.
- Case, T.
+ Fritz,
+ C.M.
+ Quinn,
+ M.
+ Wang,
+ G.
+ Hou,
+ X.
+ Lu,
+ L.M.I.
+ Koharudin,
+ J.
+ Struppe,
+ D.A.
+ Case,
+ T.
  Polenova and A.M.
  Gronenborn.
- Accurate determination of backbone chemical shift tensors in microcrystalline
- proteins by integrated MAS NMR and QM/MM.
+ Accurate determination of backbone chemical shift tensors in microcrystalline proteins by integrated MAS NMR and QM/MM.
  
 \emph on
 Phys.
@@ -432,22 +496,29 @@ Phys.
 \series bold
 \emph default
  20,
+
 \series default
  9543-9553 (2018)
 \end_layout
 
 \begin_layout Enumerate
 H.
- Shi, A.
- Rangadurai, H.A.
- Assi, R.
- Roy, D.A.
- Case, D.
- Herschlag, J.D.
- Yesselman, and H.M.
+ Shi,
+ A.
+ Rangadurai,
+ H.A.
+ Assi,
+ R.
+ Roy,
+ D.A.
+ Case,
+ D.
+ Herschlag,
+ J.D.
+ Yesselman,
+ and H.M.
  Al-Hashimi.
- Rapid and accurate determination of atomistic RNA dynamic ensemble models
- using NMR and structure prediction.
+ Rapid and accurate determination of atomistic RNA dynamic ensemble models using NMR and structure prediction.
  
 \emph on
 Nature Commun.
@@ -455,8 +526,69 @@ Nature Commun.
 \series bold
 \emph default
 11,
+
 \series default
  5531 (2020).
+\end_layout
+
+\begin_layout Enumerate
+B.
+ Liu,
+ H.
+ Shi,
+ A.
+ Rangadurai,
+ C.-C.
+ Chu,
+ F.
+ Nussbaumer,
+ K.A.
+ Erharter,
+ D.A.
+ Case,
+ C.
+ Kreutz,
+ and H.M.
+ Al-Hashimi.
+ A quantitative model predicts how m6A reshapes the kinetic landscape of nucleic acid hybridization and conformational transitions.
+ 
+\emph on
+Nature Commun.
+
+\emph default
+ 
+\series bold
+12,
+
+\series default
+ 5201 (2021).
+\end_layout
+
+\begin_layout Enumerate
+A.
+ Geng,
+ L.
+ Ganser,
+ R.
+ Roy,
+ S.
+ Pratihar,
+ D.A.
+ Case,
+ and H.M.
+ Al-Hashimi.
+ An RNA excited conformational state at atomic resolution.
+ 
+\emph on
+Nature Commun.
+
+\emph default
+ 
+\series bold
+14,
+
+\series default
+ 8432 (2023).
 \end_layout
 
 \begin_layout Enumerate
@@ -472,20 +604,20 @@ Biophys.
  
 \series bold
 267,
+
 \series default
  106476 (2020).
 \end_layout
 
 \begin_layout Standard
-Ab initio chemical shifts can be computed using the automated fragment approach
- implemented in the AFNMR program and described in references [1], [2] and
- [6].
- The explicit solvent formalism described in reference [4] is planned for
- future versions, but is not included in the present version; however, the
- current code works well for snapshots taken from MD simulations that include
- explicit water molecules.
- Papers [7-12] are recent examples of applications of the afnmr method.
- Reference [13] is a review.
+Ab initio chemical shifts can be computed using the automated fragment approach implemented in the AFNMR program and described in references [1],
+ [2] and [6].
+ The explicit solvent formalism described in reference [3] is planned for future versions,
+ but is not included in the present version;
+ however,
+ the current code works well for snapshots taken from MD simulations that include explicit water molecules.
+ Papers [7-14] are recent examples of applications of the afnmr method.
+ Reference [15] is a review.
 \end_layout
 
 \begin_layout Section
@@ -493,7 +625,8 @@ Installation
 \end_layout
 
 \begin_layout Enumerate
-To begin, clone this repository to some directory on your local machine:
+To begin,
+ clone this repository to some directory on your local machine:
 \end_layout
 
 \begin_deeper
@@ -503,8 +636,7 @@ git clone https://github.com/dacase/afnmr.git
 
 \end_deeper
 \begin_layout Enumerate
-The path to this new directory should be defined as the environment variable
- 
+The path to this new directory should be defined as the environment variable 
 \family typewriter
 $
 \family default
@@ -533,12 +665,17 @@ insert-your-path-here/afnmr
 \begin_inset Quotes erd
 \end_inset
 
- # sh, bash, ksh, or zsh
+ # sh,
+ bash,
+ ksh,
+ or zsh
 \end_layout
 
 \end_deeper
 \begin_layout Enumerate
-Next, build and install the program , putting executable files into 
+Next,
+ build and install the program ,
+ putting executable files into 
 \family typewriter
 $AFNMRHOME/bin
 \family default
@@ -576,59 +713,60 @@ AFNMR
 \end_layout
 
 \begin_layout Standard
-This is a program for carrying out automated fragment NMR (AFNMR) chemical
- shift prediction.
- In this approach, the chemical shielding tensors for 
+This is a program for carrying out automated fragment NMR (AFNMR) chemical shift prediction.
+ In this approach,
+ the chemical shielding tensors for 
 \begin_inset Formula $^{1}$
 \end_inset
 
-H, 
+H,
+ 
 \begin_inset Formula $^{13}$
 \end_inset
 
-C, 
+C,
+ 
 \begin_inset Formula $^{15}$
 \end_inset
 
-N, and 
+N,
+ and 
 \begin_inset Formula $^{31}$
 \end_inset
 
 P are computed using an approached based on density functional theory.
- Because chemical shielding is a local property, the shielding tensors can
- be computed by including only a relatively small region around the nuclei
- of interest.
- AFNMR automates the procedure of breaking the input structure into fragments
- small enough to be treated with a high-level quantum mechanical theory
- (e.g., various density functionals).
+ Because chemical shielding is a local property,
+ the shielding tensors can be computed by including only a relatively small region around the nuclei of interest.
+ AFNMR automates the procedure of breaking the input structure into fragments small enough to be treated with a high-level quantum mechanical theory (e.g.,
+ various density functionals).
  The shielding tensors are then computed using one of the supported QM packages,
  
 \emph on
 deMon
 \emph default
-, 
+,
+ 
 \emph on
 Orca
 \emph default
-, 
+,
+ 
 \emph on
-Q-Chem, 
+Q-Chem,
+ 
 \emph default
 or 
 \emph on
 Gaussian
 \emph default
 .
- Users are directed to the relevant citations at the beginning of this manual
- for details regarding the fragmentation scheme for various systems.
+ Users are directed to the relevant citations at the beginning of this manual for details regarding the fragmentation scheme for various systems.
 \end_layout
 
 \begin_layout Standard
-Solvent contributions to shielding tensors can be included by modeling the
- solvent implicitly (e.g., with the Poisson-Boltzmann or 3D-RISM formalisms).
- A procedure for including nearby water molecules explicitly in the QM calculati
-on has been proposed to improve amide chemical shift predictions and is
- planned for future versions of AF-NMR.
+Solvent contributions to shielding tensors can be included by modeling the solvent implicitly (e.g.,
+ with the Poisson-Boltzmann or 3D-RISM formalisms).
+ A procedure for including nearby water molecules explicitly in the QM calculation has been proposed to improve amide chemical shift predictions and is planned for future versions of AF-NMR.
 \end_layout
 
 \begin_layout Subsection
@@ -643,19 +781,18 @@ name "sec:General-workflow"
 \end_layout
 
 \begin_layout Standard
-The first thing that AF-NMR does to the system is perform a local energy
- minimization using the Amber ff12SB force field.
- After that, the electrostatic potential (ESP) at the surface of the system
- is computed and surface point charges are fitted to reproduce this potential.
- AF-NMR then proceeds to break the system up into manageable fragments and
- writes input files for the requested QM package.
+The first thing that AF-NMR does to the system is perform a local energy minimization using the Amber ff12SB force field.
+ After that,
+ the electrostatic potential (ESP) at the surface of the system is computed and surface point charges are fitted to reproduce this potential.
+ AF-NMR then proceeds to break the system up into manageable fragments and writes input files for the requested QM package.
  It is then up to the user to run the QM calculations.
- While these calculations may take several hours to finish, each fragment
- can be done at the same time.
+ While these calculations may take several hours to finish,
+ each fragment can be done at the same time.
  The general workflow for AF-NMR is shown in 
 \begin_inset CommandInset ref
 LatexCommand formatted
 reference "fig:afnmr-workflow"
+nolink "false"
 
 \end_inset
 
@@ -664,6 +801,8 @@ reference "fig:afnmr-workflow"
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide false
 sideways false
 status open
@@ -711,7 +850,8 @@ name "fig:afnmr-workflow"
 
 \begin_layout Standard
 AF-NMR provides three ways to compute surface charges to model solvent effects.
- Only the second option is implemented in this release; see the 
+ Only the second option is implemented in this release;
+ see the 
 \emph on
 shifts
 \emph default
@@ -723,33 +863,30 @@ http://casegroup.rutgers.edu/shifts.html
 \end_layout
 
 \begin_layout Enumerate
-The first uses the PBSA program included with AmberTools to compute the
- ESP at the surface of the system, setting the dielectric constant of the
- system interior to 1 and that of the solvent to 80.
- These surface charges are then used for every fragment while the atoms
- outside the fragment region are treated as point charges whose values are
- equal to the partial atomic charges assigned by the Amber force field.
+The first uses the PBSA program included with AmberTools to compute the ESP at the surface of the system,
+ setting the dielectric constant of the system interior to 1 and that of the solvent to 80.
+ These surface charges are then used for every fragment while the atoms outside the fragment region are treated as point charges whose values are equal to the partial atomic charges assigned by the Amber force field.
  The PBSA program from AmberTools must be installed to use this approach.
 \end_layout
 
 \begin_layout Enumerate
-The second approach also solves the PB equation, but instead uses a 3-dielectric
- model.
- In this case, the QM region is assigned a dielectric constant of 1, the
- interior of the system that is 
+The second approach also solves the PB equation,
+ but instead uses a 3-dielectric model.
+ In this case,
+ the QM region is assigned a dielectric constant of 1,
+ the interior of the system that is 
 \emph on
 outside
 \emph default
- the QM region is assigned a dielectric constant of 4, and the region outside
- the system is assigned a dielectric constant of 80.
- With this approach, each fragment is assigned a separate set of surface
- charges at the surface of the QM region (as defined by the atom radii assigned
- by the force field).
- This approach helps to alleviate the overpolarization that occurs from
- the point charges of the atoms outside the QM region.
- However, it takes longer to compute the surface charges since a separate
- solution to the PB equation is required for each fragment; (however, this
- is still nowhere near the cost of the QM calculations themselves).
+ the QM region is assigned a dielectric constant of 4,
+ and the region outside the system is assigned a dielectric constant of 80.
+ With this approach,
+ each fragment is assigned a separate set of surface charges at the surface of the QM region (as defined by the atom radii assigned by the force field).
+ This approach helps to alleviate the overpolarization that occurs from the point charges of the atoms outside the QM region.
+ However,
+ it takes longer to compute the surface charges since a separate solution to the PB equation is required for each fragment;
+ (however,
+ this is still nowhere near the cost of the QM calculations themselves).
  This approach uses the 
 \emph on
 solinprot
@@ -762,19 +899,17 @@ MEAD
 \family typewriter
 http://stjuderesearch.org/site/lab/bashford
 \family default
-), and is included here as well.
- This is the default option, and the one that has been most extensively
- tested.
+),
+ and is included here as well.
+ This is the default option,
+ and the one that has been most extensively tested.
 \end_layout
 
 \begin_layout Enumerate
-The final approach supported by AF-NMR to compute surface charges uses the
- 3D-RISM formalism to compute the electrostatic potential.
- This approach uses a rigorous statistical mechanical approach to compute
- solvent distributions around solutes with arbitrary charge distributions.
- Like the first approach we described, it is applied to the entire system
- and a single set of point charges at the surface of the whole system are
- used to reproduce the ESP for every fragment.
+The final approach supported by AF-NMR to compute surface charges uses the 3D-RISM formalism to compute the electrostatic potential.
+ This approach uses a rigorous statistical mechanical approach to compute solvent distributions around solutes with arbitrary charge distributions.
+ Like the first approach we described,
+ it is applied to the entire system and a single set of point charges at the surface of the whole system are used to reproduce the ESP for every fragment.
 \end_layout
 
 \begin_layout Subsection
@@ -782,14 +917,14 @@ Using AFNMR
 \end_layout
 
 \begin_layout Standard
-A shell script, 
+A shell script,
+ 
 \emph on
 afnmr
 \emph default
-, is provided as the user interface to apply the AF-NMR method to a whole
- system.
- It takes a set of flags that can be used to control program flow and specify
- user-controlled options.
+,
+ is provided as the user interface to apply the AF-NMR method to a whole system.
+ It takes a set of flags that can be used to control program flow and specify user-controlled options.
  If you run 
 \emph on
 afnmr
@@ -798,12 +933,14 @@ afnmr
 \family typewriter
 --help
 \family default
- flag, you receive a brief help and usage statement.
+ flag,
+ you receive a brief help and usage statement.
  
 \end_layout
 
 \begin_layout LyX-Code
-Usage: afnmr [flags] basename
+Usage:
+ afnmr [flags] basename
 \end_layout
 
 \begin_layout Standard
@@ -816,8 +953,9 @@ basename.pdb
 \end_inset
 
  must be present.
- Currently, all protein or nucleic acid residue must be placed first, followed
- by 
+ Currently,
+ all protein or nucleic acid residue must be placed first,
+ followed by 
 \begin_inset Quotes eld
 \end_inset
 
@@ -825,7 +963,11 @@ general
 \begin_inset Quotes erd
 \end_inset
 
- residues, such as ligands, water molecules, ions, etc.
+ residues,
+ such as ligands,
+ water molecules,
+ ions,
+ etc.
  Note that the 
 \family typewriter
 basename
@@ -854,18 +996,28 @@ residues to analyze:
 
 \begin_deeper
 \begin_layout Description
--list list of residues to create fragments for; 
+-list list of residues to create fragments for;
+ 
 \emph on
 List
 \emph default
- uses bash syntax and must be quoted, e.g.
- "{1,2,{4..9},13}", "46", "{5..8}" (Note: unlike earlier versions of 
+ uses bash syntax and must be quoted,
+ e.g.
+ "{1,2,{4..9},13}",
+ "46",
+ "{5..8}" (Note:
+ unlike earlier versions of 
 \emph on
 afnmr
 \emph default
-, the residue numbers are those in the pdb file, and need not start from
- 1, nor do they need to be sequential.
- Residue numbers, however, must be unique: 
+,
+ the residue numbers are those in the pdb file,
+ and need not start from 1,
+ nor do they need to be sequential.
+ Residue numbers,
+ however,
+ must be unique:
+ 
 \emph on
 afnmr
 \emph default
@@ -873,8 +1025,8 @@ afnmr
 \emph on
 -list
 \emph default
- is not present, fragments will be made for residues 1 up to the last protein
- or nucleic acid residue.
+ is not present,
+ fragments will be made for residues 1 up to the last protein or nucleic acid residue.
  If the list argument is 
 \begin_inset Quotes eld
 \end_inset
@@ -883,8 +1035,9 @@ afnmr
 \begin_inset Quotes erd
 \end_inset
 
-, no fragmentation will be done, and the entire molecule will be treated
- at the quantum level.
+,
+ no fragmentation will be done,
+ and the entire molecule will be treated at the quantum level.
 \end_layout
 
 \end_deeper
@@ -896,13 +1049,12 @@ basis set and functional selection:
 
 \begin_deeper
 \begin_layout Description
--mixedb Uses a mixed basis set in which the central residue whose shifts
- are being computed are treated with a larger, (
+-mixedb Uses a mixed basis set in which the central residue whose shifts are being computed are treated with a larger,
+ (
 \emph on
 pcS-seg
 \emph default
-2) basis set while the surrounding QM residues outside the primary region
- use a smaller (
+2) basis set while the surrounding QM residues outside the primary region use a smaller (
 \emph on
 pcSseg-1
 \emph default
@@ -930,16 +1082,21 @@ pcS-seg1
 \emph on
 pcS-seg0
 \emph default
- by default) for all residues; this is the default if no basis flag is present.
+ by default) for all residues;
+ this is the default if no basis flag is present.
 \end_layout
 
 \begin_layout Description
--o3lyp Use o3lyp in place of olyp; requires -gau, -qchem or -orca (below)
+-o3lyp Use o3lyp in place of olyp;
+ requires -gau,
+ -qchem or -orca (below)
 \end_layout
 
 \begin_layout Description
-Note: If you want to use a different DFT functional, or different basis
- sets, you can edit the input scripts that 
+Note:
+ If you want to use a different DFT functional,
+ or different basis sets,
+ you can edit the input scripts that 
 \emph on
 afnmr
 \emph default
@@ -953,8 +1110,8 @@ best
 \end_inset
 
  way to carry out shift calculations is still an active area of research.
- Also, the deMon program does not come with the pcSseg-# basis functions
- installed by default.
+ Also,
+ the deMon program does not come with the pcSseg-# basis functions installed by default.
  We have provided a 
 \family typewriter
 BASIS
@@ -965,7 +1122,8 @@ basis
 \family default
  folder) that can replace the file of the same name in your deMon installation,
  and which adds these basis sets.
- For Gaussian, we have included 
+ For Gaussian,
+ we have included 
 \family typewriter
 .gbs
 \family default
@@ -982,8 +1140,7 @@ method to represent atoms outside the fragment:
 
 \begin_deeper
 \begin_layout Description
--solinprot Compute the surface charges using the 3-dielectric model implemented
- by the 
+-solinprot Compute the surface charges using the 3-dielectric model implemented by the 
 \emph on
 solinprot
 \emph default
@@ -992,8 +1149,7 @@ solinprot
 \end_layout
 
 \begin_layout Description
--pbsa Compute the surface charges using the PBSA program from AmberTools
- 
+-pbsa Compute the surface charges using the PBSA program from AmberTools 
 \emph on
 (not implemented in this version)
 \end_layout
@@ -1021,16 +1177,18 @@ quantum program to use:
 \begin_inset space ~
 \end_inset
 
--demon Set up QM input files to run with the deMon program, version 3
+-demon Set up QM input files to run with the deMon program,
+ version 3
 \end_layout
 
 \begin_layout Description
--demon5 Set up QM input files to run with the deMon program, version 5
+-demon5 Set up QM input files to run with the deMon program,
+ version 5
 \end_layout
 
 \begin_layout Description
--orca Set up QM input files to run with the Orca program, version 5 or 6
- 
+-orca Set up QM input files to run with the Orca program,
+ version 5 or 6 
 \emph on
 (default)
 \end_layout
@@ -1064,8 +1222,11 @@ geometry optimization:
 \emph on
 xtb
 \emph default
- semi-empirical code; then create input files for one of the other programs
- (deMon, ORCA, Gaussian, Qchem) to actually compute the shifts.
+ semi-empirical code;
+ then create input files for one of the other programs (deMon,
+ ORCA,
+ Gaussian,
+ Qchem) to actually compute the shifts.
  The 
 \emph on
 xtb
@@ -1078,20 +1239,23 @@ xtb
 \family typewriter
 -xtb
 \family default
- option, but using terachem as the optimizer.
+ option,
+ but using terachem as the optimizer.
  (
 \emph on
-experimental, probably not working
+experimental,
+ probably not working
 \emph default
 )
 \end_layout
 
 \begin_layout Description
--qopt do a quantum mechanical geometry optimization in place of a molecular
- mechanics optimization.
+-qopt do a quantum mechanical geometry optimization in place of a molecular mechanics optimization.
  (
 \emph on
-Work in progress: only fully implemented in Gaussian, Orca and deMon.
+Work in progress:
+ only fully implemented in Gaussian,
+ Orca and deMon.
  The number of steps and method of minimization is hard-coded in afnmr.F90.
 \emph default
 )
@@ -1107,19 +1271,22 @@ miscellaneous flags:
 \begin_deeper
 \begin_layout Description
 -workdir AF-NMR creates many temporary files.
- By default, they are all created inside the current directory.
- If this flag is specified, a new directory named 
+ By default,
+ they are all created inside the current directory.
+ If this flag is specified,
+ a new directory named 
 \family typewriter
 <basename>
 \family default
  will be created and all temporary files will be put there.
- This is useful, for instance, when running multiple AF-NMR calculations
- in the same directory.
+ This is useful,
+ for instance,
+ when running multiple AF-NMR calculations in the same directory.
 \end_layout
 
 \begin_layout Description
--nobuild Skip all steps requiring the Amber force field; assumes that a
- 
+-nobuild Skip all steps requiring the Amber force field;
+ assumes that a 
 \emph on
 basename.pqr
 \emph default
@@ -1152,8 +1319,7 @@ multiafnmr.sh
 \end_layout
 
 \begin_layout Standard
-Several structures in the protein data bank (PDB) were solved by refining
- structures with restraints imposed by NMR experiments.
+Several structures in the protein data bank (PDB) were solved by refining structures with restraints imposed by NMR experiments.
  Many of these entries in the PDB contain several conformations.
  The 
 \emph on
@@ -1168,19 +1334,18 @@ afnmr
 \emph on
 multiafnmr.sh
 \emph default
-, and the rest of the arguments are the command-line options described above
- for 
+,
+ and the rest of the arguments are the command-line options described above for 
 \emph on
 afnmr
 \emph default
 .
- The -workdir argument is used by default so that each conformation gets
- processed in a separate directory.
+ The -workdir argument is used by default so that each conformation gets processed in a separate directory.
 \end_layout
 
 \begin_layout Standard
-The processing of structures is parallelized, and setting the environment
- variable 
+The processing of structures is parallelized,
+ and setting the environment variable 
 \family typewriter
 NCPUS
 \family default
@@ -1189,8 +1354,8 @@ NCPUS
 multiafnmr.sh
 \emph default
  to process the given number of structures simultaneously.
- This is primarily useful when using the -solinprot option, which takes
- longer to compute surface charges with.
+ This is primarily useful when using the -solinprot option,
+ which takes longer to compute surface charges with.
 \end_layout
 
 \begin_layout Subsection
@@ -1206,25 +1371,28 @@ afnmr
 \emph on
 multiafnmr.sh
 \emph default
-), you will have a handful of input files to the QM program you requested—one
- for each of the fragments (residues) in your system.
- You can either run the QM program directly at the command-line or you can
- run the command in a cluster using some type of batch scheduling system
- like torque, slurm, or Sun grid engine.
+),
+ you will have a handful of input files to the QM program you requested—
+one for each of the fragments (residues) in your system.
+ You can either run the QM program directly at the command-line or you can run the command in a cluster using some type of batch scheduling system like torque,
+ slurm,
+ or Sun grid engine.
 \end_layout
 
 \begin_layout Standard
-We suggest that you pick the QM program you are most familiar with, which
- will help in debugging problems should they arise.
+We suggest that you pick the QM program you are most familiar with,
+ which will help in debugging problems should they arise.
  If you've chosen 
 \emph on
 Gaussian
 \emph default
-, the input files will be named 
+,
+ the input files will be named 
 \family typewriter
 <basename>XXX.com
 \family default
-, where 
+,
+ where 
 \family typewriter
 XXX
 \family default
@@ -1237,7 +1405,8 @@ XXX
 \emph on
 Orca
 \emph default
-, the file name suffix will be 
+,
+ the file name suffix will be 
 \family typewriter
 .inp
 \family default
@@ -1245,8 +1414,7 @@ Orca
 \family typewriter
 .pos
 \family default
- will be written to define the positions of the external point and surface
- charges.
+ will be written to define the positions of the external point and surface charges.
  Input files for 
 \emph on
 deMon
@@ -1255,7 +1423,8 @@ deMon
 \family typewriter
 .inp
 \family default
-, whereas those for 
+,
+ whereas those for 
 \emph on
 Q-Chem
 \emph default
@@ -1264,14 +1433,11 @@ Q-Chem
 .in
 \family default
 .
- You may wish to modify the control headers of the input file to change
- the amount of requested memory or number of CPUs based on your available
- hardware.
+ You may wish to modify the control headers of the input file to change the amount of requested memory or number of CPUs based on your available hardware.
 \end_layout
 
 \begin_layout Standard
-Sample commands to run with each of the programs is shown below for the
- first fragment of the 
+Sample commands to run with each of the programs is shown below for the first fragment of the 
 \family typewriter
 1d3z1
 \family default
@@ -1287,8 +1453,8 @@ afnmr
 \end_layout
 
 \begin_layout LyX-Code
-g09 < 1d3z1001.com > 1d3z1001.log     # For Gaussian calculations, g03 or
- g16 also work
+g09 < 1d3z1001.com > 1d3z1001.log     # For Gaussian calculations,
+ g03 or g16 also work
 \end_layout
 
 \begin_layout LyX-Code
@@ -1308,34 +1474,33 @@ Extracting chemical shifts
 \end_layout
 
 \begin_layout Standard
-Following the QM calculations on all of the fragment input files, you will
- have a large number of output files whose chemical shielding tensors need
- to be extracted.
- Because we are modeling systems in solution, the molecules are free to
- tumble in every direction.
- As a result, we are only interested in the isotropic shielding at each
- nucleus.
- If only the shielding tensor is given in the output file, the isotropic
- shielding can be computed from the trace of the tensor.
- A reference shift (which is basis set-dependent) need then be subtracted
- to get the predicted chemical shift.
- Also, care must be taken to make sure that you extract only those chemical
- shifts from the nuclei primary QM region and not those in the immediate
- surroundings—those shifts are computed more rigorously in a different output
- file.
+Following the QM calculations on all of the fragment input files,
+ you will have a large number of output files whose chemical shielding tensors need to be extracted.
+ Because we are modeling systems in solution,
+ the molecules are free to tumble in every direction.
+ As a result,
+ we are only interested in the isotropic shielding at each nucleus.
+ If only the shielding tensor is given in the output file,
+ the isotropic shielding can be computed from the trace of the tensor.
+ A reference shift (which is basis set-dependent) need then be subtracted to get the predicted chemical shift.
+ Also,
+ care must be taken to make sure that you extract only those chemical shifts from the nuclei primary QM region and not those in the immediate surroundings—
+those shifts are computed more rigorously in a different output file.
 \end_layout
 
 \begin_layout Standard
-Included in the SHIFTS package are a set of parsers written in Perl that
- will extract the relevant chemical shifts from each output file for 
+Included in the SHIFTS package are a set of parsers written in Perl that will extract the relevant chemical shifts from each output file for 
 \emph on
 deMon
 \emph default
-, 
+,
+ 
 \emph on
-Jaguar, ORCA
+Jaguar,
+ ORCA
 \emph default
-, 
+,
+ 
 \emph on
 Q-Chem
 \emph default
@@ -1344,9 +1509,7 @@ Q-Chem
 Gaussian
 \emph default
  calculations.
- These parsers use the PQR files that were generated by AF-NMR to determine
- which nuclei reside in the primary QM region to determine which chemical
- shifts to extract from each output file.
+ These parsers use the PQR files that were generated by AF-NMR to determine which nuclei reside in the primary QM region to determine which chemical shifts to extract from each output file.
  The script responsible for parsing the QM output file is 
 \emph on
 make-shiftsrdb
@@ -1372,14 +1535,14 @@ XXX
 \emph on
 Gaussian
 \emph default
-, the output file suffix 
+,
+ the output file suffix 
 \family typewriter
 .log
 \family default
  will be used instead.
- The output file will be printed in a simple tab-delimited text file that
- should be self-explanatory; it is also compatible with the RDB relational
- database format (see the description at 
+ The output file will be printed in a simple tab-delimited text file that should be self-explanatory;
+ it is also compatible with the RDB relational database format (see the description at 
 \family typewriter
 http://compbio.soe.ucsc.edu/rdb/
 \family default
@@ -1392,7 +1555,8 @@ http://compbio.soe.ucsc.edu/rdb/
 \end_layout
 
 \begin_layout LyX-Code
-# reference shifts used for H,C,N:  32.00 182.50 242.00 OLYP TZVP 1d3z1
+# reference shifts used for H,C,N:
+  32.00 182.50 242.00 OLYP TZVP 1d3z1
 \end_layout
 
 \begin_layout LyX-Code
@@ -1452,7 +1616,8 @@ $AFNMRHOME/src/afnmr/make-shiftsrdb
 \end_layout
 
 \begin_layout LyX-Code
-Usage: make-shiftsrdb qpgm reference <basename>
+Usage:
+ make-shiftsrdb qpgm reference <basename>
 \end_layout
 
 \begin_layout LyX-Code
@@ -1460,17 +1625,19 @@ Usage: make-shiftsrdb qpgm reference <basename>
 \end_layout
 
 \begin_layout LyX-Code
-* qpgm must be one of "-demon", "-gau", "-qchem", "-jaguar" or "-orca" 
+* qpgm must be one of "-demon",
+ "-gau",
+ "-qchem",
+ "-jaguar" or "-orca" 
 \end_layout
 
 \begin_layout LyX-Code
-* reference is the name of a reference shielding set The reference sets
- are defined 
+* reference is the name of a reference shielding set The reference sets are defined 
 \end_layout
 
 \begin_layout LyX-Code
-     in the getshifts-demon (etc.) scripts, and sometimes change as better
- sets 
+     in the getshifts-demon (etc.) scripts,
+ and sometimes change as better sets 
 \end_layout
 
 \begin_layout LyX-Code
@@ -1497,17 +1664,20 @@ Output goes to <basename>.rdb
 \end_layout
 
 \begin_layout Standard
-For users interested in chemical shift anisotropies, there is a corresponding
- script, 
+For users interested in chemical shift anisotropies,
+ there is a corresponding script,
+ 
 \emph on
 make-tensorrdb
 \emph default
-, that extracts and analyzes the complete shielding tensor.
+,
+ that extracts and analyzes the complete shielding tensor.
  Here is its usage information:
 \end_layout
 
 \begin_layout LyX-Code
-Usage: make-tensorrdb qpgm <basename>
+Usage:
+ make-tensorrdb qpgm <basename>
 \end_layout
 
 \begin_layout LyX-Code
@@ -1515,7 +1685,9 @@ Usage: make-tensorrdb qpgm <basename>
 \end_layout
 
 \begin_layout LyX-Code
-   * qpgm must be one of "gaussian", "qchem", or "orca"    
+   * qpgm must be one of "gaussian",
+ "qchem",
+ or "orca"    
 \end_layout
 
 \begin_layout LyX-Code
@@ -1535,8 +1707,40 @@ Usage: make-tensorrdb qpgm <basename>
    Output goes to <basename>.tensor.rdb 
 \end_layout
 
-\begin_layout LyX-Code
+\begin_layout Standard
+A common use of 
+\emph on
+afnmr
+\emph default
+ is to analyze many conformations (
+\begin_inset Quotes eld
+\end_inset
 
+snapshots
+\begin_inset Quotes erd
+\end_inset
+
+) of the same system,
+ often generated by MD simulations,
+ or by machine-learning models.
+ The 
+\family typewriter
+$AFNMRHOME/src/afnmr/make-rdball
+\family default
+ script offers a tool (that uses 
+\emph on
+make-shiftsrdb
+\emph default
+ internally) to collect all of these into a single tab-delimitted file.
+ To use this,
+ copy the 
+\emph on
+make-rdball
+\emph default
+ script to your working directory,
+ edit it to match your file structure,
+ and run the edited script.
+ See the script itself for more details.
 \end_layout
 
 \begin_layout Subsection
@@ -1548,12 +1752,16 @@ The
 \emph on
 afnmr
 \emph default
- code should be able to handle file that follow PDB standards that include
- proteins, RNA, DNA, water, and monatomic ions.
- If you have ligands, or non-standard amino acids or nucleotides, the procedure
- is more involved.
- Everything is based on the way that Amber handles these situations, so
- people familiar with Amber should understand what is being said below.
+ code should be able to handle file that follow PDB standards that include proteins,
+ RNA,
+ DNA,
+ water,
+ and monatomic ions.
+ If you have ligands,
+ or non-standard amino acids or nucleotides,
+ the procedure is more involved.
+ Everything is based on the way that Amber handles these situations,
+ so people familiar with Amber should understand what is being said below.
  (I am hoping to write instructions for more general users in the future.)
 \end_layout
 
@@ -1583,7 +1791,8 @@ frcmod
 \end_layout
 
 \begin_layout Standard
-Follow this tutorial: 
+Follow this tutorial:
+ 
 \begin_inset CommandInset href
 LatexCommand href
 name "https://ambermd.org/tutorials/basic/tutorial4b/index.php"
@@ -1592,7 +1801,8 @@ literal "false"
 
 \end_inset
 
-, but use the 
+,
+ but use the 
 \emph on
 saveOff
 \emph default
@@ -1610,16 +1820,17 @@ tleap
 -frcmod
 \family default
  flags in afnmr to get these loaded.
- You can load files for more than one type of ligand, if needed.
- One current limitation: you need to put all ligand molecules after all
- protein or nucleic acid residues.
- (I plan to eliminate this requirement in future updates.) By default, 
+ You can load files for more than one type of ligand,
+ if needed.
+ One current limitation:
+ you need to put all ligand molecules after all protein or nucleic acid residues.
+ (I plan to eliminate this requirement in future updates.) By default,
+ 
 \emph on
 afnmr
 \emph default
  will only compute shifts up to the last protein or nucleic acid residue,
- but you can get predicted shifts for ligands by including their residue
- numbers in the 
+ but you can get predicted shifts for ligands by including their residue numbers in the 
 \family typewriter
 -list
 \family default
@@ -1632,7 +1843,8 @@ Modified amino acids or nucleotides
 
 \begin_layout Standard
 These are currently a bit more compilcated.
- You can create the mol2 and frcmod files following this tutorial: 
+ You can create the mol2 and frcmod files following this tutorial:
+ 
 \begin_inset CommandInset href
 LatexCommand href
 name "https://ambermd.org/antechamber/pro4.html"
@@ -1650,8 +1862,10 @@ literal "false"
 \family typewriter
 -frcmod
 \family default
- flags to load these into afnmr, as with ligands.
- But then, you also need to edit the 
+ flags to load these into afnmr,
+ as with ligands.
+ But then,
+ you also need to edit the 
 \emph on
 afnmr.F90
 \emph default
@@ -1664,10 +1878,9 @@ presn
 nresn
 \family default
  array (for RNA and DNA).
- You will need to update the MAXPRES or MAXNRES variables if you add extra
- residue names to that list.
- Again, I am hoping to simplify and automate this process in future versions
- of the code.
+ You will need to update the MAXPRES or MAXNRES variables if you add extra residue names to that list.
+ Again,
+ I am hoping to simplify and automate this process in future versions of the code.
 \end_layout
 
 \end_body

@@ -8,7 +8,8 @@
 
 * License information is in the LICENSE file
 
-* For the impatient:  'make install && make test'
+* For the impatient:  have AFNMRHOME point to this folder;
+                      then type 'make install && make test'
 
 * Best papers to read/cite: 
 
@@ -36,7 +37,7 @@
 
    * A. Geng, L. Ganser, R. Roy, S. Pratihar, D.A. Case, and H.M. Al-Hashimi. An RNA excited conformational state at atomic resolution. Nature Commun. 14, 8432 (2023).
 
-* Version history:
+* Version history: (see tags in git)
   * Version 1.0 is the initial split from the "shifts" code base
   * Version 1.1 makes it easier to use snapshots for solvated molecular 
        dynamics simulations as inputs.
