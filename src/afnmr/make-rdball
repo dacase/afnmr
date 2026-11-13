@@ -3,7 +3,7 @@
 # script to collect individual afnmr rdb files into an "rdball" file
 
 # edit the id and the number of files below; this script assumes that each
-#   snapshot was analyzed in a separated folder.
+#   snapshot was analyzed in a separate folder.
 
 id=2jxs
 
