@@ -27,7 +27,7 @@ endif
 FLIBS=-lnabc -lsff -llapack -lblas $(LIBGFORTRAN) -lgfortran
 
 CC=gcc
-CFLAGS=-g -I$(INCDIR)
+CFLAGS=-g -I$(INCDIR) -Wno-unused-result -Wno-format
 COPTFLAGS=-O3 -mtune=native
 
 CXX=g++
