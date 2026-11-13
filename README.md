@@ -20,6 +20,21 @@
   *  D.A. Case.  Using quantum chemistry to estimate chemical 
        shifts in biomolecules. Biophys. Chem. 267, 106476 (2020).
 
+* Some papers than have used this code:
+
+  * H. Zhang, G. Hou, M. Lu, J. Ahn, I.-J. Byeon, C.J. Langmead, J.R. Perilla, I. Hung, P.L. Gor'kov, Z. Gan, W. Brey, D.A. Case, K. Schulten, A.M. Gronenborn, and T. Polenova. HIV-1 Capsid Function is Regulated by Dynamics: Quantitative Atomic-Resolution Insights by Integrating Magic-Angle-Spinning NMR, QM/MM, and MD. J. Am. Chem. Soc. 138, 14066-14075 (2016).
+
+   * M. Fritz, C.M. Quinn, M. Wang, G. Hou, X. Lu, L.M.I. Koharudin, J. Struppe, D.A. Case, T. Polenova and A.M. Gronenborn. Accurate determination of backbone chemical shift tensors in microcrystalline proteins by integrated MAS NMR and QM/MM. Phys. Chem. Chem. Phys. 20, 9543-9553 (2018).
+
+   * H. Shi, M.C. Clay, A. Rangadurai, B. Sathyamoorthy, D.A. Case, and H.M. Al-Hashimi. Atomic Structures of Excited State A-T Hoogsteen Base Pairs in Duplex DNA by Combining NMR Relaxation Dispersion, Mutagenesis, and Chemical Shift Calculations. J. Biomol. NMR 70, 229-244 (2018).
+
+   * H. Zhou, B. Sathyamoorthy, A. Stelling, Y. Xu, Y. Xue, Y.Z. Pigli, D.A. Case, P.A. Rice, and H.M. Al-Hashimi. Characterizing Watson–Crick versus Hoogsteen Base Pairing in a DNA–Protein Complex Using Nuclear Magnetic Resonance and Site-Specifically 13C-and 15N-Labeled DNA. Biochemistry 58, 1963-1974 (2019).
+
+   * H. Shi, A. Rangadurai, H.A. Assi, R. Roy, D.A. Case, D. Herschlag, J.D. Yesselman, and H.M. Al-Hashimi. Rapid and accurate determination of atomistic RNA dynamic ensemble models using NMR and structure prediction. Nature Commun. 11, 5531 (2020).
+
+   * B. Liu, H. Shi, A. Rangadurai, C.-C. Chu, F. Nussbaumer, K.A. Erharter, D.A. Case, C. Kreutz, and H.M. Al-Hashimi. A quantitative model predicts how m6A reshapes the kinetic landscape of nucleic acid hybridization and conformational transitions. Nature Commun. 12, 5201 (2021).
+
+   * A. Geng, L. Ganser, R. Roy, S. Pratihar, D.A. Case, and H.M. Al-Hashimi. An RNA excited conformational state at atomic resolution. Nature Commun. 14, 8432 (2023).
 
 * Version history:
   * Version 1.0 is the initial split from the "shifts" code base
