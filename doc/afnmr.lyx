@@ -191,17 +191,156 @@ Introduction
 
 \begin_layout Standard
 The AFNMR package provides a useful method to estimate chemical shifts in biomolecules,
+ 
+\emph on
+via
+\emph default
  density functional calculations on fragments.
  The program automatically creates the fragments from an input pdb file,
  prepares a model for environmental effects,
- then creates input files for various quantum chemistry programs.
+ then creates input files for various quantum chemistry programs;
+ supported programs currently include 
+\emph on
+deMon
+\emph default
+,
+ 
+\emph on
+Orca
+\emph default
+,
+ 
+\emph on
+Q-Chem,
+ 
+\emph default
+or 
+\emph on
+Gaussian
+\emph default
+.
  Once these quantum runs are complete,
  results can be extracted from their output files and collected into simple database files.
 \end_layout
 
 \begin_layout Standard
-The basic literature references are:
+
+\series bold
+Please note:
+
+\series default
+ this approach is not for everyone.
+ If you want to estimate what the observed shifts would be for a given (and always approximate) structure,
+ models that have been trained to perform that task will generally provide better agreement with observed shifts when the input structures are good ones.
+ Recent examples of models that use neural networks trained on experimental shifts include 
+\emph on
+NMRFx,
+ UCBshift,
+ legolas
+\emph default
+,
+ and others.) For example,
+ if you apply such models to snapshots taken from a 
+\begin_inset Quotes eld
+\end_inset
+
+good
+\begin_inset Quotes erd
+\end_inset
+
+ MD simulation,
+ almost every snapshot will return the same shift,
+ which will often be in good accord with the observed shifts,
+ and will generally be better than the average AFNMR result for the same set of snapshots.
+ These neural net (and other models) are very fast,
+ and are doing what they were trained to do:
+ return the observed shift given an approximate input structure.
+\end_layout
+
+\begin_layout Standard
+That said,
+ there are situations where quantum chemical estimates are useful.
+ These include:
+\end_layout
+
+\begin_layout Itemize
+molecules with modified amino acids or nucleotides,
+ or where ligands are bound,
+ that are outside the training set of the empirical models;
+ Ref.
+ 14,
+ below,
+ gives an example.
+\end_layout
+
+\begin_layout Itemize
+situations where the conformations encountered are not well-represented in training sets;
+ see Refs.
+ 7 and 11.
+\end_layout
+
+\begin_layout Itemize
+places where one wants information about the full chemical shift tensor,
+ and not just its isotropic shift;
+ see Refs.
+ 4 and 12.
+\end_layout
+
+\begin_layout Itemize
+studies of less-common nuclei (often 
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+
+N,
  
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+31
+\end_layout
+
+\end_inset
+
+P,
+ 
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+19
+\end_layout
+
+\end_inset
+
+F,
+ etc) where databases of observed shifts may not be available.
+\end_layout
+
+\begin_layout Itemize
+analyses that exploit the variability of shifts among similar structures,
+ for example to construct and test ensemble models that may have multiple conformations;
+ see Refs.
+ 13 and 15.
+\end_layout
+
+\begin_layout Section
+Some relevant literature
+\end_layout
+
+\begin_layout Standard
+Ab initio chemical shifts can be computed using the automated fragment approach implemented in the AFNMR program,
+ described in references [1],
+ [2] and [5].
+ The explicit solvent formalism described in reference [3] is planned for future versions,
+ but is not included in the present version;
+ however,
+ the current code works well for snapshots taken from MD simulations that include explicit water molecules.
+ Papers [6-15] are recent examples of applications of the afnmr method.
+ Reference [16] is a review.
 \end_layout
 
 \begin_layout Enumerate
@@ -276,25 +415,6 @@ T.
 \end_layout
 
 \begin_layout Enumerate
-S.
- Tang and D.A.
- Case.
- Calculation of chemical shift anisotropy in proteins.
- 
-\emph on
-J.
- Biomol.
- NMR
-\emph default
- 
-\series bold
-51,
-
-\series default
- 303-312 (2011).
-\end_layout
-
-\begin_layout Enumerate
 D.A.
  Case.
  Chemical shifts in biomolecules.
@@ -336,6 +456,44 @@ J.
 
 \series default
  125-139 (2015).
+\end_layout
+
+\begin_layout Enumerate
+S.
+ Tang and D.A.
+ Case.
+ Calculation of chemical shift anisotropy in proteins.
+ 
+\emph on
+J.
+ Biomol.
+ NMR
+\emph default
+ 
+\series bold
+51,
+
+\series default
+ 303-312 (2011).
+\end_layout
+
+\begin_layout Enumerate
+I.
+ Fu,
+ D.A.
+ Case and J.
+ Baum.
+ Dynamic water-mediated hydrogen bonding in collagen model peptides.
+ 
+\emph on
+Biochemistry
+\emph default
+ 
+\series bold
+54,
+
+\series default
+ 6029-6037 (2015).
 \end_layout
 
 \begin_layout Enumerate
@@ -581,14 +739,13 @@ A.
  
 \emph on
 Nature Commun.
-
-\emph default
  
 \series bold
+\emph default
 14,
-
+ 
 \series default
- 8432 (2023).
+8432 (2023).
 \end_layout
 
 \begin_layout Enumerate
@@ -607,17 +764,6 @@ Biophys.
 
 \series default
  106476 (2020).
-\end_layout
-
-\begin_layout Standard
-Ab initio chemical shifts can be computed using the automated fragment approach implemented in the AFNMR program and described in references [1],
- [2] and [6].
- The explicit solvent formalism described in reference [3] is planned for future versions,
- but is not included in the present version;
- however,
- the current code works well for snapshots taken from MD simulations that include explicit water molecules.
- Papers [7-14] are recent examples of applications of the afnmr method.
- Reference [15] is a review.
 \end_layout
 
 \begin_layout Section
