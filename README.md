@@ -4,7 +4,8 @@
             Tong Zhu, Xiao He, Jason Swails and David A. Case
 ------------------------------------------------------------------------------
 
-* Full instructions are in the doc/afnmr.pdf file
+* Full instructions are in the doc/afnmr.pdf file; note that this file
+discusses the pros and cons of the method implemented here.
 
 * License information is in the LICENSE file
 
